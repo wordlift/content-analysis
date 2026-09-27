@@ -1,0 +1,55 @@
+name: Release npm client
+
+# Publishes @wordlift/resolve from a tag such as ts-v0.1.1 (the version must
+# match clients/typescript/package.json). Preferred auth is npm trusted
+# publishing (OIDC, no long-lived token): enable it once on npmjs.com under the
+# package's Settings -> Trusted Publisher -> GitHub Actions, with this
+# repository and workflow file name. Until then, an NPM_TOKEN repository secret
+# (granular, publish rights on @wordlift, 2FA bypass) is used when present.
+# Manual runs default to a dry run: login check, build, tests, no upload.
+on:
+  push:
+    tags: ["ts-v*"]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Verify auth, build and test without publishing"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: clients/typescript
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+      - name: Version must match the tag
+        if: startsWith(github.ref, 'refs/tags/ts-v')
+        run: |
+          tag="${GITHUB_REF#refs/tags/ts-v}"
+          pkg="$(node -p "require('./package.json').version")"
+          test "$tag" = "$pkg" || { echo "tag $tag != package.json $pkg"; exit 1; }
+      - name: Registry login check
+        if: env.NODE_AUTH_TOKEN != ''
+        run: echo "publishing as $(npm whoami)"
+      - run: npm install
+      - run: npm test
+      - name: Publish (trusted publishing, or NPM_TOKEN fallback)
+        if: github.event_name == 'push' || inputs.dry_run == false
+        run: npm publish --provenance --access public
+      - name: Dry run
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run == true
+        run: npm publish --dry-run --access public

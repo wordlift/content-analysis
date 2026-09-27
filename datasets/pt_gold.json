@@ -1,0 +1,680 @@
+[
+ {
+  "text": "Cristiano Ronaldo nasceu na Madeira e jogou pelo Sporting antes de se mudar para o Manchester United.",
+  "lang": "pt",
+  "gold": {
+   "Cristiano Ronaldo": {
+    "qid": "Q11571",
+    "type": "Person",
+    "label": "Cristiano Ronaldo",
+    "description": "futebolista português"
+   },
+   "Madeira": {
+    "qid": "Q30188",
+    "type": "Location",
+    "label": "Ilha da Madeira",
+    "description": "ilha portuguesa"
+   },
+   "Sporting": {
+    "qid": "Q75729",
+    "type": "SportsTeam",
+    "label": "Sporting Clube de Portugal",
+    "description": "clube profissional multidesportivo português"
+   },
+   "Manchester United": {
+    "qid": "Q18656",
+    "type": "SportsTeam",
+    "label": "Manchester United Football Club",
+    "description": "clube esportivo sediado em Manchester, Inglaterra"
+   }
+  }
+ },
+ {
+  "text": "A Petrobras é a maior empresa do Brasil e tem sede no Rio de Janeiro.",
+  "lang": "pt",
+  "gold": {
+   "Petrobras": {
+    "qid": "Q210047",
+    "type": "Company",
+    "label": "Petrobras",
+    "description": "empresa brasileira de energia"
+   },
+   "Brasil": {
+    "qid": "Q155",
+    "type": "Country",
+    "label": "Brasil",
+    "description": "país na América do Sul"
+   },
+   "Rio de Janeiro": {
+    "qid": "Q8678",
+    "type": "City",
+    "label": "Rio de Janeiro",
+    "description": "capital do estado brasileiro do Rio de Janeiro"
+   }
+  }
+ },
+ {
+  "text": "Jorge Amado escreveu romances ambientados em Salvador, na Bahia.",
+  "lang": "pt",
+  "gold": {
+   "Jorge Amado": {
+    "qid": "Q184440",
+    "type": "Person",
+    "label": "Jorge Amado",
+    "description": "escritor brasileiro (1912-2001)"
+   },
+   "Salvador": {
+    "qid": "Q36947",
+    "type": "City",
+    "label": "Salvador",
+    "description": "município capital do estado brasileiro da Bahia"
+   },
+   "Bahia": {
+    "qid": "Q40430",
+    "type": "Location",
+    "label": "Bahia",
+    "description": "unidade federativa do Brasil"
+   }
+  }
+ },
+ {
+  "text": "Luís de Camões escreveu Os Lusíadas, a maior epopeia da literatura portuguesa.",
+  "lang": "pt",
+  "gold": {
+   "Luís de Camões": {
+    "qid": "Q590",
+    "type": "Person",
+    "label": "",
+    "description": "poeta português (1524-1580)"
+   },
+   "Os Lusíadas": {
+    "qid": "Q781898",
+    "type": "Book",
+    "label": "Os Lusíadas",
+    "description": "poema épico de Luís de Camões"
+   }
+  }
+ },
+ {
+  "text": "O presidente Luiz Inácio Lula da Silva discursou no Palácio do Planalto em Brasília.",
+  "lang": "pt",
+  "gold": {
+   "Luiz Inácio Lula da Silva": {
+    "qid": "Q37181",
+    "type": "Person",
+    "label": "Luiz Inácio Lula da Silva",
+    "description": "35.º e 39.º presidente do Brasil (2003–2011; 2023–presente)"
+   },
+   "Palácio do Planalto": {
+    "qid": "Q496950",
+    "type": "Place",
+    "label": "Palácio do Planalto",
+    "description": "sede do Governo Federal do Brasil"
+   },
+   "Brasília": {
+    "qid": "Q2844",
+    "type": "City",
+    "label": "Brasília",
+    "description": "capital do Brasil"
+   }
+  }
+ },
+ {
+  "text": "A Universidade de Coimbra é a mais antiga de Portugal e está classificada pela UNESCO.",
+  "lang": "pt",
+  "gold": {
+   "Universidade de Coimbra": {
+    "qid": "Q368643",
+    "type": "EducationalOrganization",
+    "label": "Universidade de Coimbra",
+    "description": "universidade pública em Coimbra, Portugal"
+   },
+   "Portugal": {
+    "qid": "Q45",
+    "type": "Country",
+    "label": "Portugal",
+    "description": "país no sudoeste da Europa com 2 arquipélagos povoados no Oceano Atlântico"
+   },
+   "UNESCO": {
+    "qid": "Q7809",
+    "type": "Organization",
+    "label": "Organização das Nações Unidas para a Educação, a Ciência e a Cultura",
+    "description": "agência especializada das Nações Unidas (ONU) focada em educação, ciência, cultura e comunicação, estabelecida para fomentar a cooperação internacional"
+   }
+  }
+ },
+ {
+  "text": "O Banco Central do Brasil reduziu a taxa Selic numa reunião em Brasília.",
+  "lang": "pt",
+  "gold": {
+   "Banco Central do Brasil": {
+    "qid": "Q806186",
+    "type": "Organization",
+    "label": "Banco Central do Brasil",
+    "description": "autarquia federal que regulamenta operações financeiras no território brasileiro"
+   },
+   "Brasília": {
+    "qid": "Q2844",
+    "type": "City",
+    "label": "Brasília",
+    "description": "capital do Brasil"
+   }
+  }
+ },
+ {
+  "text": "Fernando Pessoa viveu em Lisboa e publicou na revista Orpheu.",
+  "lang": "pt",
+  "gold": {
+   "Fernando Pessoa": {
+    "qid": "Q173481",
+    "type": "Person",
+    "label": "Fernando Pessoa",
+    "description": "poeta português (1888–1935)"
+   },
+   "Lisboa": {
+    "qid": "Q597",
+    "type": "City",
+    "label": "Lisboa",
+    "description": "capital e maior cidade de Portugal"
+   },
+   "Orpheu": {
+    "qid": "Q1351196",
+    "type": "CreativeWork",
+    "label": "Orpheu",
+    "description": "revista literária portuguesa"
+   }
+  }
+ },
+ {
+  "text": "A Embraer, sediada em São José dos Campos, exporta aviões para a Europa.",
+  "lang": "pt",
+  "gold": {
+   "Embraer": {
+    "qid": "Q105557",
+    "type": "Company",
+    "label": "Embraer",
+    "description": "empresa brasileira fabricante de aviões"
+   },
+   "São José dos Campos": {
+    "qid": "Q191642",
+    "type": "City",
+    "label": "São José dos Campos",
+    "description": "município brasileiro localizado no estado de São Paulo"
+   },
+   "Europa": {
+    "qid": "Q46",
+    "type": "Location",
+    "label": "Europa",
+    "description": "continente"
+   }
+  }
+ },
+ {
+  "text": "Ayrton Senna venceu três campeonatos de Fórmula 1 pela McLaren.",
+  "lang": "pt",
+  "gold": {
+   "Ayrton Senna": {
+    "qid": "Q10490",
+    "type": "Person",
+    "label": "Ayrton Senna",
+    "description": "piloto brasileiro (1960–1994); tricampeão mundial de Fórmula 1 (1988, 1990 e 1991)"
+   },
+   "Fórmula 1": {
+    "qid": "Q1968",
+    "type": "Event",
+    "label": "Fórmula 1",
+    "description": "principal categoria do automobilismo"
+   },
+   "McLaren": {
+    "qid": "Q172030",
+    "type": "SportsTeam",
+    "label": "McLaren",
+    "description": "equipe britânica de Fórmula 1"
+   }
+  }
+ },
+ {
+  "text": "Machado de Assis fundou a Academia Brasileira de Letras no Rio de Janeiro.",
+  "lang": "pt",
+  "gold": {
+   "Machado de Assis": {
+    "qid": "Q311145",
+    "type": "Person",
+    "label": "Machado de Assis",
+    "description": "escritor brasileiro (1839–1908)"
+   },
+   "Academia Brasileira de Letras": {
+    "qid": "Q337224",
+    "type": "Organization",
+    "label": "Academia Brasileira de Letras",
+    "description": "instituição literária brasileira"
+   },
+   "Rio de Janeiro": {
+    "qid": "Q8678",
+    "type": "City",
+    "label": "Rio de Janeiro",
+    "description": "capital do estado brasileiro do Rio de Janeiro"
+   }
+  }
+ },
+ {
+  "text": "A Vale é uma mineradora brasileira com operações em Minas Gerais e no Pará.",
+  "lang": "pt",
+  "gold": {
+   "Vale": {
+    "qid": "Q583268",
+    "type": "Company",
+    "label": "Vale",
+    "description": "empresa de mineração multinacional"
+   },
+   "Minas Gerais": {
+    "qid": "Q39109",
+    "type": "Location",
+    "label": "Minas Gerais",
+    "description": "unidade federativa do Brasil"
+   },
+   "Pará": {
+    "qid": "Q39517",
+    "type": "Location",
+    "label": "Pará",
+    "description": "unidade federativa do Brasil"
+   }
+  }
+ },
+ {
+  "text": "O Benfica e o Porto disputaram o clássico no Estádio da Luz.",
+  "lang": "pt",
+  "gold": {
+   "Benfica": {
+    "qid": "Q131499",
+    "type": "SportsTeam",
+    "label": "Sport Lisboa e Benfica",
+    "description": "clube profissional multidesportivo português"
+   },
+   "Porto": {
+    "qid": "Q128446",
+    "type": "SportsTeam",
+    "label": "Futebol Clube do Porto",
+    "description": "clube profissional multidesportivo português"
+   },
+   "Estádio da Luz": {
+    "qid": "Q7875112",
+    "type": "Place",
+    "label": "Estádio da Luz",
+    "description": "estádio de futebol em Lisboa, Portugal"
+   }
+  }
+ },
+ {
+  "text": "António Guterres lidera a Organização das Nações Unidas desde 2017.",
+  "lang": "pt",
+  "gold": {
+   "António Guterres": {
+    "qid": "Q311440",
+    "type": "Person",
+    "label": "António Guterres",
+    "description": "Secretário-geral da ONU desde 2017"
+   },
+   "Organização das Nações Unidas": {
+    "qid": "Q1065",
+    "type": "Organization",
+    "label": "Organização das Nações Unidas",
+    "description": "organização intergovernamental internacional"
+   }
+  }
+ },
+ {
+  "text": "A Amazônia cobre grande parte do território do Amazonas e do Pará.",
+  "lang": "pt",
+  "gold": {
+   "Amazônia": {
+    "qid": "Q177567",
+    "type": "Location",
+    "label": "Floresta amazônica",
+    "description": "floresta latifoliada úmida"
+   },
+   "Amazonas": {
+    "qid": "Q40040",
+    "type": "Location",
+    "label": "Amazonas",
+    "description": "unidade federativa do Brasil"
+   },
+   "Pará": {
+    "qid": "Q39517",
+    "type": "Location",
+    "label": "Pará",
+    "description": "unidade federativa do Brasil"
+   }
+  }
+ },
+ {
+  "text": "Gilberto Gil e Caetano Veloso lideraram o movimento Tropicália na Bahia.",
+  "lang": "pt",
+  "gold": {
+   "Gilberto Gil": {
+    "qid": "Q221479",
+    "type": "Person",
+    "label": "Gilberto Gil",
+    "description": "cantor, compositor, multi-instrumentista, produtor musical e político brasileiro"
+   },
+   "Caetano Veloso": {
+    "qid": "Q309983",
+    "type": "Person",
+    "label": "Caetano Veloso",
+    "description": "músico, produtor, arranjador e escritor brasileiro"
+   },
+   "Tropicália": {
+    "qid": "Q1413061",
+    "type": "CreativeWork",
+    "label": "tropicália",
+    "description": "movimento cultural brasileiro"
+   },
+   "Bahia": {
+    "qid": "Q40430",
+    "type": "Location",
+    "label": "Bahia",
+    "description": "unidade federativa do Brasil"
+   }
+  }
+ },
+ {
+  "text": "O Porto é conhecido pelo vinho do Porto e pela Ponte Dom Luís I.",
+  "lang": "pt",
+  "gold": {
+   "Porto": {
+    "qid": "Q36433",
+    "type": "City",
+    "label": "Porto",
+    "description": "município de Portugal"
+   },
+   "Ponte Dom Luís I": {
+    "qid": "Q1322447",
+    "type": "Place",
+    "label": "Ponte de D. Luís",
+    "description": "ponte no Porto, Portugal"
+   }
+  }
+ },
+ {
+  "text": "A Globo transmitiu a final da Copa do Mundo do Catar.",
+  "lang": "pt",
+  "gold": {
+   "Globo": {
+    "qid": "Q3587",
+    "type": "Company",
+    "label": "TV Globo",
+    "description": "rede de televisão comercial brasileira"
+   },
+   "Copa do Mundo": {
+    "qid": "Q19317",
+    "type": "Event",
+    "label": "Campeonato do Mundo de Futebol da FIFA",
+    "description": "competição mundial de futebol entre nações"
+   },
+   "Catar": {
+    "qid": "Q846",
+    "type": "Country",
+    "label": "Catar",
+    "description": "país na Ásia Ocidental"
+   }
+  }
+ },
+ {
+  "text": "Oscar Niemeyer projetou a Catedral de Brasília no Distrito Federal.",
+  "lang": "pt",
+  "gold": {
+   "Oscar Niemeyer": {
+    "qid": "Q134165",
+    "type": "Person",
+    "label": "Oscar Niemeyer",
+    "description": "arquiteto brasileiro (1907–2012)"
+   },
+   "Catedral de Brasília": {
+    "qid": "Q201720",
+    "type": "Place",
+    "label": "Catedral Metropolitana de Brasília",
+    "description": "catedral católica no Brasil"
+   },
+   "Distrito Federal": {
+    "qid": "Q119158",
+    "type": "Location",
+    "label": "Distrito Federal",
+    "description": "unidade federativa do Brasil"
+   }
+  }
+ },
+ {
+  "text": "A Madeira e os Açores são regiões autónomas de Portugal.",
+  "lang": "pt",
+  "gold": {
+   "Madeira": {
+    "qid": "Q26253",
+    "type": "Location",
+    "label": "Madeira",
+    "description": "região autónoma de Portugal no arquipélago da Madeira"
+   },
+   "Açores": {
+    "qid": "Q25263",
+    "type": "Location",
+    "label": "Açores",
+    "description": "região autónoma de Portugal no arquipélago dos Açores"
+   },
+   "Portugal": {
+    "qid": "Q45",
+    "type": "Country",
+    "label": "Portugal",
+    "description": "país no sudoeste da Europa com 2 arquipélagos povoados no Oceano Atlântico"
+   }
+  }
+ },
+ {
+  "text": "Neymar deixou o Santos para jogar no Barcelona em 2013.",
+  "lang": "pt",
+  "gold": {
+   "Neymar": {
+    "qid": "Q142794",
+    "type": "Person",
+    "label": "Neymar",
+    "description": "futebolista brasileiro"
+   },
+   "Santos": {
+    "qid": "Q80955",
+    "type": "SportsTeam",
+    "label": "Santos Futebol Clube",
+    "description": "clube poliesportivo brasileiro de Santos, SP"
+   },
+   "Barcelona": {
+    "qid": "Q7156",
+    "type": "SportsTeam",
+    "label": "Futbol Club Barcelona",
+    "description": "clube esportivo sediado em Barcelona, Espanha"
+   }
+  }
+ },
+ {
+  "text": "A Universidade de São Paulo é a maior instituição de ensino superior do Brasil.",
+  "lang": "pt",
+  "gold": {
+   "Universidade de São Paulo": {
+    "qid": "Q835960",
+    "type": "EducationalOrganization",
+    "label": "Universidade de São Paulo",
+    "description": "universidade pública estadual em São Paulo, SP, Brasil"
+   },
+   "Brasil": {
+    "qid": "Q155",
+    "type": "Country",
+    "label": "Brasil",
+    "description": "país na América do Sul"
+   }
+  }
+ },
+ {
+  "text": "Clarice Lispector nasceu na Ucrânia e cresceu em Recife.",
+  "lang": "pt",
+  "gold": {
+   "Clarice Lispector": {
+    "qid": "Q235955",
+    "type": "Person",
+    "label": "Clarice Lispector",
+    "description": "escritora, poeta e jornalista ucraniana-brasileira (1920–1977)"
+   },
+   "Ucrânia": {
+    "qid": "Q212",
+    "type": "Country",
+    "label": "Ucrânia",
+    "description": "país na Europa Oriental"
+   },
+   "Recife": {
+    "qid": "Q48344",
+    "type": "City",
+    "label": "Recife",
+    "description": "município brasileiro e a capital do estado brasileiro de Pernambuco"
+   }
+  }
+ },
+ {
+  "text": "O Sport Club Corinthians Paulista joga na Neo Química Arena em São Paulo.",
+  "lang": "pt",
+  "gold": {
+   "Sport Club Corinthians Paulista": {
+    "qid": "Q35933",
+    "type": "SportsTeam",
+    "label": "Sport Club Corinthians Paulista",
+    "description": "clube esportivo do estado de São Paulo, Brasil"
+   },
+   "Neo Química Arena": {
+    "qid": "Q1362236",
+    "type": "Place",
+    "label": "Neo Química Arena",
+    "description": "estádio de futebol localizado em São Paulo"
+   },
+   "São Paulo": {
+    "qid": "Q174",
+    "type": "City",
+    "label": "São Paulo",
+    "description": "cidade mais populosa do Brasil e capital do estado de São Paulo"
+   }
+  }
+ },
+ {
+  "text": "A TAP Air Portugal opera voos entre Lisboa e São Paulo.",
+  "lang": "pt",
+  "gold": {
+   "TAP Air Portugal": {
+    "qid": "Q208232",
+    "type": "Company",
+    "label": "TAP Air Portugal",
+    "description": "companhia aérea portuguesa"
+   },
+   "Lisboa": {
+    "qid": "Q597",
+    "type": "City",
+    "label": "Lisboa",
+    "description": "capital e maior cidade de Portugal"
+   },
+   "São Paulo": {
+    "qid": "Q174",
+    "type": "City",
+    "label": "São Paulo",
+    "description": "cidade mais populosa do Brasil e capital do estado de São Paulo"
+   }
+  }
+ },
+ {
+  "text": "José Saramago recebeu o Nobel de Literatura em 1998.",
+  "lang": "pt",
+  "gold": {
+   "José Saramago": {
+    "qid": "Q37060",
+    "type": "Person",
+    "label": "José Saramago",
+    "description": "escritor português, Nobel da Literatura de 1998 (1922-2010)"
+   },
+   "Nobel de Literatura": {
+    "qid": "Q37922",
+    "type": "Event",
+    "label": "Nobel da Literatura",
+    "description": "prêmio literário concedido anualmente"
+   }
+  }
+ },
+ {
+  "text": "O Cristo Redentor no Corcovado é um símbolo do Rio de Janeiro.",
+  "lang": "pt",
+  "gold": {
+   "Cristo Redentor": {
+    "qid": "Q79961",
+    "type": "Place",
+    "label": "Cristo Redentor",
+    "description": "estátua art déco no Rio de Janeiro"
+   },
+   "Corcovado": {
+    "qid": "Q506938",
+    "type": "Location",
+    "label": "Morro do Corcovado",
+    "description": "Morro do Corcovado, Rio de Janeiro, Brasil, conhecido pela estátua Cristo Redentor"
+   },
+   "Rio de Janeiro": {
+    "qid": "Q8678",
+    "type": "City",
+    "label": "Rio de Janeiro",
+    "description": "capital do estado brasileiro do Rio de Janeiro"
+   }
+  }
+ },
+ {
+  "text": "A Petrobras e a Vale estão listadas na B3, a bolsa de São Paulo.",
+  "lang": "pt",
+  "gold": {
+   "Petrobras": {
+    "qid": "Q210047",
+    "type": "Company",
+    "label": "Petrobras",
+    "description": "empresa brasileira de energia"
+   },
+   "Vale": {
+    "qid": "Q583268",
+    "type": "Company",
+    "label": "Vale",
+    "description": "empresa de mineração multinacional"
+   },
+   "B3": {
+    "qid": "Q796297",
+    "type": "Company",
+    "label": "B3",
+    "description": "bolsa de valores brasileira e mercado de balcão"
+   },
+   "São Paulo": {
+    "qid": "Q174",
+    "type": "City",
+    "label": "São Paulo",
+    "description": "cidade mais populosa do Brasil e capital do estado de São Paulo"
+   }
+  }
+ },
+ {
+  "text": "Marcelo Rebelo de Sousa é o Presidente da República Portuguesa.",
+  "lang": "pt",
+  "gold": {
+   "Marcelo Rebelo de Sousa": {
+    "qid": "Q6756617",
+    "type": "Person",
+    "label": "Marcelo Rebelo de Sousa",
+    "description": "político e académico português, 20.° presidente da república portuguesa"
+   }
+  }
+ },
+ {
+  "text": "O Museu Nacional, em São Cristóvão, foi destruído por um incêndio em 2018.",
+  "lang": "pt",
+  "gold": {
+   "Museu Nacional": {
+    "qid": "Q1850416",
+    "type": "Place",
+    "label": "Museu Nacional",
+    "description": "museu no Rio de Janeiro, Brasil"
+   }
+  }
+ }
+]

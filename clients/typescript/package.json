@@ -1,0 +1,47 @@
+{
+  "name": "@wordlift/resolve",
+  "version": "0.1.1",
+  "description": "TypeScript client for WordLift resolve(): map mentions to identities, or get unresolved.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wordlift/content-analysis.git",
+    "directory": "clients/typescript"
+  },
+  "homepage": "https://wordlift.io/resolve/",
+  "keywords": [
+    "entity-linking",
+    "named-entity-disambiguation",
+    "wikidata",
+    "knowledge-graph",
+    "wordlift"
+  ],
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,362 @@
+[
+  {
+    "text": "La Juventus ha battuto il Milan allo Stadium di Torino.",
+    "lang": "it",
+    "gold": {
+      "Juventus": {
+        "qid": "Q1422",
+        "type": "SportsTeam",
+        "label": "Juventus FC",
+        "description": "club calcistico italiano di Torino"
+      },
+      "Milan": {
+        "qid": "Q1543",
+        "type": "SportsTeam",
+        "label": "AC Milan",
+        "description": "club calcistico italiano di Milano"
+      },
+      "Torino": {
+        "qid": "Q495",
+        "type": "City",
+        "label": "Torino",
+        "description": "comune italiano, capoluogo dell'omonima città metropolitana e della regione Piemonte"
+      }
+    }
+  },
+  {
+    "text": "La Ferrari ha sede a Maranello, vicino a Modena.",
+    "lang": "it",
+    "gold": {
+      "Ferrari": {
+        "qid": "Q27586",
+        "type": "Company",
+        "label": "Ferrari",
+        "description": "casa automobilistica italiana"
+      },
+      "Maranello": {
+        "qid": "Q100060",
+        "type": "City",
+        "label": "Maranello",
+        "description": "comune italiano"
+      },
+      "Modena": {
+        "qid": "Q279",
+        "type": "City",
+        "label": "Modena",
+        "description": "comune italiano, capoluogo dell'omonima provincia in Emilia-Romagna"
+      }
+    }
+  },
+  {
+    "text": "Dante Alighieri scrisse la Divina Commedia in esilio a Ravenna.",
+    "lang": "it",
+    "gold": {
+      "Dante Alighieri": {
+        "qid": "Q1067",
+        "type": "Person",
+        "label": "Dante Alighieri",
+        "description": "poeta, scrittore e politico fiorentino, considerato il padre della lingua italiana (1265-1321)"
+      },
+      "Divina Commedia": {
+        "qid": "Q40185",
+        "type": "Book",
+        "label": "Divina Commedia",
+        "description": "poema di Dante Alighieri"
+      },
+      "Ravenna": {
+        "qid": "Q13364",
+        "type": "City",
+        "label": "Ravenna",
+        "description": "comune italiano, capoluogo dell'omonima provincia in Emilia-Romagna"
+      }
+    }
+  },
+  {
+    "text": "La Roma e la Lazio giocano allo Stadio Olimpico.",
+    "lang": "it",
+    "gold": {
+      "Roma": {
+        "qid": "Q2739",
+        "type": "SportsTeam",
+        "label": "AS Roma",
+        "description": "club calcistico italiano di Roma"
+      },
+      "Lazio": {
+        "qid": "Q2609",
+        "type": "SportsTeam",
+        "label": "SS Lazio",
+        "description": "club calcistico italiano di Roma"
+      },
+      "Stadio Olimpico": {
+        "qid": "Q159884",
+        "type": "Place",
+        "label": "Stadio Olimpico",
+        "description": "impianto sportivo polivalente di Roma"
+      }
+    }
+  },
+  {
+    "text": "Giuseppe Verdi compose l'Aida per il teatro dell'opera del Cairo.",
+    "lang": "it",
+    "gold": {
+      "Giuseppe Verdi": {
+        "qid": "Q7317",
+        "type": "Person",
+        "label": "Giuseppe Verdi",
+        "description": "compositore, drammaturgo e politico italiano (1813-1901)"
+      },
+      "Aida": {
+        "qid": "Q171277",
+        "type": "CreativeWork",
+        "label": "Aida",
+        "description": "opera lirica di Giuseppe Verdi"
+      },
+      "Cairo": {
+        "qid": "Q85",
+        "type": "City",
+        "label": "Il Cairo",
+        "description": "capitale dell'Egitto"
+      }
+    }
+  },
+  {
+    "text": "Luciano Pavarotti nacque a Modena e cantò alla Scala.",
+    "lang": "it",
+    "gold": {
+      "Luciano Pavarotti": {
+        "qid": "Q37615",
+        "type": "Person",
+        "label": "",
+        "description": "tenore italiano (1935-2007)"
+      },
+      "Modena": {
+        "qid": "Q279",
+        "type": "City",
+        "label": "Modena",
+        "description": "comune italiano, capoluogo dell'omonima provincia in Emilia-Romagna"
+      },
+      "Scala": {
+        "qid": "Q5471",
+        "type": "Place",
+        "label": "teatro alla Scala",
+        "description": "teatro di Milano"
+      }
+    }
+  },
+  {
+    "text": "La Fiat è stata fondata a Torino nel 1899.",
+    "lang": "it",
+    "gold": {
+      "Fiat": {
+        "qid": "Q27597",
+        "type": "Company",
+        "label": "Fiat",
+        "description": "azienda automobilistica italiana"
+      },
+      "Torino": {
+        "qid": "Q495",
+        "type": "City",
+        "label": "Torino",
+        "description": "comune italiano, capoluogo dell'omonima città metropolitana e della regione Piemonte"
+      }
+    }
+  },
+  {
+    "text": "L'Inter ha vinto lo scudetto sotto la guida di Simone Inzaghi.",
+    "lang": "it",
+    "gold": {
+      "Inter": {
+        "qid": "Q631",
+        "type": "SportsTeam",
+        "label": "FC Inter",
+        "description": "club calcistico italiano di Milano"
+      },
+      "Simone Inzaghi": {
+        "qid": "Q314670",
+        "type": "Person",
+        "label": "Simone Inzaghi",
+        "description": "allenatore di calcio e calciatore italiano (1976-)"
+      }
+    }
+  },
+  {
+    "text": "La Sicilia è la più grande isola del Mediterraneo.",
+    "lang": "it",
+    "gold": {
+      "Sicilia": {
+        "qid": "Q4951156",
+        "type": "Location",
+        "label": "Sicilia",
+        "description": "isola del Mar Mediterraneo"
+      },
+      "Mediterraneo": {
+        "qid": "Q4918",
+        "type": "Location",
+        "label": "mar Mediterraneo",
+        "description": "bacino marino compreso tra l'Africa settentrionale, l'Europa meridionale e l'Asia occidentale"
+      }
+    }
+  },
+  {
+    "text": "Leonardo da Vinci dipinse l'Ultima Cena a Milano.",
+    "lang": "it",
+    "gold": {
+      "Leonardo da Vinci": {
+        "qid": "Q762",
+        "type": "Person",
+        "label": "Leonardo da Vinci",
+        "description": "scienziato, inventore e artista italiano (1452–1519)"
+      },
+      "Ultima Cena": {
+        "qid": "Q128910",
+        "type": "CreativeWork",
+        "label": "Ultima Cena",
+        "description": "affresco di Leonardo da Vinci"
+      },
+      "Milano": {
+        "qid": "Q490",
+        "type": "City",
+        "label": "Milano",
+        "description": "comune italiano, capoluogo dell'omonima città metropolitana e della regione Lombardia"
+      }
+    }
+  },
+  {
+    "text": "Mediaset e la Rai sono i principali gruppi televisivi italiani.",
+    "lang": "it",
+    "gold": {
+      "Mediaset": {
+        "qid": "Q368151",
+        "type": "Company",
+        "label": "Mediaset",
+        "description": "gruppo televisivo italiano nazionale"
+      },
+      "Rai": {
+        "qid": "Q19616",
+        "type": "Company",
+        "label": "Rai",
+        "description": "ente radiotelevisivo pubblico italiano"
+      }
+    }
+  },
+  {
+    "text": "Umberto Eco scrisse Il nome della rosa.",
+    "lang": "it",
+    "gold": {
+      "Umberto Eco": {
+        "qid": "Q12807",
+        "type": "Person",
+        "label": "Umberto Eco",
+        "description": "semiologo, filosofo e scrittore (1932–2016)"
+      },
+      "Il nome della rosa": {
+        "qid": "Q172850",
+        "type": "Book",
+        "label": "Il nome della rosa",
+        "description": "romanzo scritto da Umberto Eco"
+      }
+    }
+  },
+  {
+    "text": "Il Parma ha giocato in Serie A contro l'Atalanta.",
+    "lang": "it",
+    "gold": {
+      "Parma": {
+        "qid": "Q2693",
+        "type": "SportsTeam",
+        "label": "Parma Calcio 1913",
+        "description": "club calcistico italiano di Parma"
+      },
+      "Serie A": {
+        "qid": "Q15804",
+        "type": "Event",
+        "label": "Serie A",
+        "description": "massima divisione del campionato italiano di calcio maschile"
+      },
+      "Atalanta": {
+        "qid": "Q1886",
+        "type": "SportsTeam",
+        "label": "Atalanta Bergamasca Calcio",
+        "description": "club calcistico italiano di Bergamo"
+      }
+    }
+  },
+  {
+    "text": "La Luiss è un'università privata di Roma.",
+    "lang": "it",
+    "gold": {
+      "Luiss": {
+        "qid": "Q1122851",
+        "type": "EducationalOrganization",
+        "label": "Libera Università Internazionale degli Studi Sociali \"Guido Carli\"",
+        "description": "università privata italiana"
+      },
+      "Roma": {
+        "qid": "Q220",
+        "type": "City",
+        "label": "Roma",
+        "description": "capitale d'Italia, capoluogo dell'omonima città metropolitana e della regione Lazio"
+      }
+    }
+  },
+  {
+    "text": "Il Lago di Garda si trova tra Lombardia, Veneto e Trentino.",
+    "lang": "it",
+    "gold": {
+      "Lago di Garda": {
+        "qid": "Q6414",
+        "type": "Location",
+        "label": "lago di Garda",
+        "description": "lago dell'Italia settentrionale"
+      },
+      "Lombardia": {
+        "qid": "Q1210",
+        "type": "Location",
+        "label": "Lombardia",
+        "description": "regione d'Italia"
+      },
+      "Veneto": {
+        "qid": "Q1243",
+        "type": "Location",
+        "label": "Veneto",
+        "description": "regione italiana a statuto ordinario"
+      },
+      "Trentino": {
+        "qid": "Q16289",
+        "type": "Location",
+        "label": "provincia autonoma di Trento",
+        "description": "provincia autonoma italiana, nella regione del Trentino-Alto Adige"
+      }
+    }
+  },
+  {
+    "text": "Lavazza e Illy sono marchi di caffè di Torino e Trieste.",
+    "lang": "it",
+    "gold": {
+      "Lavazza": {
+        "qid": "Q543750",
+        "type": "Company",
+        "label": "Luigi Lavazza",
+        "description": "azienda italiana fondata nel 1895 a Torino"
+      },
+      "Illy": {
+        "qid": "Q397897",
+        "type": "Company",
+        "label": "Illy",
+        "description": "pagina di disambiguazione di un progetto Wikimedia"
+      },
+      "Torino": {
+        "qid": "Q495",
+        "type": "City",
+        "label": "Torino",
+        "description": "comune italiano, capoluogo dell'omonima città metropolitana e della regione Piemonte"
+      },
+      "Trieste": {
+        "qid": "Q546",
+        "type": "City",
+        "label": "Trieste",
+        "description": "comune italiano, capoluogo del Friuli-Venezia Giulia"
+      }
+    }
+  }
+]

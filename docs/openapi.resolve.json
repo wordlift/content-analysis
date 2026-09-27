@@ -1,0 +1,493 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WordLift resolve()",
+    "version": "1.0.0",
+    "description": "Map mentions to identities in an explicit dataset, or return unresolved. See docs/resolve-contract.md.",
+    "license": {
+      "name": "Apache-2.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://resolve.wordlift.io"
+    }
+  ],
+  "security": [
+    {
+      "WordLiftKey": []
+    }
+  ],
+  "paths": {
+    "/v1/resolve": {
+      "post": {
+        "tags": [
+          "resolve"
+        ],
+        "summary": "Resolve",
+        "description": "Resolve mentions to identities in `dataset_uri`, or return unresolved.",
+        "operationId": "resolve_v1_resolve_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MentionResolution": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start"
+          },
+          "end": {
+            "type": "integer",
+            "title": "End"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "resolved | unresolved"
+          },
+          "entity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResolvedEntity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score",
+            "description": "Decision score; not a calibrated probability"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "candidates": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidates"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "start",
+          "end",
+          "status"
+        ],
+        "title": "MentionResolution"
+      },
+      "ResolveCandidate": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Identity in the dataset: Q312, wd:Q312 or a Wikidata entity URI"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "types": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Types"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score",
+            "description": "Caller's retrieval score; informational"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "ResolveCandidate"
+      },
+      "ResolveMention": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text"
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Start"
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "End"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "description": "Caller's type hint, e.g. Person, Organization"
+          },
+          "candidates": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ResolveCandidate"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidates",
+            "description": "Identities retrieved by the caller; if omitted the engine retrieves against dataset_uri"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "start",
+          "end"
+        ],
+        "title": "ResolveMention"
+      },
+      "ResolveRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 100000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "dataset_uri": {
+            "type": "string",
+            "title": "Dataset Uri",
+            "description": "Semantic world the identities belong to",
+            "default": "wikidata://public"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "ISO 639-1; auto-detected if omitted"
+          },
+          "mentions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ResolveMention"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mentions",
+            "description": "Explicit spans; if omitted the engine detects mentions"
+          },
+          "include": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Include",
+            "description": "Diagnostics: candidates, evidence"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "description": "NER threshold when the engine detects mentions",
+            "default": 0.5
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ResolveRequest"
+      },
+      "ResolveResponse": {
+        "properties": {
+          "mentions": {
+            "items": {
+              "$ref": "#/components/schemas/MentionResolution"
+            },
+            "type": "array",
+            "title": "Mentions"
+          },
+          "dataset_uri": {
+            "type": "string",
+            "title": "Dataset Uri"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "processing_time_ms": {
+            "type": "number",
+            "title": "Processing Time Ms"
+          },
+          "engine": {
+            "type": "string",
+            "title": "Engine",
+            "default": "content-analysis-v3"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mentions",
+          "dataset_uri",
+          "language",
+          "processing_time_ms"
+        ],
+        "title": "ResolveResponse"
+      },
+      "ResolvedEntity": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Types"
+          },
+          "same_as": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Same As"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "ResolvedEntity"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "WordLiftKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "WordLift API key, sent as `Authorization: Key <your_key>`"
+      }
+    }
+  }
+}

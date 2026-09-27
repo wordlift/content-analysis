@@ -1,0 +1,34 @@
+# Default zero-shot NER labels: English semantic anchors matched across
+# languages by GLiNER multilingual. Aligned with Schema.org types where
+# possible. Add domain-specific labels freely.
+
+labels:
+  - Person
+  - Organization
+  - Location
+  - Place
+  - Event
+  - Product
+  - Brand
+  - Company
+  - CreativeWork
+  - Book
+  - Movie
+  - Song
+  - Software
+  - MedicalCondition
+  - Drug
+  - Disease
+  - Country
+  - City
+  - Region
+  - Continent
+  - Date
+  - TimePeriod
+  - Award
+  - Currency
+  - Language
+  - Nationality
+  - Religion
+  - Sport
+  - AcademicInstitution

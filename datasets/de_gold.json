@@ -1,0 +1,368 @@
+[
+  {
+    "text": "Der FC Bayern München gewann das Spiel gegen Borussia Dortmund in der Allianz Arena.",
+    "lang": "de",
+    "gold": {
+      "FC Bayern München": {
+        "qid": "Q15789",
+        "type": "SportsTeam",
+        "label": "FC Bayern München",
+        "description": "Sportverein aus München"
+      },
+      "Borussia Dortmund": {
+        "qid": "Q41420",
+        "type": "SportsTeam",
+        "label": "Borussia Dortmund",
+        "description": "Sportverein aus Dortmund, Nordrhein-Westfalen"
+      },
+      "Allianz Arena": {
+        "qid": "Q127429",
+        "type": "Place",
+        "label": "Allianz-Arena",
+        "description": "Stadion des FC Bayern München"
+      }
+    }
+  },
+  {
+    "text": "Die Siemens AG hat ihren Sitz in München und Berlin.",
+    "lang": "de",
+    "gold": {
+      "Siemens AG": {
+        "qid": "Q81230",
+        "type": "Company",
+        "label": "Siemens",
+        "description": "deutscher Technologie- bzw. Mischkonzern"
+      },
+      "München": {
+        "qid": "Q1726",
+        "type": "City",
+        "label": "München",
+        "description": "Landeshauptstadt des Freistaates Bayern, Deutschland"
+      },
+      "Berlin": {
+        "qid": "Q64",
+        "type": "City",
+        "label": "Berlin",
+        "description": "Hauptstadt und bevölkerungsreichste Stadt der Bundesrepublik Deutschland"
+      }
+    }
+  },
+  {
+    "text": "Mozart wurde in Salzburg geboren und starb in Wien.",
+    "lang": "de",
+    "gold": {
+      "Mozart": {
+        "qid": "Q254",
+        "type": "Person",
+        "label": "Wolfgang Amadeus Mozart",
+        "description": "Musiker und Komponist der Wiener Klassik"
+      },
+      "Salzburg": {
+        "qid": "Q34713",
+        "type": "City",
+        "label": "Salzburg",
+        "description": "Hauptstadt des österreichischen Bundeslands Salzburg"
+      },
+      "Wien": {
+        "qid": "Q1741",
+        "type": "City",
+        "label": "Wien",
+        "description": "Bundeshauptstadt und bevölkerungsreichste Stadt der Republik Österreich"
+      }
+    }
+  },
+  {
+    "text": "Volkswagen produziert in Wolfsburg, Audi in Ingolstadt und Porsche in Stuttgart.",
+    "lang": "de",
+    "gold": {
+      "Volkswagen": {
+        "qid": "Q156578",
+        "type": "Company",
+        "label": "Volkswagen AG",
+        "description": "deutscher Automobilhersteller"
+      },
+      "Wolfsburg": {
+        "qid": "Q3014",
+        "type": "City",
+        "label": "Wolfsburg",
+        "description": "Großstadt in Niedersachsen"
+      },
+      "Audi": {
+        "qid": "Q23317",
+        "type": "Company",
+        "label": "Audi",
+        "description": "deutscher Automobilhersteller, Tochterunternehmen der Volkswagen AG"
+      },
+      "Ingolstadt": {
+        "qid": "Q3004",
+        "type": "City",
+        "label": "Ingolstadt",
+        "description": "Großstadt an der Donau in Bayern, Deutschland"
+      },
+      "Porsche": {
+        "qid": "Q40993",
+        "type": "Company",
+        "label": "Porsche",
+        "description": "deutscher Automobilhersteller, Tochterunternehmen der Volkswagen AG"
+      },
+      "Stuttgart": {
+        "qid": "Q1022",
+        "type": "City",
+        "label": "Stuttgart",
+        "description": "Landeshauptstadt von Baden-Württemberg, Deutschland"
+      }
+    }
+  },
+  {
+    "text": "Thomas Mann schrieb die Buddenbrooks in Lübeck.",
+    "lang": "de",
+    "gold": {
+      "Thomas Mann": {
+        "qid": "Q37030",
+        "type": "Person",
+        "label": "Thomas Mann",
+        "description": "deutscher Schriftsteller und Nobelpreisträger (1875–1955)"
+      },
+      "Buddenbrooks": {
+        "qid": "Q326909",
+        "type": "Book",
+        "label": "Buddenbrooks",
+        "description": "Roman von Thomas Mann (1901)"
+      },
+      "Lübeck": {
+        "qid": "Q2843",
+        "type": "City",
+        "label": "Lübeck",
+        "description": "deutsche Groß- und Hansestadt an der Ostseeküste in Schleswig-Holstein"
+      }
+    }
+  },
+  {
+    "text": "Der Bundestag tagt im Reichstagsgebäude in Berlin.",
+    "lang": "de",
+    "gold": {
+      "Bundestag": {
+        "qid": "Q154797",
+        "type": "Organization",
+        "label": "Deutscher Bundestag",
+        "description": "Volksvertretung und gesetzgebendes Organ der Bundesrepublik Deutschland"
+      },
+      "Reichstagsgebäude": {
+        "qid": "Q151897",
+        "type": "Place",
+        "label": "Reichstagsgebäude",
+        "description": "Sitz des Deutschen Bundestags"
+      },
+      "Berlin": {
+        "qid": "Q64",
+        "type": "City",
+        "label": "Berlin",
+        "description": "Hauptstadt und bevölkerungsreichste Stadt der Bundesrepublik Deutschland"
+      }
+    }
+  },
+  {
+    "text": "Roger Federer gewann Wimbledon achtmal.",
+    "lang": "de",
+    "gold": {
+      "Roger Federer": {
+        "qid": "Q1426",
+        "type": "Person",
+        "label": "",
+        "description": "Schweizer Tennisspieler"
+      },
+      "Wimbledon": {
+        "qid": "Q41520",
+        "type": "Event",
+        "label": "Wimbledon Championships",
+        "description": "offene englische Tennismeisterschaften"
+      }
+    }
+  },
+  {
+    "text": "Nestlé hat seinen Sitz in Vevey am Genfersee.",
+    "lang": "de",
+    "gold": {
+      "Nestlé": {
+        "qid": "Q160746",
+        "type": "Company",
+        "label": "Nestlé",
+        "description": "Schweizer Unternehmen"
+      },
+      "Vevey": {
+        "qid": "Q68160",
+        "type": "City",
+        "label": "Vevey",
+        "description": "Stadt und Gemeinde am Genfersee im Kanton Waadt, Schweiz"
+      },
+      "Genfersee": {
+        "qid": "Q6403",
+        "type": "Location",
+        "label": "Genfersee",
+        "description": "Rotten-/Rhône-See in den Westalpen, in der Schweiz und Frankreich"
+      }
+    }
+  },
+  {
+    "text": "Beethoven komponierte die Neunte Sinfonie in Wien.",
+    "lang": "de",
+    "gold": {
+      "Beethoven": {
+        "qid": "Q255",
+        "type": "Person",
+        "label": "Ludwig van Beethoven",
+        "description": "deutscher Komponist (1770–1827)"
+      },
+      "Neunte Sinfonie": {
+        "qid": "Q11989",
+        "type": "CreativeWork",
+        "label": "9. Sinfonie",
+        "description": "Sinfonie von Ludwig van Beethoven"
+      },
+      "Wien": {
+        "qid": "Q1741",
+        "type": "City",
+        "label": "Wien",
+        "description": "Bundeshauptstadt und bevölkerungsreichste Stadt der Republik Österreich"
+      }
+    }
+  },
+  {
+    "text": "BMW baut Motorräder in Berlin und Autos in Dingolfing.",
+    "lang": "de",
+    "gold": {
+      "BMW": {
+        "qid": "Q26678",
+        "type": "Company",
+        "label": "Bayerische Motoren Werke Aktiengesellschaft",
+        "description": "deutscher Automobil- und Motorradhersteller"
+      },
+      "Berlin": {
+        "qid": "Q64",
+        "type": "City",
+        "label": "Berlin",
+        "description": "Hauptstadt und bevölkerungsreichste Stadt der Bundesrepublik Deutschland"
+      },
+      "Dingolfing": {
+        "qid": "Q225909",
+        "type": "City",
+        "label": "Dingolfing",
+        "description": "Kreisstadt des niederbayerischen Landkreises Dingolfing-Landau"
+      }
+    }
+  },
+  {
+    "text": "Der Eurovision Song Contest fand in Basel statt.",
+    "lang": "de",
+    "gold": {
+      "Eurovision Song Contest": {
+        "qid": "Q276",
+        "type": "Event",
+        "label": "Eurovision Song Contest",
+        "description": "europäischer Musikwettbewerb"
+      },
+      "Basel": {
+        "qid": "Q78",
+        "type": "City",
+        "label": "Basel",
+        "description": "Schweizer Stadt am Oberrhein und Hauptort des Kantons Basel-Stadt"
+      }
+    }
+  },
+  {
+    "text": "Die Charité ist das größte Universitätsklinikum Europas.",
+    "lang": "de",
+    "gold": {
+      "Charité": {
+        "qid": "Q162684",
+        "type": "Organization",
+        "label": "Charité",
+        "description": "Krankenhaus und bedeutende Lehr- und Forschungsstätte in Berlin"
+      },
+      "Europas": {
+        "qid": "Q46",
+        "type": "Continent",
+        "label": "Europa",
+        "description": "terrestrischer Kontinent im Nordwesten Eurasiens"
+      }
+    }
+  },
+  {
+    "text": "Franz Kafka wurde in Prag geboren und schrieb Der Process.",
+    "lang": "de",
+    "gold": {
+      "Franz Kafka": {
+        "qid": "Q905",
+        "type": "Person",
+        "label": "Franz Kafka",
+        "description": "österreichisch-tschechischer Schriftsteller (1883–1924)"
+      },
+      "Prag": {
+        "qid": "Q1085",
+        "type": "City",
+        "label": "Prag",
+        "description": "Hauptstadt und bevölkerungsreichste Stadt Tschechiens"
+      },
+      "Der Process": {
+        "qid": "Q36097",
+        "type": "Book",
+        "label": "Der Process",
+        "description": "Roman von Franz Kafka"
+      }
+    }
+  },
+  {
+    "text": "Der Kölner Dom ist das Wahrzeichen von Köln.",
+    "lang": "de",
+    "gold": {
+      "Kölner Dom": {
+        "qid": "Q4176",
+        "type": "Place",
+        "label": "Kölner Dom",
+        "description": "Kirche in Köln, Deutschland"
+      },
+      "Köln": {
+        "qid": "Q365",
+        "type": "City",
+        "label": "Köln",
+        "description": "Millionenmetropole am Rhein und bevölkerungsreichste Stadt Nordrhein-Westfalens"
+      }
+    }
+  },
+  {
+    "text": "Der Zürcher Flughafen ist der größte der Schweiz.",
+    "lang": "de",
+    "gold": {
+      "Zürcher Flughafen": {
+        "qid": "Q15114",
+        "type": "Place",
+        "label": "Flughafen Zürich",
+        "description": "internationaler Flughafen in der Schweiz"
+      },
+      "Schweiz": {
+        "qid": "Q39",
+        "type": "Country",
+        "label": "Schweiz",
+        "description": "Staat in Mitteleuropa"
+      }
+    }
+  },
+  {
+    "text": "Salzburg ist die Geburtsstadt von Mozart.",
+    "lang": "de",
+    "gold": {
+      "Salzburg": {
+        "qid": "Q34713",
+        "type": "City",
+        "label": "Salzburg",
+        "description": "Hauptstadt des österreichischen Bundeslands Salzburg"
+      },
+      "Mozart": {
+        "qid": "Q254",
+        "type": "Person",
+        "label": "Wolfgang Amadeus Mozart",
+        "description": "Musiker und Komponist der Wiener Klassik"
+      }
+    }
+  }
+]

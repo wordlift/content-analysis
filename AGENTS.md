@@ -1,0 +1,61 @@
+# AGENTS.md
+
+Instructions for coding agents working in this repository. Humans: see README.md.
+
+## What this repository is
+
+The open half of WordLift's entity resolution. It holds a pipeline
+(`extract → retrieve → resolve | NIL`), a `Resolver` interface with an open
+reference implementation, and clients for WordLift's hosted `resolve()`
+engine. The engine itself (models, indexes, decision thresholds) is not here
+and is not configurable from here.
+
+## The contract you must not break
+
+- `POST https://resolve.wordlift.io/v1/resolve`, header `Authorization: Key <key>`.
+  Full schema: `docs/resolve-contract.md`, machine-readable `docs/openapi.resolve.json`,
+  live copy at `https://resolve.wordlift.io/openapi.json`.
+- Per mention the answer is `resolved` (with `entity`) or `unresolved` (with a
+  `reason`). **Unresolved is a result.** Clients map transport failures to
+  `resolver_unavailable` and never fall back to a guessed identity.
+- Identifiers are echoed in the caller's form (`Q312`, `wd:Q312`, Wikidata URI).
+- Empty candidate list means "let the engine retrieve" unless the caller set
+  `engine_retrieval=False`.
+- User datasets (`wordlift://dataset/me`, inline `dataset`, ordered worlds such
+  as `wordlift://dataset/me,wikidata://public`) are documented in
+  `docs/your-own-data.md`; with a user dataset, per-mention `candidates` are
+  not sent (the engine rejects them with 422).
+
+## Layout
+
+```
+resolve_pipeline/          Python package (types, resolver, pipeline, extract, html, evaluate, __main__)
+clients/typescript/        @wordlift/resolve, zero dependencies, tests under test/
+docs/                      contract, your-own-data guide, OpenAPI document, logos
+datasets/                  development gold sets: one Wikidata QID per mention
+examples/                  runnable scripts (need WL_KEY)
+tests/                     Python tests: no network, no GPU, no key
+```
+
+## How to work
+
+- Setup: `make setup` (venv + `pip install -e ".[dev]"`); tests: `make test`;
+  TypeScript: `cd clients/typescript && npm install && npm test`.
+- Tests must stay offline. Engine calls in tests go through a mocked
+  transport (`httpx.MockTransport` in Python, an injected `fetch` in TS).
+- Verify anything that touches a client against production once, with a real
+  key from the environment (`WL_KEY`), and paste the output in the PR.
+- Gold data: add or change a mention only with a QID verified against
+  Wikidata at authoring time, and say how in the PR.
+- Do not add engine internals, thresholds, holdout fixtures, keys or any
+  upstream hostname. The only public host is `resolve.wordlift.io`.
+- Releases of the TypeScript client are tag-driven (`ts-v<version>`, see
+  `.github/workflows/release-npm.yml`); bump `clients/typescript/package.json`
+  and `CHANGELOG.md` in the same commit.
+
+## Where things are decided
+
+Gate results, release decisions and the reasoning behind the NIL rules are
+published at https://wordlift.io/resolve/ and summarized in README.md. If a
+change here depends on engine behaviour, say so explicitly rather than
+assuming it.

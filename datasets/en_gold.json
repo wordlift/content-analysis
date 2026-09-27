@@ -1,0 +1,794 @@
+[
+ {
+  "text": "Manchester United beat Liverpool at Old Trafford on Sunday.",
+  "lang": "en",
+  "gold": {
+   "Manchester United": {
+    "qid": "Q18656",
+    "type": "SportsTeam",
+    "label": "",
+    "description": ""
+   },
+   "Liverpool": {
+    "qid": "Q1130849",
+    "type": "SportsTeam",
+    "label": "",
+    "description": ""
+   },
+   "Old Trafford": {
+    "qid": "Q83457",
+    "type": "Place",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Liverpool is a city in the north west of England, on the River Mersey.",
+  "lang": "en",
+  "gold": {
+   "Liverpool": {
+    "qid": "Q24826",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "England": {
+    "qid": "Q21",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "River Mersey": {
+    "qid": "Q19724",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Amazon opened a new warehouse in Seattle, where Jeff Bezos founded the company.",
+  "lang": "en",
+  "gold": {
+   "Amazon": {
+    "qid": "Q3884",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "Seattle": {
+    "qid": "Q5083",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "Jeff Bezos": {
+    "qid": "Q312556",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "The Amazon flows through Brazil and Peru before reaching the Atlantic Ocean.",
+  "lang": "en",
+  "gold": {
+   "Amazon": {
+    "qid": "Q3783",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Brazil": {
+    "qid": "Q155",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Peru": {
+    "qid": "Q419",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Atlantic Ocean": {
+    "qid": "Q97",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Apple presented the iPhone at Apple Park in Cupertino.",
+  "lang": "en",
+  "gold": {
+   "Apple": {
+    "qid": "Q312",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "iPhone": {
+    "qid": "Q2766",
+    "type": "Product",
+    "label": "",
+    "description": ""
+   },
+   "Apple Park": {
+    "qid": "Q22041180",
+    "type": "Place",
+    "label": "",
+    "description": ""
+   },
+   "Cupertino": {
+    "qid": "Q189471",
+    "type": "City",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Tesla was founded in California, and Nikola Tesla never saw the car that carries his name.",
+  "lang": "en",
+  "gold": {
+   "Tesla": {
+    "qid": "Q478214",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "California": {
+    "qid": "Q99",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Nikola Tesla": {
+    "qid": "Q9036",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "George Washington commanded the Continental Army during the American Revolutionary War.",
+  "lang": "en",
+  "gold": {
+   "George Washington": {
+    "qid": "Q23",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   },
+   "Continental Army": {
+    "qid": "Q54122",
+    "type": "Organization",
+    "label": "",
+    "description": ""
+   },
+   "American Revolutionary War": {
+    "qid": "Q40949",
+    "type": "Event",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Washington borders Oregon and the Pacific Ocean.",
+  "lang": "en",
+  "gold": {
+   "Washington": {
+    "qid": "Q1223",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Oregon": {
+    "qid": "Q824",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Pacific Ocean": {
+    "qid": "Q98",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Students at Cambridge punt on the Cam, a short walk from King's College.",
+  "lang": "en",
+  "gold": {
+   "Cambridge": {
+    "qid": "Q350",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "Cam": {
+    "qid": "Q944772",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "King's College": {
+    "qid": "Q924289",
+    "type": "EducationalOrganization",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Harvard sits in Cambridge, across the Charles River from Boston.",
+  "lang": "en",
+  "gold": {
+   "Harvard": {
+    "qid": "Q13371",
+    "type": "EducationalOrganization",
+    "label": "",
+    "description": ""
+   },
+   "Cambridge": {
+    "qid": "Q49111",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "Charles River": {
+    "qid": "Q794927",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Boston": {
+    "qid": "Q100",
+    "type": "City",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Python was created by Guido van Rossum and is maintained by the Python Software Foundation.",
+  "lang": "en",
+  "gold": {
+   "Python": {
+    "qid": "Q28865",
+    "type": "Software",
+    "label": "",
+    "description": ""
+   },
+   "Guido van Rossum": {
+    "qid": "Q30942",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   },
+   "Python Software Foundation": {
+    "qid": "Q83818",
+    "type": "Organization",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Java is the most populous island of Indonesia and holds its capital, Jakarta.",
+  "lang": "en",
+  "gold": {
+   "Java": {
+    "qid": "Q3757",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Indonesia": {
+    "qid": "Q252",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Jakarta": {
+    "qid": "Q3630",
+    "type": "City",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Oracle sued Google over the use of Java in Android.",
+  "lang": "en",
+  "gold": {
+   "Oracle": {
+    "qid": "Q19900",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "Google": {
+    "qid": "Q95",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "Java": {
+    "qid": "Q251",
+    "type": "Software",
+    "label": "",
+    "description": ""
+   },
+   "Android": {
+    "qid": "Q94",
+    "type": "Software",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Phoenix is the capital of Arizona and one of the hottest cities in the United States.",
+  "lang": "en",
+  "gold": {
+   "Phoenix": {
+    "qid": "Q16556",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "Arizona": {
+    "qid": "Q816",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "United States": {
+    "qid": "Q30",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Jordan won six championships with the Chicago Bulls.",
+  "lang": "en",
+  "gold": {
+   "Jordan": {
+    "qid": "Q41421",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   },
+   "Chicago Bulls": {
+    "qid": "Q128109",
+    "type": "SportsTeam",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Jordan borders Israel and Saudi Arabia, and its capital is Amman.",
+  "lang": "en",
+  "gold": {
+   "Jordan": {
+    "qid": "Q810",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Israel": {
+    "qid": "Q801",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Saudi Arabia": {
+    "qid": "Q851",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Amman": {
+    "qid": "Q3805",
+    "type": "City",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Darwin published On the Origin of Species years after visiting the Galapagos Islands.",
+  "lang": "en",
+  "gold": {
+   "Darwin": {
+    "qid": "Q1035",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   },
+   "On the Origin of Species": {
+    "qid": "Q20124",
+    "type": "Book",
+    "label": "",
+    "description": ""
+   },
+   "Galapagos Islands": {
+    "qid": "Q38095",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Darwin is the capital of the Northern Territory in Australia.",
+  "lang": "en",
+  "gold": {
+   "Darwin": {
+    "qid": "Q11568",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "Northern Territory": {
+    "qid": "Q3235",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Australia": {
+    "qid": "Q408",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "The Times reported that the Guardian had broken the story first.",
+  "lang": "en",
+  "gold": {
+   "The Times": {
+    "qid": "Q50008",
+    "type": "Organization",
+    "label": "",
+    "description": ""
+   },
+   "Guardian": {
+    "qid": "Q11148",
+    "type": "Organization",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Titanic won eleven Oscars, as many as Ben-Hur.",
+  "lang": "en",
+  "gold": {
+   "Titanic": {
+    "qid": "Q44578",
+    "type": "Movie",
+    "label": "",
+    "description": ""
+   },
+   "Oscars": {
+    "qid": "Q19020",
+    "type": "Award",
+    "label": "",
+    "description": ""
+   },
+   "Ben-Hur": {
+    "qid": "Q180098",
+    "type": "Movie",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "The Titanic sank in the Atlantic Ocean after leaving Southampton.",
+  "lang": "en",
+  "gold": {
+   "Titanic": {
+    "qid": "Q25173",
+    "type": "Product",
+    "label": "",
+    "description": ""
+   },
+   "Atlantic Ocean": {
+    "qid": "Q97",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Southampton": {
+    "qid": "Q79848",
+    "type": "City",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Nokia takes its name from a town in Finland, and Ericsson is Swedish.",
+  "lang": "en",
+  "gold": {
+   "Nokia": {
+    "qid": "Q1418",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "Finland": {
+    "qid": "Q33",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Ericsson": {
+    "qid": "Q52618",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Chelsea beat Arsenal in a London derby at Stamford Bridge.",
+  "lang": "en",
+  "gold": {
+   "Chelsea": {
+    "qid": "Q9616",
+    "type": "SportsTeam",
+    "label": "",
+    "description": ""
+   },
+   "Arsenal": {
+    "qid": "Q9617",
+    "type": "SportsTeam",
+    "label": "",
+    "description": ""
+   },
+   "London": {
+    "qid": "Q84",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "Stamford Bridge": {
+    "qid": "Q171458",
+    "type": "Place",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Turner painted the Fighting Temeraire, which hangs in the National Gallery.",
+  "lang": "en",
+  "gold": {
+   "Turner": {
+    "qid": "Q159758",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   },
+   "Fighting Temeraire": {
+    "qid": "Q257580",
+    "type": "CreativeWork",
+    "label": "",
+    "description": ""
+   },
+   "National Gallery": {
+    "qid": "Q180788",
+    "type": "Organization",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Mercury orbits closer to the Sun than Venus does.",
+  "lang": "en",
+  "gold": {
+   "Mercury": {
+    "qid": "Q308",
+    "type": "Place",
+    "label": "",
+    "description": ""
+   },
+   "Sun": {
+    "qid": "Q525",
+    "type": "Place",
+    "label": "",
+    "description": ""
+   },
+   "Venus": {
+    "qid": "Q313",
+    "type": "Place",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Queen performed at Live Aid in 1985 with Freddie Mercury on vocals.",
+  "lang": "en",
+  "gold": {
+   "Queen": {
+    "qid": "Q15862",
+    "type": "Organization",
+    "label": "",
+    "description": ""
+   },
+   "Live Aid": {
+    "qid": "Q193740",
+    "type": "Event",
+    "label": "",
+    "description": ""
+   },
+   "Freddie Mercury": {
+    "qid": "Q15869",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Banco Santander has its headquarters in Santander, in Cantabria.",
+  "lang": "en",
+  "gold": {
+   "Banco Santander": {
+    "qid": "Q6496310",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "Santander": {
+    "qid": "Q12233",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "Cantabria": {
+    "qid": "Q3946",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Shell and BP both reported record profits from the North Sea.",
+  "lang": "en",
+  "gold": {
+   "Shell": {
+    "qid": "Q154950",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "BP": {
+    "qid": "Q152057",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   },
+   "North Sea": {
+    "qid": "Q1693",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Abraham Lincoln delivered the Gettysburg Address in Pennsylvania.",
+  "lang": "en",
+  "gold": {
+   "Abraham Lincoln": {
+    "qid": "Q91",
+    "type": "Person",
+    "label": "",
+    "description": ""
+   },
+   "Gettysburg Address": {
+    "qid": "Q214524",
+    "type": "CreativeWork",
+    "label": "",
+    "description": ""
+   },
+   "Pennsylvania": {
+    "qid": "Q1400",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Georgia declared independence from the Soviet Union in 1991, with Tbilisi as its capital.",
+  "lang": "en",
+  "gold": {
+   "Georgia": {
+    "qid": "Q230",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Soviet Union": {
+    "qid": "Q15180",
+    "type": "Country",
+    "label": "",
+    "description": ""
+   },
+   "Tbilisi": {
+    "qid": "Q994",
+    "type": "City",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Atlanta is the capital of Georgia and the home of Coca-Cola.",
+  "lang": "en",
+  "gold": {
+   "Atlanta": {
+    "qid": "Q23556",
+    "type": "City",
+    "label": "",
+    "description": ""
+   },
+   "Georgia": {
+    "qid": "Q1428",
+    "type": "Location",
+    "label": "",
+    "description": ""
+   },
+   "Coca-Cola": {
+    "qid": "Q3295867",
+    "type": "Company",
+    "label": "",
+    "description": ""
+   }
+  }
+ },
+ {
+  "text": "Real Madrid signed the striker from Ajax in Amsterdam.",
+  "lang": "en",
+  "gold": {
+   "Real Madrid": {
+    "qid": "Q8682",
+    "type": "SportsTeam",
+    "label": "",
+    "description": ""
+   },
+   "Ajax": {
+    "qid": "Q81888",
+    "type": "SportsTeam",
+    "label": "",
+    "description": ""
+   },
+   "Amsterdam": {
+    "qid": "Q727",
+    "type": "City",
+    "label": "",
+    "description": ""
+   }
+  }
+ }
+]

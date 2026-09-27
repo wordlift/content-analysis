@@ -1,0 +1,350 @@
+[
+  {
+    "text": "El Real Madrid ganó la Champions en el Bernabéu.",
+    "lang": "es",
+    "gold": {
+      "Real Madrid": {
+        "qid": "Q8682",
+        "type": "SportsTeam",
+        "label": "Real Madrid Club de Fútbol",
+        "description": "club deportivo de Madrid, España"
+      },
+      "Champions": {
+        "qid": "Q18756",
+        "type": "Event",
+        "label": "Liga de Campeones de la UEFA",
+        "description": "campeonato europeo de fútbol a nivel de clubes"
+      },
+      "Bernabéu": {
+        "qid": "Q164027",
+        "type": "Place",
+        "label": "Estadio Santiago Bernabéu",
+        "description": "estadio de fútbol en Madrid, España"
+      }
+    }
+  },
+  {
+    "text": "Telefónica e Iberdrola cotizan en el IBEX 35.",
+    "lang": "es",
+    "gold": {
+      "Telefónica": {
+        "qid": "Q160229",
+        "type": "Company",
+        "label": "Telefónica",
+        "description": "compañía de telecomunicaciones con sede en Madrid, España"
+      },
+      "Iberdrola": {
+        "qid": "Q1437502",
+        "type": "Company",
+        "label": "Iberdrola",
+        "description": "multinacional española"
+      },
+      "IBEX 35": {
+        "qid": "Q938032",
+        "type": "Organization",
+        "label": "IBEX 35",
+        "description": "índice bursátil español"
+      }
+    }
+  },
+  {
+    "text": "El Barcelona y el Sevilla jugaron en el Camp Nou.",
+    "lang": "es",
+    "gold": {
+      "Barcelona": {
+        "qid": "Q7156",
+        "type": "SportsTeam",
+        "label": "Fútbol Club Barcelona",
+        "description": "club deportivo de Barcelona, España"
+      },
+      "Sevilla": {
+        "qid": "Q10329",
+        "type": "SportsTeam",
+        "label": "Sevilla Fútbol Club",
+        "description": "club deportivo de Sevilla, España"
+      },
+      "Camp Nou": {
+        "qid": "Q159848",
+        "type": "Place",
+        "label": "Camp Nou",
+        "description": "estadio de fútbol en Barcelona, España"
+      }
+    }
+  },
+  {
+    "text": "Sevilla es famosa por la Giralda y la Feria de Abril.",
+    "lang": "es",
+    "gold": {
+      "Sevilla": {
+        "qid": "Q8717",
+        "type": "City",
+        "label": "Sevilla",
+        "description": "capital de la comunidad autónoma de Andalucía, España"
+      },
+      "Giralda": {
+        "qid": "Q834479",
+        "type": "Place",
+        "label": "Giralda",
+        "description": "torre en Sevilla, España"
+      },
+      "Feria de Abril": {
+        "qid": "Q2918983",
+        "type": "Event",
+        "label": "Feria de Abril",
+        "description": "fiesta española de Interés Turístico Nacional"
+      }
+    }
+  },
+  {
+    "text": "El Banco Santander tiene su sede en Santander, Cantabria.",
+    "lang": "es",
+    "gold": {
+      "Banco Santander": {
+        "qid": "Q6496310",
+        "type": "Company",
+        "label": "Banco Santander",
+        "description": "banco español"
+      },
+      "Santander": {
+        "qid": "Q12233",
+        "type": "City",
+        "label": "Santander",
+        "description": "municipio capital de Cantabria‎, España"
+      },
+      "Cantabria": {
+        "qid": "Q3946",
+        "type": "Location",
+        "label": "Cantabria",
+        "description": "comunidad autónoma de España"
+      }
+    }
+  },
+  {
+    "text": "Guernica es una villa de Vizcaya bombardeada en 1937.",
+    "lang": "es",
+    "gold": {
+      "Guernica": {
+        "qid": "Q189848",
+        "type": "City",
+        "label": "Guernica y Luno",
+        "description": "municipio de Vizcaya, España"
+      },
+      "Vizcaya": {
+        "qid": "Q93366",
+        "type": "Location",
+        "label": "Vizcaya",
+        "description": "provincia del País Vasco, España"
+      }
+    }
+  },
+  {
+    "text": "El Museo del Prado exhibe Las Meninas de Velázquez.",
+    "lang": "es",
+    "gold": {
+      "Museo del Prado": {
+        "qid": "Q160112",
+        "type": "Place",
+        "label": "Museo del Prado",
+        "description": "museo de arte de Madrid, España"
+      },
+      "Las Meninas": {
+        "qid": "Q208758",
+        "type": "CreativeWork",
+        "label": "Las Meninas",
+        "description": "cuadro de Diego Velázquez"
+      },
+      "Velázquez": {
+        "qid": "Q297",
+        "type": "Person",
+        "label": "Diego Velázquez",
+        "description": "pintor español"
+      }
+    }
+  },
+  {
+    "text": "El Atlético de Madrid es el eterno rival del Real Madrid.",
+    "lang": "es",
+    "gold": {
+      "Atlético de Madrid": {
+        "qid": "Q8701",
+        "type": "SportsTeam",
+        "label": "Atlético de Madrid",
+        "description": "club de fútbol español"
+      },
+      "Real Madrid": {
+        "qid": "Q8682",
+        "type": "SportsTeam",
+        "label": "Real Madrid Club de Fútbol",
+        "description": "club deportivo de Madrid, España"
+      }
+    }
+  },
+  {
+    "text": "Miguel de Cervantes escribió el Quijote.",
+    "lang": "es",
+    "gold": {
+      "Miguel de Cervantes": {
+        "qid": "Q5682",
+        "type": "Person",
+        "label": "Miguel de Cervantes",
+        "description": "escritor español"
+      },
+      "Quijote": {
+        "qid": "Q480",
+        "type": "Book",
+        "label": "Don Quijote de la Mancha",
+        "description": "novela de Miguel de Cervantes en dos partes (1605, 1615)"
+      }
+    }
+  },
+  {
+    "text": "Antonio Banderas nació en Málaga y trabajó en Hollywood.",
+    "lang": "es",
+    "gold": {
+      "Antonio Banderas": {
+        "qid": "Q41548",
+        "type": "Person",
+        "label": "Antonio Banderas",
+        "description": "actor español"
+      },
+      "Málaga": {
+        "qid": "Q8851",
+        "type": "City",
+        "label": "Málaga",
+        "description": "municipio y capital de la provincia de Málaga, España"
+      },
+      "Hollywood": {
+        "qid": "Q34006",
+        "type": "Location",
+        "label": "Hollywood",
+        "description": "barrio en la región central de Los Ángeles, California, Estados Unidos"
+      }
+    }
+  },
+  {
+    "text": "El Guggenheim de Bilbao fue diseñado por Frank Gehry.",
+    "lang": "es",
+    "gold": {
+      "Guggenheim": {
+        "qid": "Q179199",
+        "type": "Place",
+        "label": "Museo Guggenheim Bilbao",
+        "description": "museo en el País Vasco"
+      },
+      "Bilbao": {
+        "qid": "Q8692",
+        "type": "City",
+        "label": "Bilbao",
+        "description": "capital de la provincia de Vizcaya, País Vasco, España"
+      },
+      "Frank Gehry": {
+        "qid": "Q180374",
+        "type": "Person",
+        "label": "Frank Gehry",
+        "description": "arquitecto canadiense"
+      }
+    }
+  },
+  {
+    "text": "Shakira y Juanes son cantantes colombianos.",
+    "lang": "es",
+    "gold": {
+      "Shakira": {
+        "qid": "Q34424",
+        "type": "Person",
+        "label": "",
+        "description": "cantante, compositora y actriz colombiana"
+      },
+      "Juanes": {
+        "qid": "Q43189",
+        "type": "Person",
+        "label": "Juanes",
+        "description": "músico colombiano (nacido en 1972)"
+      }
+    }
+  },
+  {
+    "text": "Andalucía es la comunidad autónoma más poblada de España.",
+    "lang": "es",
+    "gold": {
+      "Andalucía": {
+        "qid": "Q5783",
+        "type": "Location",
+        "label": "Andalucía",
+        "description": "comunidad autónoma de España"
+      },
+      "España": {
+        "qid": "Q29",
+        "type": "Country",
+        "label": "España",
+        "description": "país del suroeste de Europa con territorios en África"
+      }
+    }
+  },
+  {
+    "text": "El Cid conquistó Valencia en 1094.",
+    "lang": "es",
+    "gold": {
+      "El Cid": {
+        "qid": "Q43958",
+        "type": "Person",
+        "label": "Rodrigo Díaz de Vivar",
+        "description": "militar castellano"
+      },
+      "Valencia": {
+        "qid": "Q8818",
+        "type": "City",
+        "label": "Valencia",
+        "description": "ciudad y municipio de España, capital de la Comunidad Valenciana"
+      }
+    }
+  },
+  {
+    "text": "Frida Kahlo y Diego Rivera vivieron en Coyoacán.",
+    "lang": "es",
+    "gold": {
+      "Frida Kahlo": {
+        "qid": "Q5588",
+        "type": "Person",
+        "label": "Frida Kahlo",
+        "description": "pintora y activista mexicana"
+      },
+      "Diego Rivera": {
+        "qid": "Q171128",
+        "type": "Person",
+        "label": "Diego Rivera",
+        "description": "muralista y pintor mexicano"
+      },
+      "Coyoacán": {
+        "qid": "Q661315",
+        "type": "Location",
+        "label": "Coyoacán",
+        "description": "demarcación territorial de la Ciudad de México"
+      }
+    }
+  },
+  {
+    "text": "Buenos Aires es la capital de Argentina y sede de Boca Juniors.",
+    "lang": "es",
+    "gold": {
+      "Buenos Aires": {
+        "qid": "Q1486",
+        "type": "City",
+        "label": "Buenos Aires",
+        "description": "capital y ciudad más poblada de Argentina"
+      },
+      "Argentina": {
+        "qid": "Q414",
+        "type": "Country",
+        "label": "Argentina",
+        "description": "país de América del Sur"
+      },
+      "Boca Juniors": {
+        "qid": "Q170703",
+        "type": "SportsTeam",
+        "label": "Boca Juniors",
+        "description": "club deportivo de Buenos Aires, Argentina"
+      }
+    }
+  }
+]

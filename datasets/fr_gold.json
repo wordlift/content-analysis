@@ -1,0 +1,320 @@
+[
+  {
+    "text": "Le Paris Saint-Germain a battu l'Olympique de Marseille au Parc des Princes.",
+    "lang": "fr",
+    "gold": {
+      "Paris Saint-Germain": {
+        "qid": "Q483020",
+        "type": "SportsTeam",
+        "label": "Paris Saint-Germain FC",
+        "description": "club de football français"
+      },
+      "Olympique de Marseille": {
+        "qid": "Q132885",
+        "type": "SportsTeam",
+        "label": "Olympique de Marseille",
+        "description": "club de football français"
+      },
+      "Parc des Princes": {
+        "qid": "Q193431",
+        "type": "Place",
+        "label": "Parc des Princes",
+        "description": "stade de football situé à Paris"
+      }
+    }
+  },
+  {
+    "text": "TotalEnergies et Renault sont cotées à la Bourse de Paris.",
+    "lang": "fr",
+    "gold": {
+      "TotalEnergies": {
+        "qid": "Q154037",
+        "type": "Company",
+        "label": "",
+        "description": "multinationale française de production et de fourniture d'hydrocarbures"
+      },
+      "Renault": {
+        "qid": "Q6686",
+        "type": "Company",
+        "label": "Renault",
+        "description": "groupe automobile français"
+      },
+      "Bourse de Paris": {
+        "qid": "Q2385849",
+        "type": "Organization",
+        "label": "Euronext Paris",
+        "description": "plateforme boursière française"
+      }
+    }
+  },
+  {
+    "text": "Lyon est traversée par le Rhône et la Saône.",
+    "lang": "fr",
+    "gold": {
+      "Lyon": {
+        "qid": "Q456",
+        "type": "City",
+        "label": "Lyon",
+        "description": "commune française (chef-lieu du département du Rhône et de la région Auvergne-Rhone-Alpes)"
+      },
+      "Rhône": {
+        "qid": "Q602",
+        "type": "Location",
+        "label": "Rhône",
+        "description": "fleuve de Suisse et de France"
+      },
+      "Saône": {
+        "qid": "Q187834",
+        "type": "Location",
+        "label": "Saône",
+        "description": "rivière de France"
+      }
+    }
+  },
+  {
+    "text": "Le Louvre abrite la Joconde de Léonard de Vinci.",
+    "lang": "fr",
+    "gold": {
+      "Louvre": {
+        "qid": "Q19675",
+        "type": "Place",
+        "label": "Musée du Louvre",
+        "description": "musée d'art et d'archéologie à Paris, France"
+      },
+      "Joconde": {
+        "qid": "Q12418",
+        "type": "CreativeWork",
+        "label": "La Joconde",
+        "description": "peinture à l'huile, sur panneau de bois, de Léonard de Vinci, musée du Louvre"
+      },
+      "Léonard de Vinci": {
+        "qid": "Q762",
+        "type": "Person",
+        "label": "Léonard de Vinci",
+        "description": "peintre, sculpteur, architecte et ingénieur, théoricien de l'art et chercheur scientifique toscan"
+      }
+    }
+  },
+  {
+    "text": "Le Mont-Blanc est le plus haut sommet des Alpes.",
+    "lang": "fr",
+    "gold": {
+      "Mont-Blanc": {
+        "qid": "Q583",
+        "type": "Location",
+        "label": "mont Blanc",
+        "description": "plus haut sommet des Alpes"
+      },
+      "Alpes": {
+        "qid": "Q1286",
+        "type": "Location",
+        "label": "Alpes",
+        "description": "chaîne de montagnes d'Europe"
+      }
+    }
+  },
+  {
+    "text": "Le Tour de France se termine sur les Champs-Élysées.",
+    "lang": "fr",
+    "gold": {
+      "Tour de France": {
+        "qid": "Q33881",
+        "type": "Event",
+        "label": "Tour de France",
+        "description": "compétition de cyclisme française"
+      },
+      "Champs-Élysées": {
+        "qid": "Q550",
+        "type": "Place",
+        "label": "avenue des Champs-Élysées",
+        "description": "avenue de Paris (France)"
+      }
+    }
+  },
+  {
+    "text": "Marseille est le plus grand port de France.",
+    "lang": "fr",
+    "gold": {
+      "Marseille": {
+        "qid": "Q23482",
+        "type": "City",
+        "label": "Marseille",
+        "description": "ville et commune française (chef-lieu du département des Bouches-du-Rhône et de la région Provence-Alpes-Côte d'Azur) et 2e plus grande ville de France"
+      },
+      "France": {
+        "qid": "Q142",
+        "type": "Country",
+        "label": "France",
+        "description": "pays transcontinental au territoire métropolitain situé en Europe de l'Ouest"
+      }
+    }
+  },
+  {
+    "text": "Le Festival de Cannes récompense le meilleur film par la Palme d'or.",
+    "lang": "fr",
+    "gold": {
+      "Festival de Cannes": {
+        "qid": "Q42369",
+        "type": "Event",
+        "label": "Festival de Cannes",
+        "description": "festival international de cinéma, se tenant chaque année à Cannes, France"
+      },
+      "Palme d'or": {
+        "qid": "Q179808",
+        "type": "Award",
+        "label": "Palme d'or",
+        "description": "prix cinématographique, plus grande distinction du Festival de Cannes"
+      }
+    }
+  },
+  {
+    "text": "Les Girondins de Bordeaux ont été relégués.",
+    "lang": "fr",
+    "gold": {
+      "Girondins de Bordeaux": {
+        "qid": "Q172476",
+        "type": "SportsTeam",
+        "label": "Girondins de Bordeaux",
+        "description": "club de football français"
+      }
+    }
+  },
+  {
+    "text": "Simone Veil a présidé le Parlement européen.",
+    "lang": "fr",
+    "gold": {
+      "Simone Veil": {
+        "qid": "Q298180",
+        "type": "Person",
+        "label": "Simone Veil",
+        "description": "femme politique française"
+      },
+      "Parlement européen": {
+        "qid": "Q8889",
+        "type": "Organization",
+        "label": "Parlement européen",
+        "description": "institution de l'Union européenne"
+      }
+    }
+  },
+  {
+    "text": "Le Mont-Saint-Michel est classé au patrimoine mondial de l'UNESCO.",
+    "lang": "fr",
+    "gold": {
+      "Mont-Saint-Michel": {
+        "qid": "Q20883",
+        "type": "Location",
+        "label": "mont Saint-Michel",
+        "description": "îlot rocheux granitique dans la Manche, Normandie, France"
+      },
+      "UNESCO": {
+        "qid": "Q7809",
+        "type": "Organization",
+        "label": "Organisation des Nations unies pour l'éducation, la science et la culture",
+        "description": "agence spécialisée des Nations unies pour l'éducation, les sciences et la culture"
+      }
+    }
+  },
+  {
+    "text": "Le Stade de France se trouve à Saint-Denis.",
+    "lang": "fr",
+    "gold": {
+      "Stade de France": {
+        "qid": "Q13205",
+        "type": "Place",
+        "label": "stade de France",
+        "description": "stade situé à Saint-Denis, en Île-de-France"
+      },
+      "Saint-Denis": {
+        "qid": "Q131575588",
+        "type": "City",
+        "label": "Saint-Denis",
+        "description": "commune française de la Seine-Saint-Denis, région Île-de-France"
+      }
+    }
+  },
+  {
+    "text": "Danone et Carrefour sont des groupes agroalimentaires et de distribution.",
+    "lang": "fr",
+    "gold": {
+      "Danone": {
+        "qid": "Q329426",
+        "type": "Company",
+        "label": "Danone",
+        "description": "groupe industriel multinational fondé en France"
+      },
+      "Carrefour": {
+        "qid": "Q3117359",
+        "type": "Company",
+        "label": "Groupe Carrefour",
+        "description": "multinationale française de la grande distribution"
+      }
+    }
+  },
+  {
+    "text": "Albert Camus a écrit L'Étranger en 1942.",
+    "lang": "fr",
+    "gold": {
+      "Albert Camus": {
+        "qid": "Q34670",
+        "type": "Person",
+        "label": "Albert Camus",
+        "description": "écrivain, philosophe et journaliste français"
+      },
+      "L'Étranger": {
+        "qid": "Q163297",
+        "type": "Book",
+        "label": "L'Étranger",
+        "description": "roman d’Albert Camus"
+      }
+    }
+  },
+  {
+    "text": "Monaco accueille chaque année le Grand Prix de Monaco de Formule 1.",
+    "lang": "fr",
+    "gold": {
+      "Monaco": {
+        "qid": "Q235",
+        "type": "Country",
+        "label": "Monaco",
+        "description": "micro État d'Europe fondé en 1297"
+      },
+      "Grand Prix de Monaco": {
+        "qid": "Q9102",
+        "type": "Event",
+        "label": "Grand Prix automobile de Monaco",
+        "description": "course de Formule 1"
+      },
+      "Formule 1": {
+        "qid": "Q1968",
+        "type": "Event",
+        "label": "Formule 1",
+        "description": "championnat du monde automobile de monoplaces catégorie reine"
+      }
+    }
+  },
+  {
+    "text": "Gustave Eiffel a construit la tour Eiffel pour l'Exposition universelle de 1889.",
+    "lang": "fr",
+    "gold": {
+      "Gustave Eiffel": {
+        "qid": "Q20882",
+        "type": "Person",
+        "label": "Gustave Eiffel",
+        "description": "architecte, ingénieur et constructeur français"
+      },
+      "tour Eiffel": {
+        "qid": "Q243",
+        "type": "Place",
+        "label": "tour Eiffel",
+        "description": "tour de fer puddlé de 330 mètres à Paris, France"
+      },
+      "Exposition universelle de 1889": {
+        "qid": "Q957317",
+        "type": "Event",
+        "label": "Exposition universelle de Paris de 1889",
+        "description": "dixième exposition universelle, qui fut organisée à Paris (France)"
+      }
+    }
+  }
+]
