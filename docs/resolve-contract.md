@@ -163,6 +163,32 @@ in the dataset carries that surface form, `low_relevance` when the context does
 not support the match. Resolved entities carry the dataset's own `id`, `label`,
 `types` and `same_as` links.
 
+## Metering
+
+Every successful response carries the request's cost in smart credits:
+
+```
+X-Wordlift-Consumption: 2
+```
+
+One credit per request plus one per 1,000 characters of `text`, so a sentence
+costs 2 and a 5,000-character article costs 6. Resolving against your own
+graph or an inline vocabulary costs the same as the public world; the graph
+load is not charged per request.
+
+Credits are booked against the account's monthly allowance for resolve(), and
+the usual rate-limit headers describe where it stands:
+
+```
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4998
+X-RateLimit-Reset: 1234567
+```
+
+When the allowance is spent the request is answered with `429 Too Many
+Requests` and the same headers, and nothing is resolved. Responses with an
+error status cost nothing.
+
 ## Out of scope
 
 Relation extraction, automatic graph writes, graph traversal, and any exposure
