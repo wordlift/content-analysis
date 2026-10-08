@@ -19,6 +19,11 @@ and is not configurable from here.
   `reason`). **Unresolved is a result.** Clients map transport failures to
   `resolver_unavailable` and never fall back to a guessed identity.
 - Identifiers are echoed in the caller's form (`Q312`, `wd:Q312`, Wikidata URI).
+- The answer for a mention is the one response row with its span, rebased to
+  the text that was sent (`Context` carries the window's offset). No row, two
+  rows, a resolved row without an identity, or a body of another shape is a
+  protocol error (`protocol_error` / `ResolverProtocolError`): never another
+  row, never a guessed identity, and distinct from `resolver_unavailable`.
 - Empty candidate list means "let the engine retrieve" unless the caller set
   `engine_retrieval=False`.
 - User datasets (`wordlift://dataset/me`, inline `dataset`, ordered worlds such

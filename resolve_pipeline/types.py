@@ -15,6 +15,11 @@ NO_CANDIDATES = "no_candidates"
 TYPE_CONFLICT = "type_conflict"
 LOW_RELEVANCE = "low_relevance"
 RESOLVER_UNAVAILABLE = "resolver_unavailable"
+# The engine answered, but not with something a client can act on: no row for
+# the requested span, two rows for it, a resolved row without an identity, a
+# body that is not the contract's shape. Distinct from a transport failure and
+# from a genuine abstention; never turned into an identity.
+PROTOCOL_ERROR = "protocol_error"
 
 RESOLVED = "resolved"
 UNRESOLVED = "unresolved"
@@ -27,6 +32,41 @@ class Mention:
     end: int
     label: str = ""
     score: float | None = None
+
+
+class Context(str):
+    """The text a resolver reads, and where it starts in the document.
+
+    A context window is a slice of the document; the mention's offsets are
+    document-relative. `offset` is what makes the two agree: the mention sits
+    at `start - offset` in the text. Context is a `str`, so a retriever or
+    resolver written against plain text keeps working; a plain string means
+    offset 0 (the string is the whole document).
+    """
+    offset: int
+
+    def __new__(cls, text: str, offset: int = 0) -> "Context":
+        self = super().__new__(cls, text)
+        self.offset = offset
+        return self
+
+    @property
+    def text(self) -> str:
+        return str.__str__(self)
+
+    def __repr__(self) -> str:
+        return f"Context({self.text!r}, offset={self.offset})"
+
+    @classmethod
+    def of(cls, context: "str | Context") -> "Context":
+        return context if isinstance(context, Context) else cls(context, 0)
+
+    def local_span(self, mention: "Mention") -> tuple[int, int] | None:
+        """The mention's span inside this text, or None when it does not lie here as written."""
+        start, end = mention.start - self.offset, mention.end - self.offset
+        if start < 0 or end > len(self.text) or self.text[start:end] != mention.text:
+            return None
+        return start, end
 
 
 @dataclass(frozen=True)

@@ -23,5 +23,15 @@ class AttributionTests(unittest.TestCase):
         self.assertAlmostEqual(r["end_to_end_accuracy"], 1 / 4)
 
 
+class IdentifierFormsTests(unittest.TestCase):
+    def test_wikidata_forms_are_one_identity_and_dataset_iris_are_not_touched(self):
+        from resolve_pipeline.evaluate import attribute, canonical_id, CORRECT, RETRIEVAL_MISS
+        for form in ("Q312", "wd:Q312", "http://www.wikidata.org/entity/Q312", "https://www.wikidata.org/wiki/Q312"):
+            self.assertEqual(canonical_id(form), "Q312")
+        self.assertEqual(canonical_id("https://data.example/apple"), "https://data.example/apple")
+        self.assertEqual(attribute("Q312", ["wd:Q312"], "https://www.wikidata.org/entity/Q312"), CORRECT)
+        self.assertEqual(attribute("Q312", ["Q89"], None), RETRIEVAL_MISS)
+
+
 if __name__ == "__main__":
     unittest.main()
