@@ -86,8 +86,9 @@ export interface ResolvedEntity {
   id: string;
   label: string;
   description?: string | null;
-  types: string[];
-  same_as: string[];
+  /** Absent when the engine has no type for the entity. */
+  types?: string[];
+  same_as?: string[];
 }
 
 export type UnresolvedReason =
@@ -119,7 +120,7 @@ export interface ResolveResponse {
   dataset_uri: string;
   language: string;
   processing_time_ms: number;
-  engine: string;
+  engine?: string;
 }
 
 export interface WordLiftResolverOptions {
@@ -141,6 +142,21 @@ export class ResolverUnavailableError extends Error {
     super(message);
     this.name = "ResolverUnavailableError";
     this.status = status;
+    this.body = body;
+  }
+}
+
+/**
+ * The engine answered, but not with something a client can act on: a body that
+ * is not the contract's shape, no row for the requested span, two rows for it,
+ * a resolved row without an identity. Distinct from a transport failure and
+ * from a genuine `unresolved`; never turned into an identity.
+ */
+export class ResolverProtocolError extends Error {
+  readonly body?: unknown;
+  constructor(message: string, body?: unknown) {
+    super(message);
+    this.name = "ResolverProtocolError";
     this.body = body;
   }
 }
@@ -178,6 +194,7 @@ export class WordLiftResolver {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     let response: Response;
+    let text: string;
     try {
       response = await this.fetchImpl(`${this.baseUrl}/v1/resolve`, {
         method: "POST",
@@ -185,28 +202,63 @@ export class WordLiftResolver {
         body: JSON.stringify(body),
         signal: controller.signal,
       });
+      // The timeout covers the body too: a stalled stream is as unavailable as a stalled connection.
+      text = await response.text();
     } catch (err) {
       throw new ResolverUnavailableError(`resolve() unreachable: ${(err as Error).message}`);
     } finally {
       clearTimeout(timer);
     }
-    const text = await response.text();
     let parsed: unknown = text;
     try { parsed = text ? JSON.parse(text) : null; } catch { /* keep raw text */ }
     if (response.status === 422) throw new InvalidRequestError((parsed as { detail?: unknown })?.detail ?? parsed);
     if (!response.ok) throw new ResolverUnavailableError(`resolve() HTTP ${response.status}`, response.status, parsed);
-    return parsed as ResolveResponse;
+    return validateResponse(parsed);
   }
 
-  /** Convenience: one mention, your candidates, one answer. */
+  /**
+   * Convenience: one mention, your candidates, one answer.
+   *
+   * The answer is the row with exactly the requested span. No such row, or
+   * more than one, is a ResolverProtocolError: another row is never the
+   * answer for this mention.
+   */
   async resolveMention(
     text: string,
     mention: Mention,
     options: { language?: string; include?: ResolveRequest["include"] } = {},
   ): Promise<MentionResolution> {
     const res = await this.resolve({ text, mentions: [mention], ...options });
-    const hit = res.mentions.find((m) => m.start === mention.start && m.end === mention.end) ?? res.mentions[0];
-    if (!hit) throw new ResolverUnavailableError("resolve() returned no mention");
-    return hit;
+    const hits = res.mentions.filter((m) => m.start === mention.start && m.end === mention.end);
+    if (hits.length !== 1) {
+      throw new ResolverProtocolError(`resolve() returned ${hits.length} rows for span [${mention.start}, ${mention.end})`, res);
+    }
+    return hits[0];
   }
+}
+
+/**
+ * The structural invariants a client needs for identity safety, checked on
+ * every successful response; unknown fields pass through. A body that fails
+ * is a ResolverProtocolError.
+ */
+export function validateResponse(parsed: unknown): ResolveResponse {
+  const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+  if (!isObject(parsed) || !Array.isArray(parsed.mentions)) {
+    throw new ResolverProtocolError("resolve() answered without a `mentions` list", parsed);
+  }
+  for (const row of parsed.mentions) {
+    if (!isObject(row) || typeof row.start !== "number" || typeof row.end !== "number") {
+      throw new ResolverProtocolError("resolve() returned a mention without a span", parsed);
+    }
+    if (row.status === "resolved") {
+      const entity = row.entity;
+      if (!isObject(entity) || typeof entity.id !== "string" || entity.id === "") {
+        throw new ResolverProtocolError("resolve() returned a resolved mention without an identity", parsed);
+      }
+    } else if (row.status !== "unresolved") {
+      throw new ResolverProtocolError(`resolve() returned an unknown status ${String(row.status)}`, parsed);
+    }
+  }
+  return parsed as unknown as ResolveResponse;
 }

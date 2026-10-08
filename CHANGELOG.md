@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.1.2 — unreleased
+
+Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
+
+- The context window carries its offset (`Context`), the request span is
+  rebased to the text sent, and resolutions keep document offsets. Before this
+  a mention beyond the window's start was sent with document offsets into a
+  cropped text.
+- No fallback row: the answer for a mention is the one row with its span.
+  No row, two rows, a resolved row without an identity or a body of another
+  shape is `protocol_error` (Python) or `ResolverProtocolError` (TypeScript),
+  distinct from `resolver_unavailable` and from a genuine `unresolved`.
+- HTML: offsets come from the parser's source positions; entities map to
+  their source, attributes, scripts and comments are never matched, inline
+  whitespace is one space, the text is not trimmed. Standard library only;
+  the `html` extra is no longer needed.
+- TypeScript: the timeout covers the body; `types`, `same_as` and `engine`
+  optional as the schema says.
+- CLI: candidates are refused with any user world; a missing score prints.
+- `ArgmaxResolver` ignores nonfinite scores. The evaluator treats `Q312`,
+  `wd:Q312` and the Wikidata URIs as one identity.
+- OpenAPI: the security scheme reference, `dataset`, per-mention
+  `dataset_uri` and `signals`, the 401, 429 and 503 responses, the
+  consumption and rate-limit headers, contact and audience metadata; a test
+  keeps it consistent.
+- Extraction serialises the splitter assignment and the prediction per model;
+  `WordLiftResolver` closes the HTTP client it owns (context manager).
+
 ## 0.1.1 — unreleased
 
 - `signals` on every mention (`path`, `retrieval_prior`, `match_probability`,

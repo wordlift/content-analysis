@@ -11,10 +11,25 @@ from typing import Any, Protocol, runtime_checkable
 
 import httpx
 
+import math
+
 from .types import (
-    LOW_RELEVANCE, NO_CANDIDATES, NO_SUITABLE_CANDIDATE, RESOLVER_UNAVAILABLE,
-    Candidate, Entity, Mention, Resolution, resolved, unresolved,
+    LOW_RELEVANCE, NO_CANDIDATES, NO_SUITABLE_CANDIDATE, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE,
+    Candidate, Context, Entity, Mention, Resolution, resolved, unresolved,
 )
+
+PUBLIC_WORLD = "wikidata://public"
+WORDLIFT_GRAPH = "wordlift://dataset/me"
+INLINE = "inline"
+
+
+def worlds(dataset_uri: str) -> list[str]:
+    return [w.strip() for w in (dataset_uri or "").split(",") if w.strip()]
+
+
+def is_user_world(dataset_uri: str, dataset: Any = None) -> bool:
+    """True when the dataset is the candidate world and per-mention candidates must not be sent."""
+    return dataset is not None or any(w in (WORDLIFT_GRAPH, INLINE) for w in worlds(dataset_uri))
 
 
 @runtime_checkable
@@ -22,7 +37,7 @@ class Resolver(Protocol):
     def resolve(
         self,
         mention: Mention,
-        context: str,
+        context: "str | Context",
         candidates: list[Candidate],
         *,
         language: str = "",
@@ -42,7 +57,10 @@ class ArgmaxResolver:
         self.min_score = min_score
         self.min_margin = min_margin
 
-    def resolve(self, mention: Mention, context: str, candidates: list[Candidate], *, language: str = "") -> Resolution:
+    def resolve(self, mention: Mention, context: "str | Context", candidates: list[Candidate], *, language: str = "") -> Resolution:
+        # A score that is not a finite number is no score: it would pass every
+        # comparison-based gate (NaN compares false to everything).
+        candidates = [c for c in candidates if c.score is None or math.isfinite(c.score)]
         if not candidates:
             return unresolved(mention, NO_CANDIDATES)
         ranked = sorted(candidates, key=lambda c: c.score if c.score is not None else float("-inf"), reverse=True)
@@ -65,9 +83,9 @@ class WordLiftResolver:
     """
 
     DEFAULT_BASE_URL = "https://resolve.wordlift.io"
-    WORDLIFT_GRAPH = "wordlift://dataset/me"
+    WORDLIFT_GRAPH = WORDLIFT_GRAPH
     #: Your entities first, Wikidata for everything else.
-    LOCAL_FIRST = "wordlift://dataset/me,wikidata://public"
+    LOCAL_FIRST = f"{WORDLIFT_GRAPH},{PUBLIC_WORLD}"
 
     def __init__(
         self,
@@ -100,16 +118,32 @@ class WordLiftResolver:
         self.dataset_uri = "inline" if self.dataset is not None else dataset_uri
         self.timeout = timeout
         self.engine_retrieval = engine_retrieval
+        self._owns_client = client is None
         self._client = client or httpx.Client(timeout=timeout)
         self._headers = {"Authorization": f"Key {api_key}", "Content-Type": "application/json"}
 
+    def close(self) -> None:
+        """Close the HTTP client this resolver created; an injected client stays the caller's."""
+        if self._owns_client:
+            self._client.close()
+
+    def __enter__(self) -> "WordLiftResolver":
+        return self
+
+    def __exit__(self, *exc: Any) -> None:
+        self.close()
+
     @property
     def user_dataset(self) -> bool:
-        worlds = [w.strip() for w in self.dataset_uri.split(",")]
-        return self.dataset is not None or self.WORDLIFT_GRAPH in worlds or "inline" in worlds
+        return is_user_world(self.dataset_uri, self.dataset)
 
-    def payload(self, mention: Mention, context: str, candidates: list[Candidate], language: str) -> dict[str, Any]:
-        span: dict[str, Any] = {"text": mention.text, "start": mention.start, "end": mention.end,
+    def payload(self, mention: Mention, context: "str | Context", candidates: list[Candidate], language: str) -> dict[str, Any]:
+        """The request body. The span is rebased to the context text; see Context."""
+        ctx = Context.of(context)
+        local = ctx.local_span(mention)
+        if local is None:
+            raise ValueError(f"mention {mention.text!r} [{mention.start}, {mention.end}) does not lie in the context as written")
+        span: dict[str, Any] = {"text": mention.text, "start": local[0], "end": local[1],
                                 "type": mention.label or None}
         if candidates and not self.user_dataset:
             span["candidates"] = [
@@ -117,42 +151,71 @@ class WordLiftResolver:
                  "types": list(c.types) or None, "score": c.score}
                 for c in candidates
             ]
-        body: dict[str, Any] = {"text": context, "dataset_uri": self.dataset_uri, "language": language or None, "mentions": [span]}
+        body: dict[str, Any] = {"text": ctx.text, "dataset_uri": self.dataset_uri, "language": language or None, "mentions": [span]}
         if self.dataset is not None:
             body["dataset"] = self.dataset
         return body
 
-    def resolve(self, mention: Mention, context: str, candidates: list[Candidate], *, language: str = "") -> Resolution:
+    def resolve(self, mention: Mention, context: "str | Context", candidates: list[Candidate], *, language: str = "") -> Resolution:
         if not candidates and not self.engine_retrieval and not self.user_dataset:
             return unresolved(mention, NO_CANDIDATES)
+        ctx = Context.of(context)
+        if ctx.local_span(mention) is None:
+            return unresolved(mention, PROTOCOL_ERROR, detail="mention span does not match the context text")
         try:
             response = self._client.post(
                 f"{self.base_url}/v1/resolve",
-                json=self.payload(mention, context, candidates, language),
+                json=self.payload(mention, ctx, candidates, language),
                 headers=self._headers,
                 timeout=self.timeout,
             )
             response.raise_for_status()
-            body = response.json()
-        except (httpx.HTTPError, ValueError) as exc:
+        except httpx.HTTPError as exc:
             return unresolved(mention, RESOLVER_UNAVAILABLE, error=type(exc).__name__)
-        return self.parse(mention, body)
+        try:
+            body = response.json()
+        except ValueError:
+            return unresolved(mention, PROTOCOL_ERROR, detail="response is not JSON")
+        return self.parse(mention, body, ctx)
 
     @staticmethod
-    def parse(mention: Mention, body: dict[str, Any]) -> Resolution:
-        rows = body.get("mentions") or []
-        row = next((r for r in rows if r.get("start") == mention.start and r.get("end") == mention.end), rows[0] if rows else {})
+    def parse(mention: Mention, body: Any, context: "str | Context | None" = None) -> Resolution:
+        """The resolution for `mention` in a contract-shaped response body.
+
+        Exactly one row must carry the mention's span (rebased to the context
+        it was sent with). No row, two rows, a resolved row without an
+        identity, or a body of another shape is a `protocol_error`: an answer
+        the client cannot act on is never turned into an identity. Unknown
+        fields are ignored.
+        """
+        if not isinstance(body, dict) or not isinstance(body.get("mentions"), list):
+            return unresolved(mention, PROTOCOL_ERROR, detail="response has no `mentions` list")
+        local = Context.of(context).local_span(mention) if context is not None else (mention.start, mention.end)
+        if local is None:
+            return unresolved(mention, PROTOCOL_ERROR, detail="mention span does not match the context text")
+        rows = [r for r in body["mentions"] if isinstance(r, dict) and r.get("start") == local[0] and r.get("end") == local[1]]
+        if len(rows) != 1:
+            return unresolved(mention, PROTOCOL_ERROR, detail=f"{len(rows)} rows for the requested span")
+        row = rows[0]
         entity = row.get("entity")
         extra = dict(row.get("diagnostics") or {})
         if row.get("dataset_uri"):
             extra["dataset_uri"] = row["dataset_uri"]
         if row.get("signals"):
             extra["signals"] = row["signals"]
-        if row.get("status") == "resolved" and entity:
+        status = row.get("status")
+        if status == "resolved":
+            if not isinstance(entity, dict) or not isinstance(entity.get("id"), str) or not entity["id"]:
+                return unresolved(mention, PROTOCOL_ERROR, detail="resolved row without an identity")
+            score = row.get("score")
+            if score is not None and not (isinstance(score, (int, float)) and math.isfinite(score)):
+                score = None
             return resolved(
                 mention,
-                Entity(entity["id"], entity.get("label", ""), tuple(entity.get("types") or ()), tuple(entity.get("same_as") or ())),
-                score=row.get("score"),
+                Entity(entity["id"], entity.get("label") or "", tuple(entity.get("types") or ()), tuple(entity.get("same_as") or ())),
+                score=score,
                 **extra,
             )
-        return unresolved(mention, row.get("reason") or NO_SUITABLE_CANDIDATE, **extra)
+        if status == "unresolved":
+            return unresolved(mention, row.get("reason") or NO_SUITABLE_CANDIDATE, **extra)
+        return unresolved(mention, PROTOCOL_ERROR, detail=f"unknown status {status!r}")

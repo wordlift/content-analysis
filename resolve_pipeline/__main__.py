@@ -20,7 +20,7 @@ import sys
 
 import httpx
 
-from .resolver import WordLiftResolver
+from .resolver import WordLiftResolver, is_user_world
 from .types import RESOLVER_UNAVAILABLE
 
 
@@ -50,8 +50,11 @@ def main(argv: list[str] | None = None) -> int:
         with open(args.dataset, encoding="utf-8") as fh:
             entities = json.load(fh)
         body["dataset"] = {"entities": entities} if isinstance(entities, list) else entities
-        if args.candidate:
-            ap.error("--candidate cannot be combined with --dataset: the dataset is the candidate world")
+    if args.candidate and is_user_world(args.dataset_uri or "", body.get("dataset")):
+        ap.error("--candidate cannot be combined with --dataset or a user world in --dataset-uri: "
+                 "the dataset is the candidate world (the engine answers 422)")
+    if args.candidate and not args.mention:
+        ap.error("--candidate needs --mention")
     if args.mention:
         start = args.text.find(args.mention)
         if start < 0:
@@ -78,7 +81,9 @@ def main(argv: list[str] | None = None) -> int:
         e = m.get("entity") or {}
         world = f"  via {m['dataset_uri']}" if m.get("dataset_uri") and "," in (body.get("dataset_uri") or "") else ""
         if m["status"] == "resolved":
-            print(f"{m['text']:<16} {'resolved':<11} {e.get('id', ''):<12} {e.get('label', ''):<25} score {m.get('score'):.2f}{world}")
+            score = m.get("score")
+            shown = f"{score:.2f}" if isinstance(score, (int, float)) else "n/a"
+            print(f"{m['text']:<16} {'resolved':<11} {e.get('id', ''):<12} {e.get('label', ''):<25} score {shown}{world}")
         else:
             print(f"{m['text']:<16} {'unresolved':<11} {'':<12} {m.get('reason', '')}{world}")
     print(f"language {data.get('language')} · {data.get('engine')} · {data.get('processing_time_ms')} ms", file=sys.stderr)

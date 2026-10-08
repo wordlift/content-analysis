@@ -227,7 +227,7 @@ resolve_pipeline/
   resolver.py    Resolver protocol, ArgmaxResolver, WordLiftResolver
   pipeline.py    run(): extract → retrieve → resolve over one document
   extract.py     GLiNER multilingual NER (optional extra)
-  html.py        HTML → text with a character offset map (optional extra)
+  html.py        HTML → text with a character offset map (standard library)
   evaluate.py    error attribution CLI
   __main__.py    `python -m resolve_pipeline "text"`
 datasets/        development gold sets (en, it, fr, de, es, pt)

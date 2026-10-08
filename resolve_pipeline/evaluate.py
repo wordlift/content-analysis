@@ -18,6 +18,21 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+import re
+
+# The contract echoes a Wikidata identity in the caller's form: Q312, wd:Q312,
+# or a Wikidata URI. For scoring they are one identity. Anything else (an IRI
+# of a user dataset, say) is compared as written.
+_WIKIDATA = re.compile(r"^(?:wd:|https?://(?:www\.)?wikidata\.org/(?:entity|wiki)/)?(Q\d+)$")
+
+
+def canonical_id(identifier: str | None) -> str | None:
+    if identifier is None:
+        return None
+    m = _WIKIDATA.match(identifier.strip())
+    return m.group(1) if m else identifier
+
+
 RETRIEVAL_MISS = "retrieval_miss"
 CORRECT = "correct"
 ABSTAINED = "abstained"
@@ -26,9 +41,10 @@ MISSING = "missing_prediction"
 
 
 def attribute(gold_qid: str, candidates: list[str], prediction: str | None) -> str:
-    if gold_qid not in candidates:
+    gold = canonical_id(gold_qid)
+    if gold not in {canonical_id(c) for c in candidates}:
         return RETRIEVAL_MISS
-    if prediction == gold_qid:
+    if canonical_id(prediction) == gold:
         return CORRECT
     if prediction is None:
         return ABSTAINED

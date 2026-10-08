@@ -6,6 +6,7 @@ matches them zero-shot across languages. Install with `pip install ".[ner]"`.
 from __future__ import annotations
 
 import logging
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +39,9 @@ def load_model(model_id: str = MODEL_ID) -> Any:
     return GLiNER.from_pretrained(model_id, map_location=device)
 
 
+_MODEL_LOCK = threading.Lock()
+
+
 def _splitter_for(lang: str) -> Any:
     name = SPLITTER_BY_LANG.get(lang or "", "whitespace")
     if name not in _SPLITTERS:
@@ -60,12 +64,20 @@ def extract(
     threshold: float = 0.5,
     lang: str = "",
 ) -> list[Mention]:
-    """Return mentions with character spans in `text`, highest-scoring span per overlap."""
+    """Return mentions with character spans in `text`, highest-scoring span per overlap.
+
+    The word splitter is chosen per language and set on the model's shared
+    processor, so the splitter assignment and the prediction run under one
+    lock: two threads sharing one model never predict with each other's
+    splitter. Calls on one model are therefore serialised; for parallel
+    extraction load one model per thread.
+    """
     splitter = _splitter_for(lang)
     processor = getattr(model, "data_processor", None)
-    if splitter is not None and processor is not None:
-        processor.words_splitter = splitter
-    spans = model.predict_entities(text, labels or load_labels(), threshold=threshold, flat_ner=True)
+    with _MODEL_LOCK:
+        if splitter is not None and processor is not None:
+            processor.words_splitter = splitter
+        spans = model.predict_entities(text, labels or load_labels(), threshold=threshold, flat_ner=True)
     return [
         Mention(s["text"], int(s["start"]), int(s["end"]), s["label"], round(float(s["score"]), 4))
         for s in spans

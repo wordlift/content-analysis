@@ -4,13 +4,15 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from .resolver import Resolver
-from .types import Candidate, Mention, Resolution
+from .types import Candidate, Context, Mention, Resolution
 
-Retriever = Callable[[Mention, str], list[Candidate]]
+Retriever = Callable[[Mention, "str | Context"], list[Candidate]]
 
 
-def context_window(text: str, mention: Mention, radius: int = 400) -> str:
-    return text[max(0, mention.start - radius): mention.end + radius]
+def context_window(text: str, mention: Mention, radius: int = 400) -> Context:
+    """The text around a mention, with the offset that keeps the mention's span valid."""
+    start = max(0, mention.start - radius)
+    return Context(text[start: mention.end + radius], start)
 
 
 def run(
