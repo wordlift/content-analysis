@@ -224,3 +224,19 @@ class PipelineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InvalidMentionTests(unittest.TestCase):
+    def test_run_raises_on_a_mention_that_is_not_in_the_text(self):
+        from resolve_pipeline.types import INVALID_MENTION
+        text = "Apple opened a store in Rome."
+        bad = Mention("Rome", 0, 4)
+        with self.assertRaises(ValueError):
+            run(text, retrieve=lambda m, c: [], resolver=ArgmaxResolver(), mentions=[bad], language="en")
+        out = run(text, retrieve=lambda m, c: [], resolver=ArgmaxResolver(), mentions=[Mention("Apple", 0, 5), bad],
+                  language="en", on_invalid_mention="unresolved")
+        self.assertEqual([r.status for r in out], ["unresolved", "unresolved"])
+        self.assertEqual(out[1].reason, INVALID_MENTION)
+        self.assertEqual(out[0].mention.text, "Apple")
+        with self.assertRaises(ValueError):
+            run(text, retrieve=lambda m, c: [], resolver=ArgmaxResolver(), mentions=[bad], on_invalid_mention="skip")
