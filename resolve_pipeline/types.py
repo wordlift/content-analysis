@@ -45,7 +45,7 @@ class Context(str):
     """
     offset: int
 
-    def __new__(cls, text: str, offset: int = 0) -> "Context":
+    def __new__(cls, text: str, offset: int = 0) -> Context:
         self = super().__new__(cls, text)
         self.offset = offset
         return self
@@ -58,10 +58,10 @@ class Context(str):
         return f"Context({self.text!r}, offset={self.offset})"
 
     @classmethod
-    def of(cls, context: "str | Context") -> "Context":
+    def of(cls, context: str | Context) -> Context:
         return context if isinstance(context, Context) else cls(context, 0)
 
-    def local_span(self, mention: "Mention") -> tuple[int, int] | None:
+    def local_span(self, mention: Mention) -> tuple[int, int] | None:
         """The mention's span inside this text, or None when it does not lie here as written."""
         start, end = mention.start - self.offset, mention.end - self.offset
         if start < 0 or end > len(self.text) or self.text[start:end] != mention.text:

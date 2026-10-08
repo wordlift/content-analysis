@@ -25,7 +25,7 @@ class AttributionTests(unittest.TestCase):
 
 class IdentifierFormsTests(unittest.TestCase):
     def test_wikidata_forms_are_one_identity_and_dataset_iris_are_not_touched(self):
-        from resolve_pipeline.evaluate import attribute, canonical_id, CORRECT, RETRIEVAL_MISS
+        from resolve_pipeline.evaluate import CORRECT, RETRIEVAL_MISS, attribute, canonical_id
         for form in ("Q312", "wd:Q312", "http://www.wikidata.org/entity/Q312", "https://www.wikidata.org/wiki/Q312"):
             self.assertEqual(canonical_id(form), "Q312")
         self.assertEqual(canonical_id("https://data.example/apple"), "https://data.example/apple")

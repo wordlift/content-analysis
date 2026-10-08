@@ -4,9 +4,8 @@ import unittest
 import httpx
 
 from resolve_pipeline import ArgmaxResolver, Candidate, Mention, WordLiftResolver, run
-from resolve_pipeline.types import NO_CANDIDATES, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE
-from resolve_pipeline import Context
 from resolve_pipeline.pipeline import context_window
+from resolve_pipeline.types import NO_CANDIDATES, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE
 
 APPLE = Mention("Apple", 12, 17, "Organization", 0.9)
 TEXT = "I bought an Apple laptop in Rome."
@@ -48,7 +47,8 @@ class WordLiftClientTests(unittest.TestCase):
         self.assertEqual((r.entity.id, r.score), ("wd:Q312", 0.97))
 
     def test_unresolved_response_keeps_reason(self):
-        handler = lambda req: httpx.Response(200, json={"mentions": [{"start": 12, "end": 17, "status": "unresolved", "entity": None, "reason": "no_suitable_candidate"}]})
+        row = {"start": 12, "end": 17, "status": "unresolved", "entity": None, "reason": "no_suitable_candidate"}
+        handler = lambda req: httpx.Response(200, json={"mentions": [row]})
         r = self.client(handler).resolve(APPLE, TEXT, CANDS)
         self.assertFalse(r.resolved)
         self.assertEqual(r.reason, "no_suitable_candidate")
@@ -74,7 +74,8 @@ class WordLiftClientTests(unittest.TestCase):
         def handler(request):
             seen["body"] = json.loads(request.content)
             return httpx.Response(200, json={"mentions": [{"start": 12, "end": 17, "status": "resolved",
-                                                             "entity": {"id": "https://x/apple", "label": "Apple", "types": ["Organization"],
+                                                             "entity": {"id": "https://x/apple", "label": "Apple",
+                                                                        "types": ["Organization"],
                                                                         "same_as": ["http://www.wikidata.org/entity/Q312"]}}],
                                              "dataset_uri": "inline"})
 
@@ -85,10 +86,11 @@ class WordLiftClientTests(unittest.TestCase):
         self.assertEqual(seen["body"]["dataset"]["entities"][0]["id"], "https://x/apple")
         self.assertNotIn("candidates", seen["body"]["mentions"][0])
         self.assertEqual((r.entity.id, r.entity.same_as), ("https://x/apple", ("http://www.wikidata.org/entity/Q312",)))
-        graph = WordLiftResolver("k", dataset_uri=WordLiftResolver.WORDLIFT_GRAPH, client=httpx.Client(transport=httpx.MockTransport(handler)))
+        mock = httpx.Client(transport=httpx.MockTransport(handler))
+        graph = WordLiftResolver("k", dataset_uri=WordLiftResolver.WORDLIFT_GRAPH, client=mock)
         graph.resolve(APPLE, TEXT, [], language="en")
         self.assertEqual(seen["body"]["dataset_uri"], "wordlift://dataset/me")
-        local_first = WordLiftResolver("k", dataset_uri=WordLiftResolver.LOCAL_FIRST, client=httpx.Client(transport=httpx.MockTransport(handler)))
+        local_first = WordLiftResolver("k", dataset_uri=WordLiftResolver.LOCAL_FIRST, client=mock)
         r = local_first.resolve(APPLE, TEXT, CANDS, language="en")
         self.assertEqual(seen["body"]["dataset_uri"], "wordlift://dataset/me,wikidata://public")
         self.assertNotIn("candidates", seen["body"]["mentions"][0])      # a user world is in the list
@@ -130,7 +132,8 @@ class IdentitySafetyTests(unittest.TestCase):
     def test_mentions_before_and_after_the_crop_and_a_repeated_form(self):
         text = "Paris in France or Paris in Texas. " * 30
         first, second = text.index("Paris"), text.index("Paris", 20)
-        for m in (Mention("Paris", first, first + 5), Mention("Paris", second, second + 5), Mention("Texas", text.rindex("Texas"), text.rindex("Texas") + 5)):
+        texas = text.rindex("Texas")
+        for m in (Mention("Paris", first, first + 5), Mention("Paris", second, second + 5), Mention("Texas", texas, texas + 5)):
             ctx = context_window(text, m, radius=50)
             self.assertEqual(ctx.text[m.start - ctx.offset:m.end - ctx.offset], m.text)
             self.assertIsNotNone(ctx.local_span(m))

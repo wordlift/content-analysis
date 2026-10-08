@@ -16,6 +16,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
+      - run: python -m ruff check .
+      - run: python -m mypy
       - run: python -m pytest -q
   typescript-client:
     runs-on: ubuntu-latest

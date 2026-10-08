@@ -1,7 +1,8 @@
 """extract -> retrieve -> resolve over one document."""
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from .resolver import Resolver
 from .types import Candidate, Context, Mention, Resolution

@@ -27,10 +27,27 @@ Issues = "https://github.com/wordlift/content-analysis/issues"
 [project.optional-dependencies]
 ner = ["gliner>=0.2.27", "torch>=2.4"]
 html = []  # kept for compatibility: the HTML helper needs the standard library only since 0.1.2
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "types-PyYAML"]
 
 [tool.setuptools.packages.find]
 include = ["resolve_pipeline*"]
 
 [tool.setuptools.package-data]
 resolve_pipeline = ["labels.yml", "py.typed"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+extend-exclude = ["clients"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E731"]  # one-line lambda handlers keep the mocked transports in tests readable
+
+[tool.mypy]
+files = ["resolve_pipeline"]
+python_version = "3.10"
+
+[[tool.mypy.overrides]]
+module = ["gliner", "gliner.*", "torch"]  # the optional `ner` extra
+ignore_missing_imports = true

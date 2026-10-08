@@ -7,15 +7,24 @@ Returning `unresolved` is a valid answer.
 """
 from __future__ import annotations
 
+import math
 from typing import Any, Protocol, runtime_checkable
 
 import httpx
 
-import math
-
 from .types import (
-    LOW_RELEVANCE, NO_CANDIDATES, NO_SUITABLE_CANDIDATE, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE,
-    Candidate, Context, Entity, Mention, Resolution, resolved, unresolved,
+    LOW_RELEVANCE,
+    NO_CANDIDATES,
+    NO_SUITABLE_CANDIDATE,
+    PROTOCOL_ERROR,
+    RESOLVER_UNAVAILABLE,
+    Candidate,
+    Context,
+    Entity,
+    Mention,
+    Resolution,
+    resolved,
+    unresolved,
 )
 
 PUBLIC_WORLD = "wikidata://public"
@@ -135,7 +144,7 @@ class WordLiftResolver:
         if self._owns_client:
             self._client.close()
 
-    def __enter__(self) -> "WordLiftResolver":
+    def __enter__(self) -> WordLiftResolver:
         return self
 
     def __exit__(self, *exc: Any) -> None:

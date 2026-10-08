@@ -34,6 +34,12 @@ Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
 - Extraction serialises the splitter assignment and the prediction per model
   (a lock per model, so different models still run in parallel);
   `WordLiftResolver` closes the HTTP client it owns (context manager).
+- Standards follow-up to the review: every number in the OpenAPI document
+  declares its format (offsets `int32`, counters and seconds `int64`, scores
+  `double`) and a test keeps it so; the contract records its deviations from
+  the Zalando guidelines and why the specification is JSON; the npm lockfile
+  is committed and CI and release install with `npm ci`; `make lint` and CI
+  run ruff and mypy as well as byte-compiling.
 
 ## 0.1.1 — unreleased
 
