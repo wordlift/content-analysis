@@ -206,9 +206,17 @@ any of them needs a coordinated migration:
   Problem JSON; the 422 and 429 bodies are produced by the engine and the
   gateway, and the document describes them as sent today.
 - **JSON specification**: `docs/openapi.resolve.json` is JSON, not YAML,
-  because it is the document the engine serves at
-  `https://resolve.wordlift.io/openapi.json`; a second YAML copy would drift.
-  Tools that need YAML can convert it.
+  because the engine generates and serves its schema as JSON at
+  `https://resolve.wordlift.io/openapi.json`; keeping one format avoids a
+  second copy that drifts. Tools that need YAML can convert it.
+
+`docs/openapi.resolve.json` is curated from the engine's schema and is
+currently ahead of the live document: the security scheme reference, the
+`dataset`, `dataset_uri` and `signals` fields, the 401, 429 and 503 responses
+with their headers, the `info` metadata and the numeric formats are in this
+copy only, until the engine's schema adopts them. Regenerating this file from
+the live service would drop them; change both, and treat this copy as the
+reference for clients.
 
 ## Out of scope
 

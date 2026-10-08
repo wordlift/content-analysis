@@ -13,8 +13,10 @@ and is not configurable from here.
 ## The contract you must not break
 
 - `POST https://resolve.wordlift.io/v1/resolve`, header `Authorization: Key <key>`.
-  Full schema: `docs/resolve-contract.md`, machine-readable `docs/openapi.resolve.json`,
-  live copy at `https://resolve.wordlift.io/openapi.json`.
+  Full schema: `docs/resolve-contract.md`, machine-readable `docs/openapi.resolve.json`.
+  The engine serves its own schema at `https://resolve.wordlift.io/openapi.json`;
+  the repo copy is curated and currently ahead of it (see "API guidelines" in
+  the contract), so never overwrite it by regenerating from the live service.
 - Per mention the answer is `resolved` (with `entity`) or `unresolved` (with a
   `reason`). **Unresolved is a result.** Clients map transport failures to
   `resolver_unavailable` and never fall back to a guessed identity.
@@ -55,8 +57,10 @@ tests/                     Python tests: no network, no GPU, no key
 - Do not add engine internals, thresholds, holdout fixtures, keys or any
   upstream hostname. The only public host is `resolve.wordlift.io`.
 - Releases of the TypeScript client are tag-driven (`ts-v<version>`, see
-  `.github/workflows/release-npm.yml`); bump `clients/typescript/package.json`
-  and `CHANGELOG.md` in the same commit.
+  `.github/workflows/release-npm.yml`); bump the version with
+  `npm version <x> --no-git-tag-version` in `clients/typescript` (it updates
+  `package.json` and `package-lock.json` together) and update `CHANGELOG.md`
+  in the same commit.
 
 ## Where things are decided
 

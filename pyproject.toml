@@ -27,7 +27,7 @@ Issues = "https://github.com/wordlift/content-analysis/issues"
 [project.optional-dependencies]
 ner = ["gliner>=0.2.27", "torch>=2.4"]
 html = []  # kept for compatibility: the HTML helper needs the standard library only since 0.1.2
-dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "types-PyYAML"]
+dev = ["pytest>=8", "ruff~=0.16.10", "mypy~=2.4.0", "types-PyYAML"]  # linters pinned: a new rule must not break CI unannounced
 
 [tool.setuptools.packages.find]
 include = ["resolve_pipeline*"]

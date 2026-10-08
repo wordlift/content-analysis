@@ -167,7 +167,7 @@ relying on it: [`docs/your-own-data.md`](docs/your-own-data.md). Runnable:
 |---|---|---|
 | Python | this package, `WordLiftResolver` | `pip install "resolve-pipeline @ git+https://github.com/wordlift/content-analysis.git"` |
 | TypeScript / JavaScript | [`clients/typescript`](clients/typescript), zero dependencies, Node 18+ and browsers | `npm install @wordlift/resolve` |
-| Anything else | [`docs/openapi.resolve.json`](docs/openapi.resolve.json), generated from the live service | `openapi-generator generate -i docs/openapi.resolve.json -g <lang>` |
+| Anything else | [`docs/openapi.resolve.json`](docs/openapi.resolve.json), curated from the live service's schema ([why it differs](docs/resolve-contract.md#api-guidelines)) | `openapi-generator generate -i docs/openapi.resolve.json -g <lang>` |
 
 Every client keeps the same rule: `unresolved` is a result, a transport
 failure is an error, and neither ever turns into a guessed identity.

@@ -27,7 +27,9 @@ class OpenApiDocument(unittest.TestCase):
     def test_every_number_declares_its_format(self):
         def walk(node, path):
             if isinstance(node, dict):
-                if node.get("type") in ("integer", "number"):
+                types = node.get("type")         # a string, a 3.1 list such as ["number", "null"], or a property named `type`
+                types = [types] if isinstance(types, str) else types if isinstance(types, list) else []
+                if {"integer", "number"} & set(types):
                     self.assertIn("format", node, path)
                 for key, value in node.items():
                     walk(value, f"{path}/{key}")

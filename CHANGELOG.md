@@ -38,8 +38,9 @@ Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
   declares its format (offsets `int32`, counters and seconds `int64`, scores
   `double`) and a test keeps it so; the contract records its deviations from
   the Zalando guidelines and why the specification is JSON; the npm lockfile
-  is committed and CI and release install with `npm ci`; `make lint` and CI
-  run ruff and mypy as well as byte-compiling.
+  is committed and CI and release install with `npm ci`; `make lint` and a
+  CI lint job run ruff and mypy (pinned) as well as byte-compiling. The repo
+  OpenAPI copy is documented as curated and ahead of the live schema.
 
 ## 0.1.1 — unreleased
 
