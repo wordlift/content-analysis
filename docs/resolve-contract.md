@@ -189,6 +189,27 @@ When the allowance is spent the request is answered with `429 Too Many
 Requests` and the same headers, and nothing is resolved. Responses with an
 error status cost nothing.
 
+## API guidelines
+
+The contract follows the [Zalando RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)
+where an existing caller is not affected: JSON with snake_case properties, a
+top-level object envelope, HTTPS, credentials in a header, explicit numeric
+formats, and declared 401, 422, 429 and 503 responses with their headers.
+
+Recorded deviations of the existing contract, kept for compatibility; changing
+any of them needs a coordinated migration:
+
+- **Verb path** `/resolve` and **URL versioning** `/v1`.
+- **`Key` authentication** (`Authorization: Key <key>`) instead of OAuth2:
+  the WordLift account key is the credential.
+- **Error bodies**: 422 carries the framework's `detail` array, not RFC 9457
+  Problem JSON; the 422 and 429 bodies are produced by the engine and the
+  gateway, and the document describes them as sent today.
+- **JSON specification**: `docs/openapi.resolve.json` is JSON, not YAML,
+  because it is the document the engine serves at
+  `https://resolve.wordlift.io/openapi.json`; a second YAML copy would drift.
+  Tools that need YAML can convert it.
+
 ## Out of scope
 
 Relation extraction, automatic graph writes, graph traversal, and any exposure
