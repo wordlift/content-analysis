@@ -105,6 +105,15 @@ class CliOutput(unittest.TestCase):
 
 
 class CliFailures(unittest.TestCase):
+    def test_a_rejected_request_is_invalid_request_not_unavailability(self):
+        detail = [{"loc": ["body", "mentions", 0, "candidates"], "msg": "not allowed with a user dataset", "type": "value_error"}]
+        for handler, shown in ((lambda req: httpx.Response(422, json={"detail": detail}), json.dumps(detail)),
+                               (lambda req: httpx.Response(422, text="bad span"), '"bad span"')):
+            code, out, err, _ = cli([TEXT], handler)
+            self.assertEqual((code, out), (1, ""))
+            self.assertEqual(err.strip(), f"invalid_request: {shown}")
+            self.assertNotIn("resolver_unavailable", err)
+
     def test_failures_exit_2_as_resolver_unavailable(self):
         def unreachable(request):
             raise httpx.ConnectError("down", request=request)
