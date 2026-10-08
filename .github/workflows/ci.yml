@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
-      - run: python -m pytest -q
+      - run: python -m pytest -q --cov
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -42,4 +42,4 @@ jobs:
           cache: npm
           cache-dependency-path: clients/typescript/package-lock.json
       - run: npm ci
-      - run: npm test
+      - run: npm run coverage

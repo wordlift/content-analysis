@@ -242,6 +242,8 @@ tests/           no network, no GPU, no key needed
 git clone https://github.com/wordlift/content-analysis.git && cd content-analysis
 make setup      # venv + editable install with dev extras
 make test       # pytest
+make coverage   # pytest with line and branch coverage (CI enforces the floor)
+make lint       # compile, ruff, mypy
 make example    # examples/resolve_with_wordlift.py (needs WL_KEY)
 ```
 

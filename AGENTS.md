@@ -47,7 +47,11 @@ tests/                     Python tests: no network, no GPU, no key
 ## How to work
 
 - Setup: `make setup` (venv + `pip install -e ".[dev]"`); tests: `make test`;
-  TypeScript: `cd clients/typescript && npm install && npm test`.
+  coverage: `make coverage`; lint: `make lint`. TypeScript:
+  `cd clients/typescript && npm ci && npm test` (`npm run coverage` for coverage).
+- Coverage floors (Python `fail_under` in `pyproject.toml`, TypeScript
+  thresholds in the `coverage` script) are enforced in CI. Raise them when
+  coverage rises; never lower them to make a change pass.
 - Tests must stay offline. Engine calls in tests go through a mocked
   transport (`httpx.MockTransport` in Python, an injected `fetch` in TS).
 - Verify anything that touches a client against production once, with a real

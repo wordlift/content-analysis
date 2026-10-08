@@ -41,6 +41,10 @@ Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
   is committed and CI and release install with `npm ci`; `make lint` and a
   CI lint job run ruff and mypy (pinned) as well as byte-compiling. The repo
   OpenAPI copy is documented as curated and ahead of the live schema.
+- CLI tests (options refused before any request, the request body, output,
+  exit codes) with a mocked transport. Coverage runs in CI: Python line and
+  branch coverage with a 90% floor (`make coverage`), the TypeScript client
+  at 100% lines and functions and 90% branches (`npm run coverage`).
 
 ## 0.1.1 — unreleased
 
