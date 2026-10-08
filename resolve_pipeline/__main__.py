@@ -9,7 +9,8 @@
 Without --mention the engine detects mentions; without --candidate it retrieves
 against the dataset (Wikidata by default; see docs/your-own-data.md for your
 WordLift graph, an inline vocabulary and local-first). Output is one line per mention; exit code is 0 when the call
-succeeded, 2 when the engine could not be reached.
+succeeded, 1 when the engine rejected the request (422: bad span, unknown identity form, unsupported dataset),
+2 when the engine could not be reached.
 """
 from __future__ import annotations
 
@@ -22,6 +23,8 @@ import httpx
 
 from .resolver import WordLiftResolver, is_user_world
 from .types import RESOLVER_UNAVAILABLE
+
+INVALID_REQUEST = "invalid_request"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -66,6 +69,14 @@ def main(argv: list[str] | None = None) -> int:
     try:
         resp = httpx.post(f"{args.base_url.rstrip('/')}/v1/resolve", json=body, timeout=60,
                           headers={"Authorization": f"Key {args.key}", "Content-Type": "application/json"})
+        if resp.status_code == 422:
+            # The engine answered: the request is wrong, the engine is not unavailable.
+            try:
+                detail = resp.json().get("detail")
+            except (ValueError, AttributeError):
+                detail = resp.text[:200]
+            print(f"{INVALID_REQUEST}: {json.dumps(detail, ensure_ascii=False)}", file=sys.stderr)
+            return 1
         resp.raise_for_status()
         data = resp.json()
     except httpx.HTTPStatusError as exc:

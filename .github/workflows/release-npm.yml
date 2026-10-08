@@ -45,7 +45,7 @@ jobs:
       - name: Registry login check
         if: env.NODE_AUTH_TOKEN != ''
         run: echo "publishing as $(npm whoami)"
-      - run: npm install
+      - run: npm ci
       - run: npm test
       - name: Publish (trusted publishing, or NPM_TOKEN fallback)
         if: github.event_name == 'push' || inputs.dry_run == false

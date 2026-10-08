@@ -7,15 +7,24 @@ Returning `unresolved` is a valid answer.
 """
 from __future__ import annotations
 
+import math
 from typing import Any, Protocol, runtime_checkable
 
 import httpx
 
-import math
-
 from .types import (
-    LOW_RELEVANCE, NO_CANDIDATES, NO_SUITABLE_CANDIDATE, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE,
-    Candidate, Context, Entity, Mention, Resolution, resolved, unresolved,
+    LOW_RELEVANCE,
+    NO_CANDIDATES,
+    NO_SUITABLE_CANDIDATE,
+    PROTOCOL_ERROR,
+    RESOLVER_UNAVAILABLE,
+    Candidate,
+    Context,
+    Entity,
+    Mention,
+    Resolution,
+    resolved,
+    unresolved,
 )
 
 PUBLIC_WORLD = "wikidata://public"
@@ -30,6 +39,16 @@ def worlds(dataset_uri: str) -> list[str]:
 def is_user_world(dataset_uri: str, dataset: Any = None) -> bool:
     """True when the dataset is the candidate world and per-mention candidates must not be sent."""
     return dataset is not None or any(w in (WORDLIFT_GRAPH, INLINE) for w in worlds(dataset_uri))
+
+
+class InvalidRequestError(ValueError):
+    """The engine rejected the request (422): bad span, unknown identity form,
+    candidates with a user dataset, a malformed inline dataset. The request is
+    wrong, the engine is not unavailable; `detail` is the engine's explanation."""
+
+    def __init__(self, detail: Any):
+        super().__init__(f"resolve() rejected the request: {detail}")
+        self.detail = detail
 
 
 def local_span(mention: Mention, context: str) -> tuple[int, int]:
@@ -135,7 +154,7 @@ class WordLiftResolver:
         if self._owns_client:
             self._client.close()
 
-    def __enter__(self) -> "WordLiftResolver":
+    def __enter__(self) -> WordLiftResolver:
         return self
 
     def __exit__(self, *exc: Any) -> None:
@@ -162,7 +181,8 @@ class WordLiftResolver:
         return body
 
     def resolve(self, mention: Mention, context: str, candidates: list[Candidate], *, language: str = "") -> Resolution:
-        """Raises ValueError, before any request, when the mention does not lie in `context` as written."""
+        """Raises ValueError, before any request, when the mention does not lie in `context` as written,
+        and InvalidRequestError (a ValueError) when the engine rejects the request with 422."""
         if not candidates and not self.engine_retrieval and not self.user_dataset:
             return unresolved(mention, NO_CANDIDATES)
         request = self.payload(mention, context, candidates, language)
@@ -173,6 +193,12 @@ class WordLiftResolver:
                 headers=self._headers,
                 timeout=self.timeout,
             )
+            if response.status_code == 422:
+                try:
+                    detail = response.json().get("detail")
+                except (ValueError, AttributeError):
+                    detail = response.text[:200]
+                raise InvalidRequestError(detail)
             response.raise_for_status()
         except httpx.HTTPError as exc:
             return unresolved(mention, RESOLVER_UNAVAILABLE, error=type(exc).__name__)

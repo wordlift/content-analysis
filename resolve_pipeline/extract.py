@@ -5,8 +5,8 @@ matches them zero-shot across languages. Install with `pip install ".[ner]"`.
 """
 from __future__ import annotations
 
-import logging
 import functools
+import logging
 import threading
 import weakref
 from pathlib import Path
@@ -33,15 +33,15 @@ def load_labels(path: Path = LABELS_PATH) -> list[str]:
 
 
 def load_model(model_id: str = MODEL_ID) -> Any:
-    from gliner import GLiNER
     import torch
+    from gliner import GLiNER
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info("Loading GLiNER %s on %s", model_id, device)
     return GLiNER.from_pretrained(model_id, map_location=device)
 
 
-_MODEL_LOCKS: "weakref.WeakKeyDictionary[Any, threading.Lock]" = weakref.WeakKeyDictionary()
+_MODEL_LOCKS: weakref.WeakKeyDictionary[Any, threading.Lock] = weakref.WeakKeyDictionary()
 _MODEL_LOCKS_GUARD = threading.Lock()
 
 

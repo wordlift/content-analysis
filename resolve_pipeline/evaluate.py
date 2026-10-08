@@ -14,11 +14,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Any
-
-import re
 
 # The contract echoes a Wikidata identity in the caller's form: Q312, wd:Q312,
 # or a Wikidata URI. For scoring they are one identity. Anything else (an IRI
@@ -84,7 +83,7 @@ def main() -> None:
     ap.add_argument("--output", type=Path)
     args = ap.parse_args()
     cases = json.loads(args.cases.read_text(encoding="utf-8"))
-    predictions = [json.loads(l) for l in args.predictions.read_text(encoding="utf-8").splitlines() if l.strip()]
+    predictions = [json.loads(line) for line in args.predictions.read_text(encoding="utf-8").splitlines() if line.strip()]
     report = evaluate(cases, predictions)
     summary = {k: v for k, v in report.items() if k != "rows"}
     print(json.dumps(summary, indent=2))

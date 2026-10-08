@@ -24,6 +24,20 @@ class OpenApiDocument(unittest.TestCase):
             for field in schema.get("required", []):
                 self.assertIn(field, schema.get("properties", {}), f"{name}.{field}")
 
+    def test_every_number_declares_its_format(self):
+        def walk(node, path):
+            if isinstance(node, dict):
+                types = node.get("type")         # a string, a 3.1 list such as ["number", "null"], or a property named `type`
+                types = [types] if isinstance(types, str) else types if isinstance(types, list) else []
+                if {"integer", "number"} & set(types):
+                    self.assertIn("format", node, path)
+                for key, value in node.items():
+                    walk(value, f"{path}/{key}")
+            elif isinstance(node, list):
+                for i, value in enumerate(node):
+                    walk(value, f"{path}/{i}")
+        walk(DOC, "")
+
     def test_documented_fields_the_clients_rely_on(self):
         S = DOC["components"]["schemas"]
         self.assertIn("dataset", S["ResolveRequest"]["properties"])

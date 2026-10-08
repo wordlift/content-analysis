@@ -34,6 +34,21 @@ Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
 - Extraction serialises the splitter assignment and the prediction per model
   (a lock per model, so different models still run in parallel);
   `WordLiftResolver` closes the HTTP client it owns (context manager).
+- Standards follow-up to the review: every number in the OpenAPI document
+  declares its format (offsets `int32`, counters and seconds `int64`, scores
+  `double`) and a test keeps it so; the contract records its deviations from
+  the Zalando guidelines and why the specification is JSON; the npm lockfile
+  is committed and CI and release install with `npm ci`; `make lint` and a
+  CI lint job run ruff and mypy (pinned) as well as byte-compiling. The repo
+  OpenAPI copy is documented as curated and ahead of the live schema.
+- CLI tests (options refused before any request, the request body, output,
+  exit codes) with a mocked transport. Coverage runs in CI: Python line and
+  branch coverage with a 90% floor (`make coverage`), the TypeScript client
+  at 100% lines and functions and 90% branches (`npm run coverage`).
+- A 422 is the caller's error, no longer `resolver_unavailable`: the engine
+  answered, the request was wrong. `WordLiftResolver` raises
+  `InvalidRequestError` (a `ValueError`, with the engine's `detail`), as the
+  TypeScript client does; the CLI prints `invalid_request` and exits 1.
 
 ## 0.1.1 — unreleased
 
