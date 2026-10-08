@@ -6,7 +6,7 @@ from typing import Any, Callable
 from .resolver import Resolver
 from .types import Candidate, Context, Mention, Resolution
 
-Retriever = Callable[[Mention, "str | Context"], list[Candidate]]
+Retriever = Callable[[Mention, str], list[Candidate]]
 
 
 def context_window(text: str, mention: Mention, radius: int = 400) -> Context:

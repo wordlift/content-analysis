@@ -135,11 +135,23 @@ class IdentitySafetyTests(unittest.TestCase):
             self.assertEqual(ctx.text[m.start - ctx.offset:m.end - ctx.offset], m.text)
             self.assertIsNotNone(ctx.local_span(m))
 
-    def test_a_span_that_does_not_match_the_context_is_a_protocol_error_not_a_request(self):
+    def test_a_span_that_does_not_match_the_context_is_the_callers_error_not_a_request(self):
         calls = []
         handler = lambda req: calls.append(req) or httpx.Response(200, json={"mentions": []})
-        r = self.client(handler).resolve(Mention("Apple", 501, 506), "x" * 405, CANDS)   # the old bug, caught
-        self.assertEqual((r.resolved, r.reason, calls), (False, PROTOCOL_ERROR, []))
+        with self.assertRaises(ValueError):                                          # the old bug, caught
+            self.client(handler).resolve(Mention("Apple", 501, 506), "x" * 405, CANDS)
+        self.assertEqual(calls, [])
+
+    def test_the_context_is_a_str_for_retrievers_and_resolvers(self):
+        ctx = context_window("x" * 500 + "Apple", Mention("Apple", 500, 505), radius=10)
+        self.assertIsInstance(ctx, str)
+        self.assertEqual((ctx.lower(), ctx.offset, json.dumps(ctx)), ("x" * 10 + "apple", 490, json.dumps(ctx.text)))
+
+    def test_a_boolean_score_is_no_score(self):
+        r = WordLiftResolver.parse(APPLE, {"mentions": [{"start": 12, "end": 17, "status": "resolved",
+                                                         "entity": {"id": "Q312"}, "score": True}]}, TEXT)
+        self.assertTrue(r.resolved)
+        self.assertIsNone(r.score)
 
     def test_no_row_for_the_span_is_a_protocol_error_never_another_row(self):
         handler = lambda req: httpx.Response(200, json={"mentions": [{"start": 28, "end": 32, "status": "resolved",

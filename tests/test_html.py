@@ -54,6 +54,15 @@ class HtmlOffsets(unittest.TestCase):
         s = to_html_span(second, second + 4, maps)
         self.assertEqual(s, (len("<p>Rome</p><p>"), len("<p>Rome</p><p>Rome")))
 
+    def test_an_omitted_head_end_tag_keeps_the_body(self):
+        text, s, src = span_of("<html><head><title>T</title><body><p>Apple in Rome</p></body></html>", "Rome")
+        self.assertEqual((text, src), ("Apple in Rome\n", "Rome"))
+
+    def test_unknown_references_stay_as_written(self):
+        text, s, src = span_of("<p>AT&T and R&D rule</p>", "AT&T")
+        self.assertEqual((text, src), ("AT&T and R&D rule\n", "AT&T"))
+        self.assertEqual(span_of("<p>a &copy 2026</p>", "©")[2], "&copy")
+
     def test_bad_spans(self):
         text, maps = extract_text_with_offsets("<p>Apple</p>")
         self.assertIsNone(to_html_span(3, 3, maps))

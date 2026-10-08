@@ -32,12 +32,20 @@ def is_user_world(dataset_uri: str, dataset: Any = None) -> bool:
     return dataset is not None or any(w in (WORDLIFT_GRAPH, INLINE) for w in worlds(dataset_uri))
 
 
+def local_span(mention: Mention, context: str) -> tuple[int, int]:
+    """The mention's span in the text sent; a mention that is not there as written is the caller's error."""
+    local = Context.of(context).local_span(mention)
+    if local is None:
+        raise ValueError(f"mention {mention.text!r} [{mention.start}, {mention.end}) does not lie in the context as written")
+    return local
+
+
 @runtime_checkable
 class Resolver(Protocol):
     def resolve(
         self,
         mention: Mention,
-        context: "str | Context",
+        context: str,
         candidates: list[Candidate],
         *,
         language: str = "",
@@ -57,7 +65,7 @@ class ArgmaxResolver:
         self.min_score = min_score
         self.min_margin = min_margin
 
-    def resolve(self, mention: Mention, context: "str | Context", candidates: list[Candidate], *, language: str = "") -> Resolution:
+    def resolve(self, mention: Mention, context: str, candidates: list[Candidate], *, language: str = "") -> Resolution:
         # A score that is not a finite number is no score: it would pass every
         # comparison-based gate (NaN compares false to everything).
         candidates = [c for c in candidates if c.score is None or math.isfinite(c.score)]
@@ -137,13 +145,10 @@ class WordLiftResolver:
     def user_dataset(self) -> bool:
         return is_user_world(self.dataset_uri, self.dataset)
 
-    def payload(self, mention: Mention, context: "str | Context", candidates: list[Candidate], language: str) -> dict[str, Any]:
+    def payload(self, mention: Mention, context: str, candidates: list[Candidate], language: str) -> dict[str, Any]:
         """The request body. The span is rebased to the context text; see Context."""
-        ctx = Context.of(context)
-        local = ctx.local_span(mention)
-        if local is None:
-            raise ValueError(f"mention {mention.text!r} [{mention.start}, {mention.end}) does not lie in the context as written")
-        span: dict[str, Any] = {"text": mention.text, "start": local[0], "end": local[1],
+        start, end = local_span(mention, context)
+        span: dict[str, Any] = {"text": mention.text, "start": start, "end": end,
                                 "type": mention.label or None}
         if candidates and not self.user_dataset:
             span["candidates"] = [
@@ -151,21 +156,20 @@ class WordLiftResolver:
                  "types": list(c.types) or None, "score": c.score}
                 for c in candidates
             ]
-        body: dict[str, Any] = {"text": ctx.text, "dataset_uri": self.dataset_uri, "language": language or None, "mentions": [span]}
+        body: dict[str, Any] = {"text": str(context), "dataset_uri": self.dataset_uri, "language": language or None, "mentions": [span]}
         if self.dataset is not None:
             body["dataset"] = self.dataset
         return body
 
-    def resolve(self, mention: Mention, context: "str | Context", candidates: list[Candidate], *, language: str = "") -> Resolution:
+    def resolve(self, mention: Mention, context: str, candidates: list[Candidate], *, language: str = "") -> Resolution:
+        """Raises ValueError, before any request, when the mention does not lie in `context` as written."""
         if not candidates and not self.engine_retrieval and not self.user_dataset:
             return unresolved(mention, NO_CANDIDATES)
-        ctx = Context.of(context)
-        if ctx.local_span(mention) is None:
-            return unresolved(mention, PROTOCOL_ERROR, detail="mention span does not match the context text")
+        request = self.payload(mention, context, candidates, language)
         try:
             response = self._client.post(
                 f"{self.base_url}/v1/resolve",
-                json=self.payload(mention, ctx, candidates, language),
+                json=request,
                 headers=self._headers,
                 timeout=self.timeout,
             )
@@ -176,10 +180,10 @@ class WordLiftResolver:
             body = response.json()
         except ValueError:
             return unresolved(mention, PROTOCOL_ERROR, detail="response is not JSON")
-        return self.parse(mention, body, ctx)
+        return self.parse(mention, body, context)
 
     @staticmethod
-    def parse(mention: Mention, body: Any, context: "str | Context | None" = None) -> Resolution:
+    def parse(mention: Mention, body: Any, context: str | None = None) -> Resolution:
         """The resolution for `mention` in a contract-shaped response body.
 
         Exactly one row must carry the mention's span (rebased to the context
@@ -190,9 +194,7 @@ class WordLiftResolver:
         """
         if not isinstance(body, dict) or not isinstance(body.get("mentions"), list):
             return unresolved(mention, PROTOCOL_ERROR, detail="response has no `mentions` list")
-        local = Context.of(context).local_span(mention) if context is not None else (mention.start, mention.end)
-        if local is None:
-            return unresolved(mention, PROTOCOL_ERROR, detail="mention span does not match the context text")
+        local = local_span(mention, context) if context is not None else (mention.start, mention.end)
         rows = [r for r in body["mentions"] if isinstance(r, dict) and r.get("start") == local[0] and r.get("end") == local[1]]
         if len(rows) != 1:
             return unresolved(mention, PROTOCOL_ERROR, detail=f"{len(rows)} rows for the requested span")
@@ -208,7 +210,7 @@ class WordLiftResolver:
             if not isinstance(entity, dict) or not isinstance(entity.get("id"), str) or not entity["id"]:
                 return unresolved(mention, PROTOCOL_ERROR, detail="resolved row without an identity")
             score = row.get("score")
-            if score is not None and not (isinstance(score, (int, float)) and math.isfinite(score)):
+            if score is not None and not (isinstance(score, (int, float)) and not isinstance(score, bool) and math.isfinite(score)):
                 score = None
             return resolved(
                 mention,

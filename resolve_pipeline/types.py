@@ -34,30 +34,32 @@ class Mention:
     score: float | None = None
 
 
-@dataclass(frozen=True)
-class Context:
+class Context(str):
     """The text a resolver reads, and where it starts in the document.
 
     A context window is a slice of the document; the mention's offsets are
     document-relative. `offset` is what makes the two agree: the mention sits
-    at `start - offset` in `text`. A plain string is accepted wherever a
-    Context is, and means offset 0 (the string is the whole document).
+    at `start - offset` in the text. Context is a `str`, so a retriever or
+    resolver written against plain text keeps working; a plain string means
+    offset 0 (the string is the whole document).
     """
-    text: str
-    offset: int = 0
+    offset: int
 
-    def __str__(self) -> str:
-        return self.text
+    def __new__(cls, text: str, offset: int = 0) -> "Context":
+        self = super().__new__(cls, text)
+        self.offset = offset
+        return self
 
-    def __len__(self) -> int:
-        return len(self.text)
+    @property
+    def text(self) -> str:
+        return str.__str__(self)
 
-    def __contains__(self, item: object) -> bool:
-        return item in self.text
+    def __repr__(self) -> str:
+        return f"Context({self.text!r}, offset={self.offset})"
 
     @classmethod
     def of(cls, context: "str | Context") -> "Context":
-        return context if isinstance(context, Context) else cls(str(context), 0)
+        return context if isinstance(context, Context) else cls(context, 0)
 
     def local_span(self, mention: "Mention") -> tuple[int, int] | None:
         """The mention's span inside this text, or None when it does not lie here as written."""

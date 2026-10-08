@@ -6,7 +6,9 @@ matches them zero-shot across languages. Install with `pip install ".[ner]"`.
 from __future__ import annotations
 
 import logging
+import functools
 import threading
+import weakref
 from pathlib import Path
 from typing import Any
 
@@ -39,7 +41,20 @@ def load_model(model_id: str = MODEL_ID) -> Any:
     return GLiNER.from_pretrained(model_id, map_location=device)
 
 
-_MODEL_LOCK = threading.Lock()
+_MODEL_LOCKS: "weakref.WeakKeyDictionary[Any, threading.Lock]" = weakref.WeakKeyDictionary()
+_MODEL_LOCKS_GUARD = threading.Lock()
+
+
+def serialised_per_model(fn):
+    """Run `fn(model, ...)` under a lock owned by that model: calls on one model
+    are serialised, calls on different models run in parallel."""
+    @functools.wraps(fn)
+    def wrapper(model: Any, *args: Any, **kwargs: Any) -> Any:
+        with _MODEL_LOCKS_GUARD:
+            lock = _MODEL_LOCKS.setdefault(model, threading.Lock())
+        with lock:
+            return fn(model, *args, **kwargs)
+    return wrapper
 
 
 def _splitter_for(lang: str) -> Any:
@@ -57,6 +72,7 @@ def _splitter_for(lang: str) -> Any:
     return splitter
 
 
+@serialised_per_model
 def extract(
     model: Any,
     text: str,
@@ -67,17 +83,16 @@ def extract(
     """Return mentions with character spans in `text`, highest-scoring span per overlap.
 
     The word splitter is chosen per language and set on the model's shared
-    processor, so the splitter assignment and the prediction run under one
-    lock: two threads sharing one model never predict with each other's
-    splitter. Calls on one model are therefore serialised; for parallel
+    processor, so the splitter assignment and the prediction run under the
+    model's lock: two threads sharing one model never predict with each
+    other's splitter. Calls on one model are serialised; for parallel
     extraction load one model per thread.
     """
     splitter = _splitter_for(lang)
     processor = getattr(model, "data_processor", None)
-    with _MODEL_LOCK:
-        if splitter is not None and processor is not None:
-            processor.words_splitter = splitter
-        spans = model.predict_entities(text, labels or load_labels(), threshold=threshold, flat_ner=True)
+    if splitter is not None and processor is not None:
+        processor.words_splitter = splitter
+    spans = model.predict_entities(text, labels or load_labels(), threshold=threshold, flat_ner=True)
     return [
         Mention(s["text"], int(s["start"]), int(s["end"]), s["label"], round(float(s["score"]), 4))
         for s in spans

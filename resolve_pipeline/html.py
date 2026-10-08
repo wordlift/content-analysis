@@ -27,7 +27,7 @@ BLOCK_TAGS = {
     "p", "div", "br", "h1", "h2", "h3", "h4", "h5", "h6",
     "li", "td", "th", "tr", "blockquote", "section", "article", "ul", "ol", "table", "pre", "hr",
 }
-SKIP_TAGS = {"script", "style", "noscript", "head", "template", "svg", "math"}
+SKIP_TAGS = {"script", "style", "noscript", "title", "template", "svg", "math"}  # not `head`: its end tag is optional
 VOID_TAGS = {"br", "hr", "img", "input", "meta", "link", "area", "base", "col", "embed", "source", "track", "wbr"}
 
 
@@ -99,20 +99,22 @@ class _Extractor(HTMLParser):
             return
         self._emit(data, start, start + len(data))
 
-    def _ref(self, raw: str, decoded: str) -> None:
+    def _ref(self, raw: str) -> None:
         if self.skipping:
             return
         start = self._pos()
         end = start + len(raw)
         if self.source[end:end + 1] == ";":
             end += 1
-        self._emit(decoded, start, end)
+        # Decode the reference as written: an unknown name such as the `&T` of
+        # "AT&T" stays as it is, never gains a `;`.
+        self._emit(_html.unescape(self.source[start:end]), start, end)
 
     def handle_entityref(self, name):
-        self._ref("&" + name, _html.unescape(f"&{name};"))
+        self._ref("&" + name)
 
     def handle_charref(self, name):
-        self._ref("&#" + name, _html.unescape(f"&#{name};"))
+        self._ref("&#" + name)
 
 
 def extract_text_with_offsets(source: str) -> tuple[str, list[OffsetMapping]]:
