@@ -3,7 +3,7 @@ import unittest
 
 import httpx
 
-from resolve_pipeline import ArgmaxResolver, Candidate, Mention, WordLiftResolver, run
+from resolve_pipeline import ArgmaxResolver, Candidate, InvalidRequestError, Mention, WordLiftResolver, run
 from resolve_pipeline.pipeline import context_window
 from resolve_pipeline.types import NO_CANDIDATES, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE
 
@@ -101,6 +101,15 @@ class WordLiftClientTests(unittest.TestCase):
         r = self.client(handler).resolve(APPLE, TEXT, CANDS)
         self.assertFalse(r.resolved)
         self.assertEqual(r.reason, RESOLVER_UNAVAILABLE)
+
+    def test_a_rejected_request_raises_invalid_request_not_unavailability(self):
+        detail = [{"loc": ["body", "mentions", 0, "candidates"], "msg": "not allowed with a user dataset"}]
+        for handler, expected in ((lambda req: httpx.Response(422, json={"detail": detail}), detail),
+                                  (lambda req: httpx.Response(422, text="bad span"), "bad span")):
+            with self.assertRaises(InvalidRequestError) as caught:
+                self.client(handler).resolve(APPLE, TEXT, CANDS)
+            self.assertEqual(caught.exception.detail, expected)
+            self.assertIsInstance(caught.exception, ValueError)     # one family with the mismatched span
 
 
 class IdentitySafetyTests(unittest.TestCase):

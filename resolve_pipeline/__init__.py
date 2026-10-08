@@ -1,10 +1,10 @@
 """Open content-analysis pipeline: extract, retrieve, resolve or NIL."""
 from .pipeline import run
-from .resolver import ArgmaxResolver, Resolver, WordLiftResolver
+from .resolver import ArgmaxResolver, InvalidRequestError, Resolver, WordLiftResolver
 from .types import RESOLVED, UNRESOLVED, Candidate, Context, Entity, Mention, Resolution
 
 __all__ = [
-    "run", "Resolver", "ArgmaxResolver", "WordLiftResolver",
+    "run", "Resolver", "ArgmaxResolver", "WordLiftResolver", "InvalidRequestError",
     "Candidate",
     "Context", "Entity", "Mention", "Resolution", "RESOLVED", "UNRESOLVED",
 ]

@@ -45,9 +45,10 @@ Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
   exit codes) with a mocked transport. Coverage runs in CI: Python line and
   branch coverage with a 90% floor (`make coverage`), the TypeScript client
   at 100% lines and functions and 90% branches (`npm run coverage`).
-- CLI: a 422 is `invalid_request` with the engine's `detail` and exit code
-  1, no longer `resolver_unavailable`: the engine answered, the request was
-  wrong.
+- A 422 is the caller's error, no longer `resolver_unavailable`: the engine
+  answered, the request was wrong. `WordLiftResolver` raises
+  `InvalidRequestError` (a `ValueError`, with the engine's `detail`), as the
+  TypeScript client does; the CLI prints `invalid_request` and exits 1.
 
 ## 0.1.1 — unreleased
 

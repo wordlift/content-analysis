@@ -202,9 +202,11 @@ any of them needs a coordinated migration:
 - **Verb path** `/resolve` and **URL versioning** `/v1`.
 - **`Key` authentication** (`Authorization: Key <key>`) instead of OAuth2:
   the WordLift account key is the credential.
-- **Error bodies**: 422 carries the framework's `detail` array, not RFC 9457
-  Problem JSON; the 422 and 429 bodies are produced by the engine and the
-  gateway, and the document describes them as sent today.
+- **Error bodies**: 422 carries a `detail` field, not RFC 9457 Problem JSON:
+  the framework's validation array for a malformed body, or an object such
+  as `{"error": "dataset_not_supported", "dataset_uri": ..., "supported": [...]}`
+  for a request the engine refuses. The 422 and 429 bodies are produced by
+  the engine and the gateway, and the document describes them as sent today.
 - **JSON specification**: `docs/openapi.resolve.json` is JSON, not YAML,
   because the engine generates and serves its schema as JSON at
   `https://resolve.wordlift.io/openapi.json`; keeping one format avoids a

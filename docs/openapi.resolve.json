@@ -187,11 +187,21 @@
       "HTTPValidationError": {
         "properties": {
           "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "type": "array",
-            "title": "Detail"
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ValidationError"
+                },
+                "type": "array"
+              },
+              {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "A request the engine refuses, e.g. {\"error\": \"dataset_not_supported\", \"dataset_uri\": ..., \"supported\": [...]}"
+              }
+            ],
+            "title": "Detail",
+            "description": "The framework's validation errors for a malformed body, or an object for a request the engine refuses."
           }
         },
         "type": "object",

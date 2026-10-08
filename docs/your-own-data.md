@@ -246,8 +246,10 @@ The same ordering works with an inline vocabulary: `"dataset_uri": "inline,wikid
   dataset is the candidate world; a request that also sends per-mention
   `candidates` is rejected with 422.
 - **Failures are explicit.** A graph that cannot be read is a 502; a malformed
-  inline dataset or an unknown `dataset_uri` is a 422. The clients turn
-  transport failures into `resolver_unavailable`, never into a guess.
+  inline dataset or an unknown `dataset_uri` is a 422, which the clients
+  raise as `InvalidRequestError` (the CLI prints `invalid_request` and exits
+  1). They turn transport failures into `resolver_unavailable`, never into a
+  guess.
 - **Size and speed.** Inline: up to 5,000 entities per request. Graph: the
   first call reads it (a few seconds for a few hundred entities), then it is
   cached for about ten minutes per key.
