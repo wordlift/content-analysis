@@ -58,25 +58,29 @@
               "X-Wordlift-Consumption": {
                 "description": "The request's cost in smart credits: one per request plus one per 1,000 characters of text.",
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int64"
                 }
               },
               "X-RateLimit-Limit": {
                 "description": "Monthly allowance of the account for resolve().",
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int64"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Credits left in the current period.",
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int64"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Seconds until the allowance resets.",
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             }
@@ -107,19 +111,22 @@
               "X-RateLimit-Limit": {
                 "description": "Monthly allowance.",
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int64"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Always 0 here.",
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int64"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Seconds until the allowance resets.",
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -138,7 +145,8 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying.",
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -154,7 +162,8 @@
                       "type": "string"
                     },
                     "retry_after_s": {
-                      "type": "integer"
+                      "type": "integer",
+                      "format": "int64"
                     },
                     "detail": {
                       "type": "string"
@@ -196,11 +205,13 @@
           },
           "start": {
             "type": "integer",
-            "title": "Start"
+            "title": "Start",
+            "format": "int32"
           },
           "end": {
             "type": "integer",
-            "title": "End"
+            "title": "End",
+            "format": "int32"
           },
           "type": {
             "anyOf": [
@@ -231,7 +242,8 @@
           "score": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "format": "double"
               },
               {
                 "type": "null"
@@ -351,15 +363,15 @@
           "score": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "format": "double"
               },
               {
                 "type": "null"
               }
             ],
             "title": "Score",
-            "description": "Caller's retrieval score; informational",
-            "format": "double"
+            "description": "Caller's retrieval score; informational"
           }
         },
         "type": "object",
@@ -378,12 +390,14 @@
           "start": {
             "type": "integer",
             "minimum": 0.0,
-            "title": "Start"
+            "title": "Start",
+            "format": "int32"
           },
           "end": {
             "type": "integer",
             "minimum": 1.0,
-            "title": "End"
+            "title": "End",
+            "format": "int32"
           },
           "type": {
             "anyOf": [
@@ -586,7 +600,8 @@
                   "type": "string"
                 },
                 {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int32"
                 }
               ]
             },
