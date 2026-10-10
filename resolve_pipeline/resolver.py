@@ -51,11 +51,16 @@ class InvalidRequestError(ValueError):
         self.detail = detail
 
 
+def mention_not_in_text(mention: Mention) -> ValueError:
+    """The caller's error for a mention whose span does not hold its text; raised before any request."""
+    return ValueError(f"mention {mention.text!r} [{mention.start}, {mention.end}) does not lie in the text as written")
+
+
 def local_span(mention: Mention, context: str) -> tuple[int, int]:
     """The mention's span in the text sent; a mention that is not there as written is the caller's error."""
     local = Context.of(context).local_span(mention)
     if local is None:
-        raise ValueError(f"mention {mention.text!r} [{mention.start}, {mention.end}) does not lie in the context as written")
+        raise mention_not_in_text(mention)
     return local
 
 

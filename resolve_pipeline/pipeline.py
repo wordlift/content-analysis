@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Literal
 
-from .resolver import Resolver
+from .resolver import Resolver, mention_not_in_text
 from .types import INVALID_MENTION, Candidate, Context, Mention, Resolution, unresolved
 
 Retriever = Callable[[Mention, str], list[Candidate]]
@@ -27,7 +27,7 @@ def run(
     labels: list[str] | None = None,
     threshold: float = 0.5,
     context_radius: int = 400,
-    on_invalid_mention: str = "raise",
+    on_invalid_mention: Literal["raise", "unresolved"] = "raise",
 ) -> list[Resolution]:
     """Resolve every mention in `text`.
 
@@ -49,10 +49,11 @@ def run(
         from .extract import extract
         mentions = extract(model, text, labels, threshold, language)
     out: list[Resolution] = []
+    document = Context(text)
     for mention in mentions:
-        if text[mention.start:mention.end] != mention.text:
+        if document.local_span(mention) is None:
             if on_invalid_mention == "raise":
-                raise ValueError(f"mention {mention.text!r} [{mention.start}, {mention.end}) does not lie in the text as written")
+                raise mention_not_in_text(mention)
             out.append(unresolved(mention, INVALID_MENTION, detail="mention does not lie in the text as written"))
             continue
         context = context_window(text, mention, context_radius)

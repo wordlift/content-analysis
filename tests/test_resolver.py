@@ -5,7 +5,7 @@ import httpx
 
 from resolve_pipeline import ArgmaxResolver, Candidate, InvalidRequestError, Mention, WordLiftResolver, run
 from resolve_pipeline.pipeline import context_window
-from resolve_pipeline.types import NO_CANDIDATES, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE
+from resolve_pipeline.types import INVALID_MENTION, NO_CANDIDATES, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE
 
 APPLE = Mention("Apple", 12, 17, "Organization", 0.9)
 TEXT = "I bought an Apple laptop in Rome."
@@ -222,13 +222,8 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(out[0].entity.id, "wd:Q312")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class InvalidMentionTests(unittest.TestCase):
     def test_run_raises_on_a_mention_that_is_not_in_the_text(self):
-        from resolve_pipeline.types import INVALID_MENTION
         text = "Apple opened a store in Rome."
         bad = Mention("Rome", 0, 4)
         with self.assertRaises(ValueError):
@@ -240,3 +235,7 @@ class InvalidMentionTests(unittest.TestCase):
         self.assertEqual(out[0].mention.text, "Apple")
         with self.assertRaises(ValueError):
             run(text, retrieve=lambda m, c: [], resolver=ArgmaxResolver(), mentions=[bad], on_invalid_mention="skip")
+
+
+if __name__ == "__main__":
+    unittest.main()
