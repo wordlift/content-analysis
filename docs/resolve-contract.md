@@ -208,8 +208,17 @@ any of them needs a coordinated migration:
   `detail` when there is a sentence, the stable `code`, and extension members
   such as `dataset_uri`, `mention`, `accepted`, `retry_after_s`; a body that
   fails validation is `422 invalid_request` with an `errors` list. This is
-  the engine's since 2026-10-09. The 429 body is the gateway's and is still
-  `text/plain`; the document describes it as sent today.
+  the engine's since 2026-10-09. Each `type` URI leads to that code's page
+  under [docs.wordlift.io/problems](https://docs.wordlift.io/problems/).
+  A `429` has two sources, told apart by the `Content-Type`: the gateway's
+  allowance block is `text/plain` with the `X-RateLimit-*` headers
+  (Metering, above), the engine's bounded queue is Problem JSON
+  `too_many_requests` with `Retry-After`. Where a retry time is given, the
+  `Retry-After` header is authoritative; `retry_after_s` repeats the same
+  number in the body for clients that only read the body.
+  `dataset_unavailable` is answered with `502` when the caller's graph could
+  not be read (the world in `dataset_uri`; a retry can help) and with `503`
+  when the engine itself has no index yet.
 - **JSON specification**: `docs/openapi.resolve.json` is JSON, not YAML,
   because the engine generates and serves its schema as JSON at
   `https://resolve.wordlift.io/openapi.json`; keeping one format avoids a
