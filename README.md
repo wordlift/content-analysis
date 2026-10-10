@@ -88,9 +88,25 @@ Resolution(mention, status="resolved"|"unresolved", entity=Entity|None, score=No
 
 `unresolved` is a result, not an error. Reasons: `no_suitable_candidate`,
 `no_candidates`, `type_conflict`, `low_relevance`; the client adds
-`resolver_unavailable` when the engine cannot be reached, so a transport
-failure never becomes a guessed identity. Identifiers are echoed in the form
-you sent: `Q312`, `wd:Q312` or a Wikidata entity URI.
+`resolver_unavailable` when the engine cannot be reached, `rate_limited` when
+it answers 429 (with `retry_after` in the diagnostics), `protocol_error` when
+it answers with something the client cannot act on, and `invalid_mention` for
+a caller span that is not in the text, so none of these ever becomes a guessed
+identity. Identifiers are echoed in the form you sent: `Q312`, `wd:Q312` or a
+Wikidata entity URI.
+
+**One request per document.** `run()` retrieves candidates per mention and
+then hands the whole document to the resolver once: `WordLiftResolver`
+sends every span and the inline vocabulary in a single request (bounded by
+`MAX_MENTIONS_PER_REQUEST`, 200), instead of one request and one vocabulary
+upload per mention. Results keep the order of your mentions and their document
+offsets. A document over the engine's 100,000-character limit is sent in
+chunks that never cut a mention. A custom `Resolver` that implements only
+`resolve()` keeps working mention by mention. The client never retries on its
+own: a timed-out request may have been served and metered, so the retry
+policy is yours; `diagnostics["credits"]` reports what each request cost
+(`X-Wordlift-Consumption`). A refused key raises `AuthorizationError`, a
+rejected request `InvalidRequestError`: caller errors stop the batch.
 
 ## The engine endpoint
 

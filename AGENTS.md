@@ -75,3 +75,10 @@ Gate results, release decisions and the reasoning behind the NIL rules are
 published at https://wordlift.io/resolve/ and summarized in README.md. If a
 change here depends on engine behaviour, say so explicitly rather than
 assuming it.
+
+- Resolution goes to the engine once per document (`Resolver.resolve_many`;
+  `run()` falls back to `resolve()` for a resolver without it). Never reintroduce
+  a request per mention: with an inline vocabulary that re-uploads the whole
+  vocabulary for every mention (issue #4). The client does not retry: a
+  timed-out request may have been served and metered.
+

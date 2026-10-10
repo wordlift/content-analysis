@@ -5,7 +5,7 @@ import httpx
 
 from resolve_pipeline import ArgmaxResolver, Candidate, InvalidRequestError, Mention, WordLiftResolver, run
 from resolve_pipeline.pipeline import context_window
-from resolve_pipeline.types import INVALID_MENTION, NO_CANDIDATES, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE
+from resolve_pipeline.types import NO_CANDIDATES, PROTOCOL_ERROR, RESOLVER_UNAVAILABLE
 
 APPLE = Mention("Apple", 12, 17, "Organization", 0.9)
 TEXT = "I bought an Apple laptop in Rome."
@@ -222,8 +222,13 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(out[0].entity.id, "wd:Q312")
 
 
+if __name__ == "__main__":
+    unittest.main()
+
+
 class InvalidMentionTests(unittest.TestCase):
     def test_run_raises_on_a_mention_that_is_not_in_the_text(self):
+        from resolve_pipeline.types import INVALID_MENTION
         text = "Apple opened a store in Rome."
         bad = Mention("Rome", 0, 4)
         with self.assertRaises(ValueError):
@@ -237,5 +242,98 @@ class InvalidMentionTests(unittest.TestCase):
             run(text, retrieve=lambda m, c: [], resolver=ArgmaxResolver(), mentions=[bad], on_invalid_mention="skip")
 
 
-if __name__ == "__main__":
-    unittest.main()
+class BatchResolutionTests(unittest.TestCase):
+    """Issue #4: one request per document, the vocabulary once, order and offsets kept."""
+
+    TEXT = "Apple opened a store in Rome. Tim Cook flew to Paris. Apple again."
+
+    def spans(self):
+        return [Mention("Apple", 0, 5), Mention("Rome", 24, 28), Mention("Tim Cook", 30, 38),
+                Mention("Paris", 47, 52), Mention("Apple", 54, 59)]
+
+    @staticmethod
+    def resolver(handler):
+        return WordLiftResolver("k", base_url="https://example.test", client=httpx.Client(transport=httpx.MockTransport(handler)))
+
+    def engine(self, calls, status=200, headers=None, rows=None):
+        def handler(request):
+            body = json.loads(request.content)
+            calls.append(body)
+            if status != 200:
+                problem = {"type": "https://docs.wordlift.io/problems/too_many_requests", "status": status,
+                           "code": "too_many_requests", "detail": "full"}
+                return httpx.Response(status, json=problem, headers=headers or {})
+            out = rows if rows is not None else [
+                {"text": m["text"], "start": m["start"], "end": m["end"], "status": "resolved",
+                 "entity": {"id": f"Q{m['start']}", "label": m["text"]}, "score": 0.9} for m in body["mentions"]]
+            return httpx.Response(200, json={"mentions": out}, headers=headers or {})
+        return handler
+
+    def test_one_request_carries_every_span_and_the_vocabulary_once(self):
+        calls = []
+        vocab = [{"id": "v:apple", "name": "Apple", "description": "x" * 1000}]
+        handler = self.engine(calls, headers={"X-Wordlift-Consumption": "2"})
+        resolver = WordLiftResolver("k", base_url="https://example.test", dataset=vocab,
+                                    client=httpx.Client(transport=httpx.MockTransport(handler)))
+        from resolve_pipeline import run
+        res = run(self.TEXT, retrieve=lambda m, c: [], resolver=resolver, mentions=self.spans(), language="en")
+        self.assertEqual(len(calls), 1)                                   # was five requests
+        self.assertEqual(len(calls[0]["mentions"]), 5)
+        self.assertEqual(calls[0]["dataset"], {"entities": vocab})       # sent once, not five times
+        self.assertEqual([r.mention.text for r in res], ["Apple", "Rome", "Tim Cook", "Paris", "Apple"])
+        self.assertEqual([r.entity.id for r in res], ["Q0", "Q24", "Q30", "Q47", "Q54"])  # order and offsets kept
+        self.assertTrue(all(r.diagnostics["credits"] == "2" for r in res))
+
+    def test_batches_are_bounded(self):
+        calls = []
+        resolver = self.resolver(self.engine(calls))
+        resolver.MAX_MENTIONS_PER_REQUEST = 2
+        res = resolver.resolve_many(self.TEXT, self.spans(), [[]] * 5, language="en")
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(res), 5)
+
+    def test_rate_limit_is_distinguishable_and_carries_retry_after(self):
+        resolver = self.resolver(self.engine([], status=429, headers={"Retry-After": "5"}))
+        res = resolver.resolve_many(self.TEXT, self.spans()[:2], [[], []])
+        self.assertEqual([r.reason for r in res], ["rate_limited", "rate_limited"])
+        self.assertEqual(res[0].diagnostics, {"status": 429, "code": "too_many_requests", "retry_after": "5"})
+
+    def test_a_refused_key_stops_the_batch(self):
+        from resolve_pipeline.resolver import AuthorizationError
+        resolver = self.resolver(self.engine([], status=401))
+        with self.assertRaises(AuthorizationError):
+            resolver.resolve_many(self.TEXT, self.spans()[:1], [[]])
+
+    def test_a_missing_row_is_a_protocol_error_for_that_mention_only(self):
+        rows = [{"text": "Apple", "start": 0, "end": 5, "status": "resolved", "entity": {"id": "Q312"}}]
+        resolver = self.resolver(self.engine([], rows=rows))
+        res = resolver.resolve_many(self.TEXT, self.spans()[:2], [[], []])
+        self.assertEqual(res[0].entity.id, "Q312")
+        self.assertEqual(res[1].reason, "protocol_error")
+
+    def test_a_single_mention_resolver_still_works_through_run(self):
+        from resolve_pipeline import run
+        res = run(self.TEXT, retrieve=lambda m, c: [Candidate("wd:Q1", "x", score=0.9)], resolver=ArgmaxResolver(),
+                  mentions=self.spans(), language="en")
+        self.assertEqual(len(res), 5)
+
+    def test_long_documents_are_chunked_without_cutting_a_mention(self):
+        from resolve_pipeline.pipeline import chunk_document
+        text = ("word " * 30000).strip()                  # 149,999 chars
+        boundary = 99_995
+        mention = Mention(text[boundary - 3:boundary + 6], boundary - 3, boundary + 6)
+        chunks = chunk_document(text, [mention], limit=100_000)
+        self.assertEqual(chunks[0][0], 0)
+        self.assertEqual(chunks[-1][1], len(text))
+        for a, b in chunks:
+            self.assertLessEqual(b - a, 100_000)
+            self.assertFalse(a < mention.start < b < mention.end)  # no chunk ends inside the mention
+        calls = []
+        resolver = self.resolver(self.engine(calls))
+        from resolve_pipeline import run
+        spans = [Mention("word", 0, 4), mention, Mention("word", len(text) - 4, len(text))]
+        res = run(text, retrieve=lambda m, c: [], resolver=resolver, mentions=spans)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual([r.mention.start for r in res], [0, mention.start, len(text) - 4])
+        for call in calls:
+            self.assertLessEqual(len(call["text"]), 100_000)

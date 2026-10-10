@@ -15,6 +15,11 @@ NO_CANDIDATES = "no_candidates"
 TYPE_CONFLICT = "type_conflict"
 LOW_RELEVANCE = "low_relevance"
 RESOLVER_UNAVAILABLE = "resolver_unavailable"
+# The engine (or the gateway) refused the request with 429: the replica's queue
+# is full or the plan's monthly allowance is spent. `diagnostics["retry_after"]`
+# carries the seconds the server asked for. Distinct from an outage so a caller
+# can wait instead of failing over; never turned into an identity.
+RATE_LIMITED = "rate_limited"
 # The engine answered, but not with something a client can act on: no row for
 # the requested span, two rows for it, a resolved row without an identity, a
 # body that is not the contract's shape. Distinct from a transport failure and

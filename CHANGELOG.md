@@ -2,6 +2,15 @@
 
 ## 0.1.2 — unreleased
 
+- One request per document (issue #4): `Resolver.resolve_many` on both
+  resolvers; `run()` sends every span and the inline vocabulary once instead of
+  one request per mention, bounded by `MAX_MENTIONS_PER_REQUEST` (200), with
+  order and document offsets kept and chunking above the engine's
+  100,000-character limit that never cuts a mention. 429 becomes `rate_limited`
+  with `retry_after`; 401/403 raise `AuthorizationError`; a 5xx keeps its
+  status in the diagnostics; each request's cost is reported as `credits`. No
+  automatic retries. `evaluate(..., keep_rows=False)` for large datasets.
+
 Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
 
 - `run(..., on_invalid_mention="raise" | "unresolved")` (issue #5): a
