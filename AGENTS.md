@@ -76,9 +76,16 @@ published at https://wordlift.io/resolve/ and summarized in README.md. If a
 change here depends on engine behaviour, say so explicitly rather than
 assuming it.
 
-- Resolution goes to the engine once per document (`Resolver.resolve_many`;
-  `run()` falls back to `resolve()` for a resolver without it). Never reintroduce
-  a request per mention: with an inline vocabulary that re-uploads the whole
-  vocabulary for every mention (issue #4). The client does not retry: a
-  timed-out request may have been served and metered.
+- Resolution goes to the engine once per document through `BatchResolver`
+  (`as_batch` adapts a single-mention `Resolver`). Never reintroduce a request
+  per mention: with an inline vocabulary that re-uploads the whole vocabulary
+  for every mention (issue #4). Chunking by text length and by mention count
+  lives in `WordLiftResolver`, next to the limits, not in the pipeline. The
+  client does not retry: a timed-out request may have been served and metered.
+- Engine behaviour this client relies on, checked on 2026-10-10: the engine
+  decides each mention on the 400 characters either side of its span, so one
+  request per document gives the same decisions as one request per mention
+  with the client's former 400-character window. If the engine's window
+  changes, this note and the README sentence about `context_radius` change
+  with it.
 

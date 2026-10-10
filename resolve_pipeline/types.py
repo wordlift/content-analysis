@@ -79,6 +79,18 @@ class Context(str):
         return start, end
 
 
+def context_window(text: str, mention: Mention, radius: int = 400) -> Context:
+    """The text around a mention, with the offset that keeps the mention's span valid.
+
+    `text` may itself be a Context (a chunk of a longer document): the window is
+    cut from it and its offset is document-relative.
+    """
+    doc = Context.of(text)
+    start = max(0, mention.start - doc.offset - radius)
+    end = mention.end - doc.offset + radius
+    return Context(doc.text[start:end], doc.offset + start)
+
+
 @dataclass(frozen=True)
 class Candidate:
     id: str

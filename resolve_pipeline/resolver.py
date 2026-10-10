@@ -8,6 +8,8 @@ Returning `unresolved` is a valid answer.
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
+from dataclasses import dataclass, replace
 from typing import Any, Protocol, runtime_checkable
 
 import httpx
@@ -24,6 +26,7 @@ from .types import (
     Entity,
     Mention,
     Resolution,
+    context_window,
     resolved,
     unresolved,
 )
@@ -66,6 +69,14 @@ def mention_not_in_text(mention: Mention) -> ValueError:
     return ValueError(f"mention {mention.text!r} [{mention.start}, {mention.end}) does not lie in the text as written")
 
 
+def complete(results: list[Resolution | None]) -> list[Resolution]:
+    """Every mention has its Resolution, or the resolver broke the protocol; a hole is never dropped silently."""
+    missing = [i for i, r in enumerate(results) if r is None]
+    if missing:
+        raise RuntimeError(f"no resolution for mentions {missing}")
+    return [r for r in results if r is not None]
+
+
 def local_span(mention: Mention, context: str) -> tuple[int, int]:
     """The mention's span in the text sent; a mention that is not there as written is the caller's error."""
     local = Context.of(context).local_span(mention)
@@ -84,6 +95,56 @@ class Resolver(Protocol):
         *,
         language: str = "",
     ) -> Resolution: ...
+
+
+@runtime_checkable
+class BatchResolver(Protocol):
+    """A resolver that decides all mentions of one text in one go.
+
+    `candidates[i]` belongs to `mentions[i]`; the result has one Resolution per
+    mention, in the same order, with explicit `unresolved` outcomes. `text` may
+    be a Context (a chunk of a longer document) whose offset the mentions'
+    spans are relative to.
+    """
+
+    def resolve_many(
+        self,
+        text: str,
+        mentions: list[Mention],
+        candidates: list[list[Candidate]],
+        *,
+        language: str = "",
+    ) -> list[Resolution]: ...
+
+
+class PerMention:
+    """A single-mention Resolver seen through the batch protocol.
+
+    Each mention is resolved on its own, with the context window of
+    `context_radius` characters either side of it, which is what `run()` sent
+    before resolution was batched. `as_batch()` applies it to any resolver that
+    does not offer `resolve_many` itself.
+    """
+
+    def __init__(self, resolver: Resolver, context_radius: int = 400):
+        self.resolver = resolver
+        self.context_radius = context_radius
+
+    def resolve(self, mention: Mention, context: str, candidates: list[Candidate], *, language: str = "") -> Resolution:
+        return self.resolver.resolve(mention, context, candidates, language=language)
+
+    def resolve_many(
+        self, text: str, mentions: list[Mention], candidates: list[list[Candidate]], *, language: str = ""
+    ) -> list[Resolution]:
+        return [self.resolver.resolve(m, context_window(text, m, self.context_radius), c, language=language)
+                for m, c in zip(mentions, candidates, strict=True)]
+
+
+def as_batch(resolver: Resolver | BatchResolver, context_radius: int = 400) -> BatchResolver:
+    """The resolver itself when it batches, otherwise the per-mention adapter."""
+    if isinstance(resolver, BatchResolver):
+        return resolver
+    return PerMention(resolver, context_radius)
 
 
 class ArgmaxResolver:
@@ -114,26 +175,99 @@ class ArgmaxResolver:
             return unresolved(mention, NO_SUITABLE_CANDIDATE, top_id=top.id, margin=top.score - runner_up)
         return resolved(mention, Entity(top.id, top.label, top.types), score=top.score)
 
-    def resolve_many(
-        self, text: str, mentions: list[Mention], candidates: list[list[Candidate]], *, language: str = ""
-    ) -> list[Resolution]:
-        """Local resolver: one decision per mention, no request to batch."""
-        return [self.resolve(m, text, c, language=language) for m, c in zip(mentions, candidates, strict=True)]
+
+def chunk_document(text: str, mentions: list[Mention], limit: int) -> list[tuple[int, int]]:
+    """Character ranges that cover `text`, each at most `limit` long, none cutting a mention.
+
+    A chunk ends at the last newline or space before the limit, and earlier
+    when that would fall inside a mention. Ranges are relative to `text`.
+    """
+    if len(text) <= limit:
+        return [(0, len(text))]
+    spans = sorted((m.start, m.end) for m in mentions)
+    chunks: list[tuple[int, int]] = []
+    start = 0
+    while start < len(text):
+        end = min(len(text), start + limit)
+        if end < len(text):
+            cut = max(text.rfind("\n", start, end), text.rfind(" ", start, end))
+            if cut > start:
+                end = cut
+            for ms, me in spans:              # never cut through a mention
+                if ms < end < me:
+                    back = text.rfind(" ", start, ms)
+                    end = back if back > start else ms
+                    break
+        chunks.append((start, end))
+        start = end
+    return chunks
+
+
+@dataclass(frozen=True)
+class Problem:
+    """What an error response says, read once: the status, the stable `code`
+    of an RFC 9457 body when the engine sent one, the human-readable detail,
+    and the `Retry-After` header when there is one."""
+
+    status: int
+    detail: Any
+    code: str | None = None
+    retry_after: str | None = None
+
+    @classmethod
+    def of(cls, response: httpx.Response) -> Problem:
+        try:
+            body = response.json()
+        except ValueError:
+            body = None
+        if isinstance(body, dict):
+            detail = body.get("detail") or body.get("title") or body
+            code = body.get("code") if isinstance(body.get("code"), str) else None
+        else:
+            detail = body if body is not None else response.text[:200]
+            code = None
+        return cls(response.status_code, detail, code, response.headers.get("Retry-After"))
+
+    def diagnostics(self) -> dict[str, Any]:
+        out: dict[str, Any] = {"status": self.status}
+        if self.code is not None:
+            out["code"] = self.code
+        if self.retry_after is not None:
+            out["retry_after"] = self.retry_after
+        return out
 
 
 class WordLiftResolver:
     """Client for WordLift's `POST /v1/resolve` (see docs/resolve-contract.md).
 
-    The request carries the mention span, its context and the caller's
-    candidates; the engine returns the supported identity or `unresolved`.
-    Transport failures become `unresolved` with reason `resolver_unavailable`
-    rather than a guessed identity: a wrong link costs more than no link.
+    One request carries a text, its mention spans and, with `candidates`, the
+    caller's candidates; the engine returns the supported identity or
+    `unresolved` per mention. Transport failures become `unresolved` with
+    reason `resolver_unavailable` rather than a guessed identity: a wrong link
+    costs more than no link.
     """
 
     DEFAULT_BASE_URL = "https://resolve.wordlift.io"
     WORDLIFT_GRAPH = WORDLIFT_GRAPH
     #: Your entities first, Wikidata for everything else.
     LOCAL_FIRST = f"{WORDLIFT_GRAPH},{PUBLIC_WORLD}"
+
+    #: Mentions per request. The engine resolves a document's mentions in one
+    #: pass; this bounds a single request's work and response size.
+    MAX_MENTIONS_PER_REQUEST = 200
+    #: The engine's limit on `text` (docs/openapi.resolve.json). A longer text
+    #: is sent in chunks that never cut a mention; results keep document offsets.
+    MAX_TEXT_CHARS = 100_000
+
+    #: Status to outcome. A caller error raises and stops the batch; the engine
+    #: or the gateway being unable to serve becomes an explicit `unresolved`.
+    RAISES: dict[int, Callable[[Problem], Exception]] = {
+        422: lambda p: InvalidRequestError(p.detail),
+        401: lambda p: AuthorizationError(p.status, p.detail),
+        403: lambda p: AuthorizationError(p.status, p.detail),
+    }
+    REASONS: dict[int, str] = {429: RATE_LIMITED}
+    DEFAULT_REASON = RESOLVER_UNAVAILABLE
 
     def __init__(
         self,
@@ -185,30 +319,8 @@ class WordLiftResolver:
     def user_dataset(self) -> bool:
         return is_user_world(self.dataset_uri, self.dataset)
 
-    def payload(self, mention: Mention, context: str, candidates: list[Candidate], language: str) -> dict[str, Any]:
-        """The request body. The span is rebased to the context text; see Context."""
-        start, end = local_span(mention, context)
-        span: dict[str, Any] = {"text": mention.text, "start": start, "end": end,
-                                "type": mention.label or None}
-        if candidates and not self.user_dataset:
-            span["candidates"] = [
-                {"id": c.id, "label": c.label or None, "description": c.description or None,
-                 "types": list(c.types) or None, "score": c.score}
-                for c in candidates
-            ]
-        body: dict[str, Any] = {"text": str(context), "dataset_uri": self.dataset_uri, "language": language or None, "mentions": [span]}
-        if self.dataset is not None:
-            body["dataset"] = self.dataset
-        return body
-
-    #: Mentions per request. The engine resolves a document's mentions in one
-    #: pass; this bounds a single request's work and response size.
-    MAX_MENTIONS_PER_REQUEST = 200
-
     def resolve(self, mention: Mention, context: str, candidates: list[Candidate], *, language: str = "") -> Resolution:
-        """Raises ValueError, before any request, when the mention does not lie in `context` as written,
-        InvalidRequestError (a ValueError) when the engine rejects the request with 422, and
-        AuthorizationError when it refuses the key."""
+        """One mention; see `resolve_many` for what is raised and what comes back."""
         return self.resolve_many(context, [mention], [candidates], language=language)[0]
 
     def resolve_many(
@@ -221,37 +333,49 @@ class WordLiftResolver:
     ) -> list[Resolution]:
         """Resolve all `mentions` of `text` with as few requests as possible.
 
-        One request carries up to MAX_MENTIONS_PER_REQUEST spans and the inline
-        vocabulary once, instead of one request (and one vocabulary upload) per
-        mention. Results come back in the order of `mentions`, one per mention,
-        with explicit `unresolved` outcomes; the engine chooses each mention's
-        own context inside the document, which is the same 400-character
-        window the pipeline used to send per mention.
+        Every span is checked first: a mention that does not lie in `text` as
+        written raises ValueError before any request is sent. Then one request
+        carries up to MAX_MENTIONS_PER_REQUEST spans and the inline vocabulary
+        once, and a text over MAX_TEXT_CHARS is cut into chunks that never
+        split a mention. Results come back in the order of `mentions`, one per
+        mention, with document offsets. The engine decides each mention on the
+        400 characters either side of it, the window `run()` used to send per
+        mention, so batching does not change decisions.
 
-        A 429 becomes `rate_limited` with `retry_after` in the diagnostics; a
-        transport failure or a 5xx becomes `resolver_unavailable` with the
-        status when there is one. 422 raises InvalidRequestError and 401/403
-        raise AuthorizationError: a caller error stops the batch. The client
-        never retries on its own: a timed-out request may have been served
-        and metered (`X-Wordlift-Consumption`), so the retry policy is the
-        caller's, and `diagnostics["credits"]` reports what each request cost.
+        Status to outcome (RAISES, REASONS): 422 raises InvalidRequestError and
+        401/403 raise AuthorizationError, since a caller error stops the batch;
+        429 becomes `rate_limited` with `retry_after` and the problem `code` in
+        the diagnostics when the body is Problem JSON (the gateway's allowance
+        block is text/plain, so it has no code); any other 4xx/5xx and a
+        transport failure become `resolver_unavailable` with the status when
+        there is one. The client never retries on its own: a timed-out request
+        may have been served and metered, so the retry policy is the caller's,
+        and `diagnostics["credits"]` reports what each request cost
+        (`X-Wordlift-Consumption`).
         """
         if len(mentions) != len(candidates):
             raise ValueError("one candidate list per mention")
+        document = Context.of(text)
+        for m in mentions:
+            local_span(m, document)                      # raises before any request
         out: list[Resolution | None] = [None] * len(mentions)
-        indices: list[int] = []
-        for i, (m, cands) in enumerate(zip(mentions, candidates, strict=True)):
-            if not cands and not self.engine_retrieval and not self.user_dataset:
-                out[i] = unresolved(m, NO_CANDIDATES)
-            else:
-                indices.append(i)
-        for start in range(0, len(indices), self.MAX_MENTIONS_PER_REQUEST):
-            batch = indices[start:start + self.MAX_MENTIONS_PER_REQUEST]
-            request = self.payload_many(text, [mentions[i] for i in batch], [candidates[i] for i in batch], language)
-            results = self._post(request, text, [mentions[i] for i in batch])
-            for i, r in zip(batch, results, strict=True):
-                out[i] = r
-        return [r for r in out if r is not None]
+        to_send = [i for i, (m, cands) in enumerate(zip(mentions, candidates, strict=True))
+                   if cands or self.engine_retrieval or self.user_dataset]
+        for i in set(range(len(mentions))) - set(to_send):
+            out[i] = unresolved(mentions[i], NO_CANDIDATES)
+        for c_start, c_end in chunk_document(document.text, [mentions[i] for i in to_send], self.MAX_TEXT_CHARS):
+            chunk = Context(document.text[c_start:c_end], document.offset + c_start)
+            inside = [i for i in to_send if chunk.local_span(mentions[i]) is not None]
+            for b in range(0, len(inside), self.MAX_MENTIONS_PER_REQUEST):
+                batch = inside[b:b + self.MAX_MENTIONS_PER_REQUEST]
+                results = self._request(chunk, [mentions[i] for i in batch], [candidates[i] for i in batch], language)
+                for i, r in zip(batch, results, strict=True):
+                    out[i] = r
+        return complete(out)
+
+    def payload(self, mention: Mention, context: str, candidates: list[Candidate], language: str) -> dict[str, Any]:
+        """The request body for one mention; see `payload_many`."""
+        return self.payload_many(context, [mention], [candidates], language)
 
     def payload_many(self, text: str, mentions: list[Mention], candidates: list[list[Candidate]], language: str) -> dict[str, Any]:
         """One request body for several mentions of one text; spans rebased to the text sent."""
@@ -271,54 +395,37 @@ class WordLiftResolver:
             body["dataset"] = self.dataset
         return body
 
-    def _post(self, request: dict[str, Any], text: str, mentions: list[Mention]) -> list[Resolution]:
+    def _request(self, context: Context, mentions: list[Mention], candidates: list[list[Candidate]], language: str) -> list[Resolution]:
+        """One request: transport, then the status table, then the rows with the request's cost attached."""
+        request = self.payload_many(context, mentions, candidates, language)
         try:
             response = self._client.post(f"{self.base_url}/v1/resolve", json=request, headers=self._headers, timeout=self.timeout)
         except httpx.HTTPError as exc:
             return [unresolved(m, RESOLVER_UNAVAILABLE, error=type(exc).__name__) for m in mentions]
-        status = response.status_code
-        detail = self._error_detail(response)
-        if status == 422:
-            raise InvalidRequestError(detail)
-        if status in (401, 403):
-            raise AuthorizationError(status, detail)
-        if status == 429:
-            retry_after = response.headers.get("Retry-After")
-            meta = {"status": status, "code": self._error_code(response)}
-            if retry_after is not None:
-                meta["retry_after"] = retry_after
-            return [unresolved(m, RATE_LIMITED, **meta) for m in mentions]
-        if status >= 400:
-            return [unresolved(m, RESOLVER_UNAVAILABLE, status=status, code=self._error_code(response)) for m in mentions]
-        credits = response.headers.get("X-Wordlift-Consumption")
+        if response.status_code >= 400:
+            return self._failure(Problem.of(response), mentions)
+        return self._with_credits(self._results(response, context, mentions), response)
+
+    def _failure(self, problem: Problem, mentions: list[Mention]) -> list[Resolution]:
+        raises = self.RAISES.get(problem.status)
+        if raises is not None:
+            raise raises(problem)
+        reason = self.REASONS.get(problem.status, self.DEFAULT_REASON)
+        return [unresolved(m, reason, **problem.diagnostics()) for m in mentions]
+
+    def _results(self, response: httpx.Response, context: str, mentions: list[Mention]) -> list[Resolution]:
         try:
             body = response.json()
         except ValueError:
             return [unresolved(m, PROTOCOL_ERROR, detail="response is not JSON") for m in mentions]
-        results = [self.parse(m, body, text) for m in mentions]
-        if credits is not None:
-            results = [Resolution(r.mention, r.status, r.entity, r.score, r.reason, {**r.diagnostics, "credits": credits})
-                       for r in results]
-        return results
+        return [self.parse(m, body, context) for m in mentions]
 
     @staticmethod
-    def _error_detail(response: httpx.Response) -> Any:
-        try:
-            body = response.json()
-        except ValueError:
-            return response.text[:200]
-        if isinstance(body, dict):
-            return body.get("detail") or body.get("title") or body
-        return body
-
-    @staticmethod
-    def _error_code(response: httpx.Response) -> str | None:
-        """The stable `code` of an RFC 9457 problem body, when the engine sent one."""
-        try:
-            body = response.json()
-        except ValueError:
-            return None
-        return body.get("code") if isinstance(body, dict) else None
+    def _with_credits(results: list[Resolution], response: httpx.Response) -> list[Resolution]:
+        credits = response.headers.get("X-Wordlift-Consumption")
+        if credits is None:
+            return results
+        return [replace(r, diagnostics={**r.diagnostics, "credits": credits}) for r in results]
 
     @staticmethod
     def parse(mention: Mention, body: Any, context: str | None = None) -> Resolution:
