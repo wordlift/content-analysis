@@ -20,6 +20,11 @@ RESOLVER_UNAVAILABLE = "resolver_unavailable"
 # body that is not the contract's shape. Distinct from a transport failure and
 # from a genuine abstention; never turned into an identity.
 PROTOCOL_ERROR = "protocol_error"
+# A caller-supplied mention that does not lie in the text as written (wrong
+# offsets, normalised text, offsets from another text). No request is made for
+# it. `run(..., on_invalid_mention="unresolved")` reports it with this reason;
+# the default raises ValueError before anything is sent (issue #5).
+INVALID_MENTION = "invalid_mention"
 
 RESOLVED = "resolved"
 UNRESOLVED = "unresolved"
