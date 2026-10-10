@@ -161,12 +161,27 @@ JSON shape of a vocabulary, the sameAs bridge and the things to know before
 relying on it: [`docs/your-own-data.md`](docs/your-own-data.md). Runnable:
 [`examples/resolve_with_your_data.py`](examples/resolve_with_your_data.py).
 
+## MCP adapter (experimental)
+
+The open-source [`clients/mcp`](clients/mcp) adapter exposes `resolve_text` as an MCP tool, forwarding requests to the existing hosted `resolve()` API. It preserves both resolved identities and explicit `unresolved` (NIL) decisions, including optional candidate and evidence diagnostics. The engine remains proprietary.
+
+To run it locally with an MCP client over stdio:
+
+```bash
+python -m pip install -r clients/mcp/requirements.txt
+export WL_KEY="your-wordlift-key"
+python clients/mcp/server.py
+```
+
+This version is **local/stdio only**. It does not provide an OAuth-enabled remote endpoint for ChatGPT. Remote access will require OAuth, tenant-safe account-to-key mapping, and a separate deployment decision; no upstream changes are required by this PR. See [`clients/mcp/README.md`](clients/mcp/README.md) for configuration and tests.
+
 ## Clients
 
 | Language | Where | Install |
 |---|---|---|
 | Python | this package, `WordLiftResolver` | `pip install "resolve-pipeline @ git+https://github.com/wordlift/content-analysis.git"` |
 | TypeScript / JavaScript | [`clients/typescript`](clients/typescript), zero dependencies, Node 18+ and browsers | `npm install @wordlift/resolve` |
+| MCP (experimental, stdio) | [`clients/mcp`](clients/mcp), thin adapter to the hosted API | `pip install -r clients/mcp/requirements.txt` |
 | Anything else | [`docs/openapi.resolve.json`](docs/openapi.resolve.json), generated from the live service | `openapi-generator generate -i docs/openapi.resolve.json -g <lang>` |
 
 Every client keeps the same rule: `unresolved` is a result, a transport
@@ -230,6 +245,7 @@ resolve_pipeline/
   html.py        HTML → text with a character offset map (optional extra)
   evaluate.py    error attribution CLI
   __main__.py    `python -m resolve_pipeline "text"`
+clients/mcp/     experimental local MCP adapter (stdio)
 datasets/        development gold sets (en, it, fr, de, es, pt)
 docs/            resolve() contract, your-own-data guide, OpenAPI, logos
 examples/        runnable scripts
