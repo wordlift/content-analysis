@@ -50,7 +50,7 @@ def attribute(gold_qid: str, candidates: list[str], prediction: str | None) -> s
     return RESOLUTION_ERROR
 
 
-def evaluate(cases: list[dict[str, Any]], predictions: list[dict[str, Any]]) -> dict[str, Any]:
+def evaluate(cases: list[dict[str, Any]], predictions: list[dict[str, Any]], *, keep_rows: bool = True) -> dict[str, Any]:
     by_key = {(int(p["doc"]), p["mention"]): p for p in predictions}
     rows = []
     counts: Counter[str] = Counter()
@@ -72,7 +72,7 @@ def evaluate(cases: list[dict[str, Any]], predictions: list[dict[str, Any]]) -> 
         "resolution_coverage": accepted / reachable if reachable else None,
         "accepted_precision": counts[CORRECT] / accepted if accepted else None,
         "end_to_end_accuracy": counts[CORRECT] / n if n else None,
-        "rows": rows,
+        "rows": rows if keep_rows else [],
     }
 
 
