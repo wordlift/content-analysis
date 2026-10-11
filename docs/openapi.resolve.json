@@ -86,27 +86,27 @@
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "The body fails validation (`invalid_request`, with `errors`) or the request is refused: `invalid_span`, `invalid_identity`, `dataset_not_supported`, `dataset_required`, `invalid_dataset`, `unknown_include`, `candidates_not_supported`.",
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/Problem"
                 }
               }
             }
           },
           "401": {
-            "description": "Missing or invalid WordLift API key.",
+            "description": "Missing or invalid WordLift API key (`unauthorized`).",
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorDetail"
+                  "$ref": "#/components/schemas/Problem"
                 }
               }
             }
           },
           "429": {
-            "description": "The account's monthly allowance for resolve() is spent. Nothing was resolved.",
+            "description": "Two sources, told apart by the Content-Type. The gateway's allowance block: the account's monthly allowance for resolve() is spent, text/plain body, X-RateLimit-* headers. The engine's bounded queue: the replica has its limit of requests in flight and waiting, application/problem+json `too_many_requests` with Retry-After. Nothing was resolved in either case.",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Monthly allowance.",
@@ -128,6 +128,13 @@
                   "type": "integer",
                   "format": "int64"
                 }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (engine's queue).",
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
               }
             },
             "content": {
@@ -136,11 +143,16 @@
                   "type": "string",
                   "description": "A sentence naming the limit, the resource and the seconds until reset."
                 }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
               }
             }
           },
           "503": {
-            "description": "The engine is loading the account's knowledge graph (`dataset_warming`); retry after the seconds given.",
+            "description": "The engine is loading the account's knowledge graph (`dataset_warming`: Retry-After and the body's `retry_after_s` carry the same seconds, the header is authoritative) or has no index yet (`dataset_unavailable`; the 502 of the same code is the caller's graph failing to read).",
             "headers": {
               "Retry-After": {
                 "description": "Seconds to wait before retrying.",
@@ -151,24 +163,19 @@
               }
             },
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    },
-                    "dataset_uri": {
-                      "type": "string"
-                    },
-                    "retry_after_s": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "detail": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The account's knowledge graph could not be read (`dataset_unavailable`, `dataset_uri` names the world); a retry can help.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
                 }
               }
             }
@@ -184,29 +191,6 @@
   },
   "components": {
     "schemas": {
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ValidationError"
-                },
-                "type": "array"
-              },
-              {
-                "type": "object",
-                "additionalProperties": true,
-                "description": "A request the engine refuses, e.g. {\"error\": \"dataset_not_supported\", \"dataset_uri\": ..., \"supported\": [...]}"
-              }
-            ],
-            "title": "Detail",
-            "description": "The framework's validation errors for a malformed body, or an object for a request the engine refuses."
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
-      },
       "MentionResolution": {
         "properties": {
           "text": {
@@ -732,16 +716,55 @@
           "rescued"
         ]
       },
-      "ErrorDetail": {
+      "Problem": {
         "type": "object",
-        "title": "ErrorDetail",
-        "description": "The engine's error body: a `detail` that is a message or a structured error.",
+        "title": "Problem",
+        "description": "RFC 9457 Problem Details, Content-Type application/problem+json. `code` is the engine's stable error code and `type` is derived from it; extension members carry what the route knows (dataset_uri, mention, accepted, retry_after_s, errors).",
         "properties": {
-          "detail": {}
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "https://docs.wordlift.io/problems/<code>, the page describing the code."
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detail": {
+            "type": "string",
+            "description": "A human-readable sentence, when the engine has one."
+          },
+          "instance": {
+            "type": "string",
+            "description": "The request path."
+          },
+          "code": {
+            "type": "string",
+            "description": "Stable error code: unauthorized, invalid_request, invalid_span, invalid_identity, dataset_not_supported, dataset_required, invalid_dataset, unknown_include, candidates_not_supported, too_many_requests, dataset_warming, dataset_unavailable; status-only codes not_found, internal_error, upstream_error, unavailable, upstream_timeout."
+          },
+          "errors": {
+            "type": "array",
+            "description": "On invalid_request: one entry per failing field.",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          },
+          "retry_after_s": {
+            "type": "integer",
+            "format": "int64",
+            "description": "On dataset_warming: the seconds of the Retry-After header, repeated for clients that only read the body. The header is authoritative."
+          }
         },
         "required": [
-          "detail"
-        ]
+          "type",
+          "title",
+          "status",
+          "code"
+        ],
+        "additionalProperties": true
       }
     },
     "securitySchemes": {
