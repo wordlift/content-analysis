@@ -32,7 +32,7 @@ knowledge graph or vocabulary, and hand mention, context and candidates to a
 | Resolver | What it is | When to use it |
 |---|---|---|
 | `ArgmaxResolver` | Open reference: best-scored candidate above a floor and margin, else NIL | Running the pipeline with no external service; a baseline to beat |
-| `WordLiftResolver` | Client for WordLift's `resolve()` engine, `POST /v1/resolve` | Production: multilingual disambiguation that returns NIL when the evidence is not strong enough |
+| `WordLiftResolver` | Client for WordLift's `resolve()` API, `POST /accounts/{accountId}/resolve` | Production: multilingual disambiguation that returns NIL when the evidence is not strong enough |
 
 Open where you build. Proprietary where we resolve.
 
@@ -115,19 +115,26 @@ rejected request `InvalidRequestError`: caller errors stop the batch. A 429 is
 `rate_limited` with `retry_after`; the engine's own 429 also carries its
 problem `code`, the gateway's allowance block is plain text and does not.
 
-## The engine endpoint
+## The endpoint
 
 ```
-POST https://resolve.wordlift.io/v1/resolve
+POST https://api.wordlift.io/accounts/{accountId}/resolve
 Authorization: Key <your WordLift key>
 ```
+
+`accountId` is the `accountId` field of `GET https://api.wordlift.io/accounts/me`
+with the same key; the clients read it from the key on first use, so they take
+only the key. The engine's own address, `https://resolve.wordlift.io/v1/resolve`,
+still answers the same contract unmetered for clients released before
+2026-10-11 (`WordLiftResolver.ENGINE_ENDPOINT`).
 
 Six languages: English, Italian, French, German, Spanish, Portuguese; Japanese and Chinese answer too, without a gold set or gate yet
 (`language` is detected when omitted). Full request and response contract:
 [`docs/resolve-contract.md`](docs/resolve-contract.md).
 
 ```bash
-curl -s -X POST https://resolve.wordlift.io/v1/resolve \
+WL_ACCOUNT_ID=$(curl -s https://api.wordlift.io/accounts/me -H "Authorization: Key $WL_KEY" | jq .accountId)
+curl -s -X POST "https://api.wordlift.io/accounts/$WL_ACCOUNT_ID/resolve" \
   -H "Authorization: Key $WL_KEY" -H "Content-Type: application/json" \
   -d '{"text": "Apple opened a new store in Rome.", "language": "en",
        "mentions": [{"text": "Apple", "start": 0, "end": 5,

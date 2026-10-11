@@ -14,7 +14,7 @@ class OpenApiDocument(unittest.TestCase):
             self.assertIn(ref[1], DOC["components"][ref[0]], ref)
 
     def test_operation_security_names_a_declared_scheme(self):
-        op = DOC["paths"]["/v1/resolve"]["post"]
+        op = DOC["paths"]["/accounts/{accountId}/resolve"]["post"]
         for requirement in op.get("security", DOC.get("security", [])):
             for scheme in requirement:
                 self.assertIn(scheme, DOC["components"]["securitySchemes"])
@@ -44,7 +44,7 @@ class OpenApiDocument(unittest.TestCase):
         for field in ("dataset_uri", "signals"):
             self.assertIn(field, S["MentionResolution"]["properties"])
         self.assertEqual(S["ResolvedEntity"]["required"], ["id", "label"])      # types and same_as are optional
-        responses = DOC["paths"]["/v1/resolve"]["post"]["responses"]
+        responses = DOC["paths"]["/accounts/{accountId}/resolve"]["post"]["responses"]
         self.assertTrue({"200", "401", "422", "429"} <= set(responses))
         self.assertIn("X-Wordlift-Consumption", responses["200"]["headers"])
         self.assertIn("X-RateLimit-Remaining", responses["429"]["headers"])

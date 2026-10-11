@@ -241,7 +241,7 @@ class Problem:
 
 
 class WordLiftResolver:
-    """Client for WordLift's `POST /v1/resolve` (see docs/resolve-contract.md).
+    """Client for WordLift's resolve() API (see docs/resolve-contract.md).
 
     One request carries a text, its mention spans and, with `candidates`, the
     caller's candidates; the engine returns the supported identity or
@@ -250,7 +250,13 @@ class WordLiftResolver:
     costs more than no link.
     """
 
-    DEFAULT_BASE_URL = "https://resolve.wordlift.io"
+    #: The WordLift API. Requests go to `POST {base_url}/accounts/{account_id}/resolve`,
+    #: metered against the account; the account id is read from the key once
+    #: (`GET /accounts/me`) unless given.
+    DEFAULT_BASE_URL = "https://api.wordlift.io"
+    #: The engine's own address, before the gateway; still answers, not metered.
+    #: Pass it as `endpoint=` to call the engine directly.
+    ENGINE_ENDPOINT = "https://resolve.wordlift.io/v1/resolve"
     WORDLIFT_GRAPH = WORDLIFT_GRAPH
     #: Your entities first, Wikidata for everything else.
     LOCAL_FIRST = f"{WORDLIFT_GRAPH},{PUBLIC_WORLD}"
@@ -281,8 +287,15 @@ class WordLiftResolver:
         engine_retrieval: bool = True,
         dataset: dict[str, Any] | list[dict[str, Any]] | None = None,
         client: httpx.Client | None = None,
+        account_id: str | int | None = None,
+        endpoint: str | None = None,
     ):
         """The world identities come from is chosen once, here.
+
+        Requests go to `{base_url}/accounts/{account_id}/resolve`. Give
+        `account_id` (the `accountId` of `GET /accounts/me`) to save the lookup,
+        or `endpoint` to send every request to one URL as given, such as
+        `WordLiftResolver.ENGINE_ENDPOINT`.
 
         `dataset_uri="wikidata://public"` (default): the engine's knowledge base.
         `dataset_uri=WordLiftResolver.WORDLIFT_GRAPH`: the caller's own WordLift
@@ -306,6 +319,34 @@ class WordLiftResolver:
         self._owns_client = client is None
         self._client = client or httpx.Client(timeout=timeout)
         self._headers = {"Authorization": f"Key {api_key}", "Content-Type": "application/json"}
+        self.account_id = str(account_id) if account_id is not None else None
+        self._endpoint = endpoint
+
+    @property
+    def endpoint(self) -> str:
+        """Where requests go: `endpoint` as given, or the account's resolve route,
+        with the account id discovered from the key on first use and kept."""
+        if self._endpoint:
+            return self._endpoint
+        if self.account_id is None:
+            self.account_id = self.discover_account()
+        return f"{self.base_url}/accounts/{self.account_id}/resolve"
+
+    def discover_account(self) -> str:
+        """The key's account id from `GET /accounts/me`. AuthorizationError when the key
+        is refused; httpx.HTTPError when the API cannot be reached or fails; ValueError
+        when the answer has no `accountId` (wrong `base_url`)."""
+        response = self._client.get(f"{self.base_url}/accounts/me", headers=self._headers, timeout=self.timeout)
+        if response.status_code in (401, 403):
+            raise AuthorizationError(response.status_code, Problem.of(response).detail)
+        response.raise_for_status()
+        try:
+            account = response.json().get("accountId")
+        except (ValueError, AttributeError):
+            account = None
+        if account is None:
+            raise ValueError(f"{self.base_url}/accounts/me did not return an accountId")
+        return str(account)
 
     def close(self) -> None:
         """Close the HTTP client this resolver created; an injected client stays the caller's."""
@@ -402,7 +443,7 @@ class WordLiftResolver:
         """One request: transport, then the status table, then the rows with the request's cost attached."""
         request = self.payload_many(context, mentions, candidates, language)
         try:
-            response = self._client.post(f"{self.base_url}/v1/resolve", json=request, headers=self._headers, timeout=self.timeout)
+            response = self._client.post(self.endpoint, json=request, headers=self._headers, timeout=self.timeout)
         except httpx.HTTPError as exc:
             return [unresolved(m, RESOLVER_UNAVAILABLE, error=type(exc).__name__) for m in mentions]
         if response.status_code >= 400:
