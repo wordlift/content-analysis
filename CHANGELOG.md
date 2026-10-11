@@ -15,6 +15,17 @@
   reported as `credits`. No automatic retries. `context_radius` now shapes
   retrieval only: the engine reads its own 400-character window per mention.
   `evaluate(..., keep_rows=False)` for large datasets.
+- TypeScript: `resolveDocument(text, mentions, options)` mirrors the Python
+  batching (spans checked first, one request per 200 mentions and per
+  100,000 characters, chunks never cut a mention, document offsets and order
+  kept, `credits` summed). Problem JSON is read once (`problemOf`, `Problem`)
+  and mapped by status (`failure`): `InvalidRequestError` carries `code`,
+  new `AuthorizationError` (401/403) and `RateLimitedError` (429 with
+  `retryAfter`; the gateway's plain-text 429 has no `code`),
+  `ResolverUnavailableError` keeps `status`, `code` and `retryAfter`;
+  `ResolveResponse.credits` from `X-Wordlift-Consumption`. Additive: existing
+  callers see no change except that a 429 and a 401/403, which used to be
+  `ResolverUnavailableError`, are now their own subclasses of `Error`.
 
 Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
 

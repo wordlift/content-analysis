@@ -121,6 +121,8 @@ export interface ResolveResponse {
   language: string;
   processing_time_ms: number;
   engine?: string;
+  /** Smart credits this request cost (`X-Wordlift-Consumption`), when the header was present. */
+  credits?: number;
 }
 
 export interface WordLiftResolverOptions {
@@ -134,15 +136,90 @@ export interface WordLiftResolverOptions {
   fetch?: typeof fetch;
 }
 
-/** The engine could not be reached or answered with an error status. */
+/**
+ * What an error response says, read once: the RFC 9457 Problem JSON members
+ * when the engine sent them (`code` is the stable identifier, `type` its page
+ * under https://docs.wordlift.io/problems/), the raw body otherwise, and the
+ * `Retry-After` header in seconds when there is one. The gateway's allowance
+ * block is a 429 with a text/plain body, so it has no `code`.
+ */
+export interface Problem {
+  status: number;
+  code?: string;
+  type?: string;
+  title?: string;
+  detail?: unknown;
+  retryAfter?: number;
+  body?: unknown;
+}
+
+export function problemOf(status: number, body: unknown, headers?: Headers): Problem {
+  const problem: Problem = { status, body };
+  if (typeof body === "object" && body !== null && !Array.isArray(body)) {
+    const b = body as Record<string, unknown>;
+    if (typeof b.code === "string") problem.code = b.code;
+    if (typeof b.type === "string") problem.type = b.type;
+    if (typeof b.title === "string") problem.title = b.title;
+    problem.detail = b.detail ?? b.title ?? body;
+  } else {
+    problem.detail = body;
+  }
+  const retry = headers?.get("Retry-After");
+  if (retry !== null && retry !== undefined && /^\d+$/.test(retry.trim())) problem.retryAfter = Number(retry);
+  return problem;
+}
+
+/** The engine could not be reached or answered with an error status it could not act on. */
 export class ResolverUnavailableError extends Error {
   readonly status?: number;
   readonly body?: unknown;
-  constructor(message: string, status?: number, body?: unknown) {
+  /** The problem `code` when the body was Problem JSON. */
+  readonly code?: string;
+  /** Seconds from the `Retry-After` header, when given. */
+  readonly retryAfter?: number;
+  constructor(message: string, status?: number, body?: unknown, problem?: Problem) {
     super(message);
     this.name = "ResolverUnavailableError";
     this.status = status;
     this.body = body;
+    this.code = problem?.code;
+    this.retryAfter = problem?.retryAfter;
+  }
+}
+
+/**
+ * The request was refused with 429: the replica's bounded queue is full (the
+ * engine's Problem JSON `too_many_requests`, with `Retry-After`) or the
+ * account's monthly allowance is spent (the gateway's text/plain body with
+ * the `X-RateLimit-*` headers, no `code`). Nothing was resolved or charged.
+ * Wait `retryAfter` seconds and send the request again; the client does not
+ * retry on its own.
+ */
+export class RateLimitedError extends Error {
+  readonly status = 429;
+  readonly code?: string;
+  readonly retryAfter?: number;
+  readonly body?: unknown;
+  constructor(problem: Problem) {
+    super(problem.retryAfter !== undefined ? `resolve() rate limited; retry after ${problem.retryAfter}s` : "resolve() rate limited");
+    this.name = "RateLimitedError";
+    this.code = problem.code;
+    this.retryAfter = problem.retryAfter;
+    this.body = problem.body;
+  }
+}
+
+/** The engine refused the key (401 or 403): no mention of this request can be resolved. */
+export class AuthorizationError extends Error {
+  readonly status: number;
+  readonly code?: string;
+  readonly detail: unknown;
+  constructor(problem: Problem) {
+    super(`resolve() refused the key: HTTP ${problem.status}`);
+    this.name = "AuthorizationError";
+    this.status = problem.status;
+    this.code = problem.code;
+    this.detail = problem.detail;
   }
 }
 
@@ -161,14 +238,81 @@ export class ResolverProtocolError extends Error {
   }
 }
 
-/** The request itself was rejected (422): bad span, unknown identity form, unsupported dataset. */
+/**
+ * The request itself was rejected (422): bad span, unknown identity form,
+ * unsupported dataset. `code` is the stable problem code (`invalid_span`,
+ * `invalid_identity`, `dataset_not_supported`, ...) and `detail` the sentence
+ * or the validation errors.
+ */
 export class InvalidRequestError extends Error {
   readonly detail: unknown;
-  constructor(detail: unknown) {
+  readonly code?: string;
+  readonly problem?: Problem;
+  constructor(detail: unknown, problem?: Problem) {
     super(typeof detail === "string" ? detail : JSON.stringify(detail));
     this.name = "InvalidRequestError";
     this.detail = detail;
+    this.code = problem?.code;
+    this.problem = problem;
   }
+}
+
+/** A mention whose span is empty or does not hold its text; raised before any request. */
+export class InvalidMentionError extends RangeError {
+  readonly mention: Mention;
+  constructor(mention: Mention) {
+    super(`mention ${JSON.stringify(mention.text)} [${mention.start}, ${mention.end}) does not lie in the text as written`);
+    this.name = "InvalidMentionError";
+    this.mention = mention;
+  }
+}
+
+/** The answer for one document: one row per mention, in the order given, with document offsets. */
+export interface DocumentResolution {
+  mentions: MentionResolution[];
+  /** Requests sent: one per 200 mentions and per 100,000 characters. */
+  requests: number;
+  /** Smart credits charged, summed over the requests (`X-Wordlift-Consumption`), when every request reported them. */
+  credits?: number;
+}
+
+/**
+ * Character ranges that cover `text`, each at most `limit` long, none cutting a
+ * mention. A chunk ends at the last newline or space before the limit, and
+ * earlier when that would fall inside a mention.
+ */
+export function chunkDocument(text: string, mentions: Mention[], limit: number): Array<[number, number]> {
+  if (text.length <= limit) return [[0, text.length]];
+  const spans = mentions.map((m) => [m.start, m.end] as const).sort((a, b) => a[0] - b[0]);
+  const chunks: Array<[number, number]> = [];
+  let start = 0;
+  while (start < text.length) {
+    let end = Math.min(text.length, start + limit);
+    if (end < text.length) {
+      const cut = Math.max(text.lastIndexOf("\n", end - 1), text.lastIndexOf(" ", end - 1));
+      if (cut > start) end = cut;
+      for (const [ms, me] of spans) {              // never cut through a mention
+        if (ms < end && end < me) {
+          const back = text.lastIndexOf(" ", ms - 1);
+          // step back before the mention; a mention that starts the chunk and is
+          // longer than the limit is sent whole (the engine refuses it with 422)
+          end = back > start ? back : ms > start ? ms : me;
+          break;
+        }
+      }
+    }
+    chunks.push([start, end]);
+    start = end;
+  }
+  return chunks;
+}
+
+/** Status to error: 422 and 401/403 are the caller's, 429 is a wait, the rest is unavailability. */
+export function failure(problem: Problem): Error {
+  if (problem.status === 422) return new InvalidRequestError(problem.detail, problem);
+  if (problem.status === 401 || problem.status === 403) return new AuthorizationError(problem);
+  if (problem.status === 429) return new RateLimitedError(problem);
+  return new ResolverUnavailableError(`resolve() HTTP ${problem.status}`, problem.status, problem.body, problem);
 }
 
 export class WordLiftResolver {
@@ -211,9 +355,71 @@ export class WordLiftResolver {
     }
     let parsed: unknown = text;
     try { parsed = text ? JSON.parse(text) : null; } catch { /* keep raw text */ }
-    if (response.status === 422) throw new InvalidRequestError((parsed as { detail?: unknown })?.detail ?? parsed);
-    if (!response.ok) throw new ResolverUnavailableError(`resolve() HTTP ${response.status}`, response.status, parsed);
-    return validateResponse(parsed);
+    if (!response.ok) throw failure(problemOf(response.status, parsed, response.headers));
+    const result = validateResponse(parsed);
+    const credits = response.headers.get("X-Wordlift-Consumption");
+    if (credits !== null && /^\d+(\.\d+)?$/.test(credits.trim())) result.credits = Number(credits);
+    return result;
+  }
+
+  /** Mentions per request; the engine resolves a document's mentions in one pass. */
+  static MAX_MENTIONS_PER_REQUEST = 200;
+  /** The engine's limit on `text`; a longer document is sent in chunks that never cut a mention. */
+  static MAX_TEXT_CHARS = 100_000;
+
+  /**
+   * Resolve all `mentions` of one document with as few requests as possible.
+   *
+   * Every span is checked first: a mention whose `[start, end)` does not hold
+   * its `text` throws InvalidMentionError before any request is sent. Then one
+   * request carries up to MAX_MENTIONS_PER_REQUEST spans and, with an inline
+   * `dataset`, the vocabulary once; a document over MAX_TEXT_CHARS is cut into
+   * chunks that never split a mention (a mention longer than the limit is sent
+   * whole and refused by the engine), with spans rebased to the chunk and
+   * answers rebased back to document offsets. Rows come back in the order of
+   * `mentions`; a span with no row or two rows is a ResolverProtocolError.
+   * The engine decides each mention on the 400 characters either side of it,
+   * so one request per document gives the same decisions as one per mention.
+   * Errors are those of resolve(); the client never retries on its own, since
+   * a timed-out request may have been served and metered.
+   */
+  async resolveDocument(
+    text: string,
+    mentions: Mention[],
+    options: Omit<ResolveRequest, "text" | "mentions"> = {},
+  ): Promise<DocumentResolution> {
+    for (const m of mentions) {
+      if (m.start < 0 || m.end <= m.start || m.end > text.length || text.slice(m.start, m.end) !== m.text) throw new InvalidMentionError(m);
+    }
+    const out: Array<MentionResolution | undefined> = new Array(mentions.length);
+    let requests = 0;
+    let credits: number | undefined = 0;
+    const perRequest = WordLiftResolver.MAX_MENTIONS_PER_REQUEST;
+    for (const [cStart, cEnd] of chunkDocument(text, mentions, WordLiftResolver.MAX_TEXT_CHARS)) {
+      const inside = mentions.map((m, i) => i).filter((i) => cStart <= mentions[i].start && mentions[i].end <= cEnd);
+      for (let b = 0; b < inside.length; b += perRequest) {
+        const batch = inside.slice(b, b + perRequest);
+        const res = await this.resolve({
+          ...options,
+          text: text.slice(cStart, cEnd),
+          mentions: batch.map((i) => ({ ...mentions[i], start: mentions[i].start - cStart, end: mentions[i].end - cStart })),
+        });
+        requests += 1;
+        credits = credits !== undefined && res.credits !== undefined ? credits + res.credits : undefined;
+        for (const i of batch) {
+          const local = [mentions[i].start - cStart, mentions[i].end - cStart];
+          const hits = res.mentions.filter((r) => r.start === local[0] && r.end === local[1]);
+          if (hits.length !== 1) {
+            throw new ResolverProtocolError(`resolve() returned ${hits.length} rows for span [${mentions[i].start}, ${mentions[i].end})`, res);
+          }
+          out[i] = { ...hits[0], start: mentions[i].start, end: mentions[i].end };
+        }
+      }
+    }
+    // chunks cover the text and none ends inside a mention, so every mention was sent exactly once
+    const result: DocumentResolution = { mentions: out as MentionResolution[], requests };
+    if (credits !== undefined) result.credits = credits;
+    return result;
   }
 
   /**

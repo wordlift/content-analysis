@@ -180,7 +180,8 @@ def chunk_document(text: str, mentions: list[Mention], limit: int) -> list[tuple
     """Character ranges that cover `text`, each at most `limit` long, none cutting a mention.
 
     A chunk ends at the last newline or space before the limit, and earlier
-    when that would fall inside a mention. Ranges are relative to `text`.
+    when that would fall inside a mention; a mention longer than the limit is
+    sent whole, so the loop always advances. Ranges are relative to `text`.
     """
     if len(text) <= limit:
         return [(0, len(text))]
@@ -196,7 +197,9 @@ def chunk_document(text: str, mentions: list[Mention], limit: int) -> list[tuple
             for ms, me in spans:              # never cut through a mention
                 if ms < end < me:
                     back = text.rfind(" ", start, ms)
-                    end = back if back > start else ms
+                    # step back before the mention; a mention that starts the chunk and
+                    # is longer than the limit is sent whole (the engine refuses it with 422)
+                    end = back if back > start else ms if ms > start else me
                     break
         chunks.append((start, end))
         start = end

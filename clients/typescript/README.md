@@ -39,14 +39,50 @@ m.status;   // "unresolved"
 m.reason;   // "low_relevance"
 ```
 
+## One request per document
+
+`resolveDocument()` takes the whole text and every mention, checks each span
+before anything is sent, and resolves them in as few requests as possible: one
+per 200 mentions and per 100,000 characters (the engine's text limit; long
+documents are cut at whitespace, never through a mention). With an inline
+`dataset` the vocabulary travels once. Rows come back in the order of your
+mentions with document offsets, and `credits` says what the document cost.
+
+```ts
+const doc = await wl.resolveDocument(article, spans, { language: "en" });
+doc.mentions[3].entity?.id;   // same order as `spans`, offsets in `article`
+doc.requests;                 // 1 for most articles
+doc.credits;                  // smart credits charged, summed over the requests
+```
+
+The engine decides each mention on the 400 characters either side of it, so one
+request per document gives the same decisions as one request per mention.
+
 ## Errors
 
-`unresolved` is a result, not an error. Two exceptions exist:
+`unresolved` is a result, not an error. Every error body under `/v1/` is RFC 9457
+Problem JSON; its stable `code` is on the error, and `type` leads to the code's
+page under https://docs.wordlift.io/problems/.
 
-- `InvalidRequestError` (HTTP 422): a span that does not match the text, an
-  identity that is not a Wikidata id, an unsupported `dataset_uri`.
-- `ResolverUnavailableError`: network failure, timeout or a non-2xx status.
+- `InvalidMentionError`: a span you passed to `resolveDocument()` does not hold
+  its text. Thrown before any request.
+- `InvalidRequestError` (HTTP 422): the engine refused the request; `code` is
+  `invalid_span`, `invalid_identity`, `dataset_not_supported`, ... and `detail`
+  the sentence or the validation errors.
+- `AuthorizationError` (401, 403): the key was refused. Nothing in the request
+  can be resolved.
+- `RateLimitedError` (429): wait `retryAfter` seconds and send it again. The
+  engine's own 429 (`code: "too_many_requests"`, its queue is full) and the
+  gateway's allowance block (plain text, no `code`, `X-RateLimit-*` headers)
+  both arrive here. Nothing was resolved or charged.
+- `ResolverUnavailableError`: network failure, timeout or another non-2xx status
+  (`status`, `code` and `retryAfter` when given, for example `dataset_warming`).
   Catch it and treat the mention as unresolved; never fall back to a guess.
+- `ResolverProtocolError`: the engine answered with something the client cannot
+  act on (no row for a span, two rows, a resolved row without an identity).
+
+The client never retries on its own: a request that timed out may still have
+been served and metered, so the retry policy is yours.
 
 ## Options
 
