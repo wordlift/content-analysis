@@ -12,8 +12,7 @@ from mcp.server.fastmcp import FastMCP
 #: The WordLift API. Requests go to POST {BASE_URL}/accounts/{accountId}/resolve, the
 #: gateway's metered route; the account id is read from the key once (GET /accounts/me)
 #: unless WL_ACCOUNT_ID is set. WL_RESOLVE_ENDPOINT sends every request to one URL as
-#: given instead (for example the engine's older address
-#: https://resolve.wordlift.io/v1/resolve, unmetered).
+#: given instead (a private deployment of the engine).
 BASE_URL = os.environ.get("WL_BASE_URL", "https://api.wordlift.io").rstrip("/")
 mcp = FastMCP("WordLift resolve")
 _accounts: dict[str, str] = {}   # key -> account id, for the life of the process

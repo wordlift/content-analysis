@@ -7,7 +7,8 @@ It calls the public API, the WordLift gateway's metered account route:
 `POST https://api.wordlift.io/accounts/{accountId}/resolve`
 with `Authorization: Key <WL_KEY>`. The account id is read from the key once
 (`GET /accounts/me`); set `WL_ACCOUNT_ID` to skip the lookup, or
-`WL_RESOLVE_ENDPOINT` to send every request to one URL as given.
+`WL_RESOLVE_ENDPOINT` to send every request to one URL as given (a private
+deployment of the engine).
 
 ## Local use (stdio)
 

@@ -91,7 +91,7 @@ new WordLiftResolver({
   apiKey,                       // required; sent as `Authorization: Key <apiKey>`
   baseUrl,                      // default: https://api.wordlift.io
   accountId,                    // your account id; read from the key (GET /accounts/me) when omitted
-  endpoint,                     // one URL as given, e.g. ENGINE_ENDPOINT, skips the lookup
+  endpoint,                     // one URL as given (a private engine deployment), skips the lookup
   datasetUri: "wikidata://public",
   timeoutMs: 30000,
   fetch,                        // custom fetch for tests or special runtimes

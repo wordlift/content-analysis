@@ -19,7 +19,7 @@
 
 /** The WordLift API: requests go to `POST {baseUrl}/accounts/{accountId}/resolve`, metered against the account. */
 export const DEFAULT_BASE_URL = "https://api.wordlift.io";
-/** The engine's own address, before the gateway; still answers, not metered. Pass it as `endpoint` to call the engine directly. */
+/** @deprecated The engine's upstream address, served only to the gateway since 2026-10-11 (direct calls are 404). Use `endpoint` for a private deployment of the engine. */
 export const ENGINE_ENDPOINT = "https://resolve.wordlift.io/v1/resolve";
 export const PUBLIC_DATASET = "wikidata://public";
 

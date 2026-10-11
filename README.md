@@ -124,9 +124,8 @@ Authorization: Key <your WordLift key>
 
 `accountId` is the `accountId` field of `GET https://api.wordlift.io/accounts/me`
 with the same key; the clients read it from the key on first use, so they take
-only the key. The engine's own address, `https://resolve.wordlift.io/v1/resolve`,
-still answers the same contract unmetered for clients released before
-2026-10-11 (`WordLiftResolver.ENGINE_ENDPOINT`).
+only the key. There is no other public address: `resolve.wordlift.io` is the
+gateway's upstream and answers 404 to direct calls.
 
 Six languages: English, Italian, French, German, Spanish, Portuguese; Japanese and Chinese answer too, without a gold set or gate yet
 (`language` is detected when omitted). Full request and response contract:
