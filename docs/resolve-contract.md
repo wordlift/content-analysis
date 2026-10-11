@@ -8,13 +8,26 @@ The contract has one job:
 returns the resolver's decision; callers should not need to invent a threshold
 to decide whether an identity exists.
 
-## Request
+## Address
 
 ```http
-POST /v1/resolve
+POST https://api.wordlift.io/accounts/{accountId}/resolve
 Authorization: Key <your_wordlift_key>
 Content-Type: application/json
 ```
+
+`accountId` is your WordLift account's id, the `accountId` field of
+`GET https://api.wordlift.io/accounts/me` called with the same key. The route is
+metered against that account (Metering, below); a key used with another
+account's id is answered `403`. The open clients read the id from the key on
+first use, so they need only the key.
+
+The engine's own address, `POST https://resolve.wordlift.io/v1/resolve`, still
+answers with the same contract but is not metered and is kept only for
+compatibility with clients released before 2026-10-11; new integrations use the
+account route.
+
+## Request
 
 ```json
 {
@@ -188,6 +201,49 @@ X-RateLimit-Reset: 1234567
 When the allowance is spent the request is answered with `429 Too Many
 Requests` and the same headers, and nothing is resolved. Responses with an
 error status cost nothing.
+
+## API guidelines
+
+The contract follows the [Zalando RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)
+where an existing caller is not affected: JSON with snake_case properties, a
+top-level object envelope, HTTPS, credentials in a header, explicit numeric
+formats, and declared 401, 422, 429 and 503 responses with their headers.
+
+Recorded deviations of the existing contract, kept for compatibility; changing
+any of them needs a coordinated migration:
+
+- **Verb path** `/accounts/{accountId}/resolve` (an action on the account resource, as the rest of the WordLift API), and **URL versioning** `/v1` on the engine's own address.
+- **`Key` authentication** (`Authorization: Key <key>`) instead of OAuth2:
+  the WordLift account key is the credential.
+- **Error bodies**: every error under `/v1/` is RFC 9457 Problem JSON
+  (`Content-Type: application/problem+json`): `type`
+  (`https://docs.wordlift.io/problems/<code>`), `title`, `status`, `instance`,
+  `detail` when there is a sentence, the stable `code`, and extension members
+  such as `dataset_uri`, `mention`, `accepted`, `retry_after_s`; a body that
+  fails validation is `422 invalid_request` with an `errors` list. This is
+  the engine's since 2026-10-09. Each `type` URI leads to that code's page
+  under [docs.wordlift.io/problems](https://docs.wordlift.io/problems/).
+  A `429` has two sources, told apart by the `Content-Type`: the gateway's
+  allowance block is `text/plain` with the `X-RateLimit-*` headers
+  (Metering, above), the engine's bounded queue is Problem JSON
+  `too_many_requests` with `Retry-After`. Where a retry time is given, the
+  `Retry-After` header is authoritative; `retry_after_s` repeats the same
+  number in the body for clients that only read the body.
+  `dataset_unavailable` is answered with `502` when the caller's graph could
+  not be read (the world in `dataset_uri`; a retry can help) and with `503`
+  when the engine itself has no index yet.
+- **JSON specification**: `docs/openapi.resolve.json` is JSON, not YAML,
+  because the engine generates and serves its schema as JSON at
+  `https://resolve.wordlift.io/openapi.json`; keeping one format avoids a
+  second copy that drifts. Tools that need YAML can convert it.
+
+`docs/openapi.resolve.json` is curated from the engine's schema and is
+currently ahead of the live document: the security scheme reference, the
+`dataset`, `dataset_uri` and `signals` fields, the 401, 429, 502 and 503 responses
+with their headers, the Problem schema, the `info` metadata and the numeric formats
+are in this copy only, until the engine's schema adopts them. Regenerating this file from
+the live service would drop them; change both, and treat this copy as the
+reference for clients.
 
 ## Out of scope
 

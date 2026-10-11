@@ -5,7 +5,10 @@ matches them zero-shot across languages. Install with `pip install ".[ner]"`.
 """
 from __future__ import annotations
 
+import functools
 import logging
+import threading
+import weakref
 from pathlib import Path
 from typing import Any
 
@@ -30,12 +33,28 @@ def load_labels(path: Path = LABELS_PATH) -> list[str]:
 
 
 def load_model(model_id: str = MODEL_ID) -> Any:
-    from gliner import GLiNER
     import torch
+    from gliner import GLiNER
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info("Loading GLiNER %s on %s", model_id, device)
     return GLiNER.from_pretrained(model_id, map_location=device)
+
+
+_MODEL_LOCKS: weakref.WeakKeyDictionary[Any, threading.Lock] = weakref.WeakKeyDictionary()
+_MODEL_LOCKS_GUARD = threading.Lock()
+
+
+def serialised_per_model(fn):
+    """Run `fn(model, ...)` under a lock owned by that model: calls on one model
+    are serialised, calls on different models run in parallel."""
+    @functools.wraps(fn)
+    def wrapper(model: Any, *args: Any, **kwargs: Any) -> Any:
+        with _MODEL_LOCKS_GUARD:
+            lock = _MODEL_LOCKS.setdefault(model, threading.Lock())
+        with lock:
+            return fn(model, *args, **kwargs)
+    return wrapper
 
 
 def _splitter_for(lang: str) -> Any:
@@ -53,6 +72,7 @@ def _splitter_for(lang: str) -> Any:
     return splitter
 
 
+@serialised_per_model
 def extract(
     model: Any,
     text: str,
@@ -60,7 +80,14 @@ def extract(
     threshold: float = 0.5,
     lang: str = "",
 ) -> list[Mention]:
-    """Return mentions with character spans in `text`, highest-scoring span per overlap."""
+    """Return mentions with character spans in `text`, highest-scoring span per overlap.
+
+    The word splitter is chosen per language and set on the model's shared
+    processor, so the splitter assignment and the prediction run under the
+    model's lock: two threads sharing one model never predict with each
+    other's splitter. Calls on one model are serialised; for parallel
+    extraction load one model per thread.
+    """
     splitter = _splitter_for(lang)
     processor = getattr(model, "data_processor", None)
     if splitter is not None and processor is not None:

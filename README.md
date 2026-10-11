@@ -32,7 +32,7 @@ knowledge graph or vocabulary, and hand mention, context and candidates to a
 | Resolver | What it is | When to use it |
 |---|---|---|
 | `ArgmaxResolver` | Open reference: best-scored candidate above a floor and margin, else NIL | Running the pipeline with no external service; a baseline to beat |
-| `WordLiftResolver` | Client for WordLift's `resolve()` engine, `POST /v1/resolve` | Production: multilingual disambiguation that returns NIL when the evidence is not strong enough |
+| `WordLiftResolver` | Client for WordLift's `resolve()` API, `POST /accounts/{accountId}/resolve` | Production: multilingual disambiguation that returns NIL when the evidence is not strong enough |
 
 Open where you build. Proprietary where we resolve.
 
@@ -88,23 +88,53 @@ Resolution(mention, status="resolved"|"unresolved", entity=Entity|None, score=No
 
 `unresolved` is a result, not an error. Reasons: `no_suitable_candidate`,
 `no_candidates`, `type_conflict`, `low_relevance`; the client adds
-`resolver_unavailable` when the engine cannot be reached, so a transport
-failure never becomes a guessed identity. Identifiers are echoed in the form
-you sent: `Q312`, `wd:Q312` or a Wikidata entity URI.
+`resolver_unavailable` when the engine cannot be reached, `rate_limited` when
+it answers 429 (with `retry_after` in the diagnostics), `protocol_error` when
+it answers with something the client cannot act on, and `invalid_mention` for
+a caller span that is not in the text, so none of these ever becomes a guessed
+identity. Identifiers are echoed in the form you sent: `Q312`, `wd:Q312` or a
+Wikidata entity URI.
 
-## The engine endpoint
+**One request per document.** `run()` retrieves candidates per mention with
+`context_radius` characters either side of it, then hands the whole document to
+the resolver once through the batch protocol (`BatchResolver.resolve_many`,
+`as_batch`). `WordLiftResolver` sends every span and the inline vocabulary in a
+single request per 200 mentions (`MAX_MENTIONS_PER_REQUEST`) and per 100,000
+characters (`MAX_TEXT_CHARS`, the engine's text limit; chunks never cut a
+mention), instead of one request and one vocabulary upload per mention. The
+engine decides each mention on the 400 characters either side of it, the same
+window the client sent before, so decisions do not change; `context_radius`
+now shapes only what your retriever sees. Results keep the order of your
+mentions and their document offsets; every span is checked before the first
+request. A custom `Resolver` that implements only `resolve()` is adapted and
+called mention by mention with its window. The client never retries on its
+own: a timed-out request may have been served and metered, so the retry policy
+is yours; `diagnostics["credits"]` reports what each request cost
+(`X-Wordlift-Consumption`). A refused key raises `AuthorizationError`, a
+rejected request `InvalidRequestError`: caller errors stop the batch. A 429 is
+`rate_limited` with `retry_after`; the engine's own 429 also carries its
+problem `code`, the gateway's allowance block is plain text and does not.
+
+## The endpoint
 
 ```
-POST https://resolve.wordlift.io/v1/resolve
+POST https://api.wordlift.io/accounts/{accountId}/resolve
 Authorization: Key <your WordLift key>
 ```
+
+`accountId` is the `accountId` field of `GET https://api.wordlift.io/accounts/me`
+with the same key; the clients read it from the key on first use, so they take
+only the key. The engine's own address, `https://resolve.wordlift.io/v1/resolve`,
+still answers the same contract unmetered for clients released before
+2026-10-11 (`WordLiftResolver.ENGINE_ENDPOINT`).
 
 Six languages: English, Italian, French, German, Spanish, Portuguese; Japanese and Chinese answer too, without a gold set or gate yet
 (`language` is detected when omitted). Full request and response contract:
 [`docs/resolve-contract.md`](docs/resolve-contract.md).
 
 ```bash
-curl -s -X POST https://resolve.wordlift.io/v1/resolve \
+WL_ACCOUNT_ID=$(curl -s https://api.wordlift.io/accounts/me -H "Authorization: Key $WL_KEY" | jq .accountId)
+curl -s -X POST "https://api.wordlift.io/accounts/$WL_ACCOUNT_ID/resolve" \
   -H "Authorization: Key $WL_KEY" -H "Content-Type: application/json" \
   -d '{"text": "Apple opened a new store in Rome.", "language": "en",
        "mentions": [{"text": "Apple", "start": 0, "end": 5,
@@ -182,7 +212,7 @@ This version is **local/stdio only**. It does not provide an OAuth-enabled remot
 | Python | this package, `WordLiftResolver` | `pip install "resolve-pipeline @ git+https://github.com/wordlift/content-analysis.git"` |
 | TypeScript / JavaScript | [`clients/typescript`](clients/typescript), zero dependencies, Node 18+ and browsers | `npm install @wordlift/resolve` |
 | MCP (experimental, stdio) | [`clients/mcp`](clients/mcp), thin adapter to the hosted API | `pip install -r clients/mcp/requirements.txt` |
-| Anything else | [`docs/openapi.resolve.json`](docs/openapi.resolve.json), generated from the live service | `openapi-generator generate -i docs/openapi.resolve.json -g <lang>` |
+| Anything else | [`docs/openapi.resolve.json`](docs/openapi.resolve.json), curated from the live service's schema ([why it differs](docs/resolve-contract.md#api-guidelines)) | `openapi-generator generate -i docs/openapi.resolve.json -g <lang>` |
 
 Every client keeps the same rule: `unresolved` is a result, a transport
 failure is an error, and neither ever turns into a guessed identity.
@@ -242,7 +272,7 @@ resolve_pipeline/
   resolver.py    Resolver protocol, ArgmaxResolver, WordLiftResolver
   pipeline.py    run(): extract → retrieve → resolve over one document
   extract.py     GLiNER multilingual NER (optional extra)
-  html.py        HTML → text with a character offset map (optional extra)
+  html.py        HTML → text with a character offset map (standard library)
   evaluate.py    error attribution CLI
   __main__.py    `python -m resolve_pipeline "text"`
 clients/mcp/     experimental local MCP adapter (stdio)
@@ -258,6 +288,8 @@ tests/           no network, no GPU, no key needed
 git clone https://github.com/wordlift/content-analysis.git && cd content-analysis
 make setup      # venv + editable install with dev extras
 make test       # pytest
+make coverage   # pytest with line and branch coverage (CI enforces the floor)
+make lint       # compile, ruff, mypy
 make example    # examples/resolve_with_wordlift.py (needs WL_KEY)
 ```
 

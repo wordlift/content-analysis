@@ -5,7 +5,8 @@ this mention refer to, or `unresolved`. By default the dataset is Wikidata.
 This guide is about making the dataset *yours*: your knowledge graph, your
 vocabulary, your ids, with Wikidata as the fallback when you want one.
 
-Three ways in, all through the same `POST /v1/resolve` call:
+Three ways in, all through the same `POST /accounts/{accountId}/resolve` call
+(`accountId` from `GET /accounts/me`; the clients read it from the key):
 
 | You have | Send | You get back |
 |---|---|---|
@@ -24,7 +25,7 @@ If you use WordLift, your graph is already the dataset. There is nothing to
 configure: the key in the `Authorization` header identifies the graph.
 
 ```bash
-curl -s -X POST https://resolve.wordlift.io/v1/resolve \
+curl -s -X POST "https://api.wordlift.io/accounts/$WL_ACCOUNT_ID/resolve" \
   -H "Authorization: Key $WL_KEY" -H "Content-Type: application/json" \
   -d '{"text": "Andrea Volpini founded WordLift in Rome.",
        "language": "en",
@@ -123,7 +124,7 @@ Up to 5,000 entities per request. `dataset_uri` may be omitted when
 `dataset` is present: it is `inline`.
 
 ```bash
-curl -s -X POST https://resolve.wordlift.io/v1/resolve \
+curl -s -X POST "https://api.wordlift.io/accounts/$WL_ACCOUNT_ID/resolve" \
   -H "Authorization: Key $WL_KEY" -H "Content-Type: application/json" \
   -d @- <<'JSON'
 {"text": "ACME Corp opened an office in Rome.",
@@ -246,8 +247,10 @@ The same ordering works with an inline vocabulary: `"dataset_uri": "inline,wikid
   dataset is the candidate world; a request that also sends per-mention
   `candidates` is rejected with 422.
 - **Failures are explicit.** A graph that cannot be read is a 502; a malformed
-  inline dataset or an unknown `dataset_uri` is a 422. The clients turn
-  transport failures into `resolver_unavailable`, never into a guess.
+  inline dataset or an unknown `dataset_uri` is a 422, which the clients
+  raise as `InvalidRequestError` (the CLI prints `invalid_request` and exits
+  1). They turn transport failures into `resolver_unavailable`, never into a
+  guess.
 - **Size and speed.** Inline: up to 5,000 entities per request. Graph: the
   first call reads it (a few seconds for a few hundred entities), then it is
   cached for about ten minutes per key.

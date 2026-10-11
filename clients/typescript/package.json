@@ -1,6 +1,6 @@
 {
   "name": "@wordlift/resolve",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "TypeScript client for WordLift resolve(): map mentions to identities, or get unresolved.",
   "license": "Apache-2.0",
   "type": "module",
@@ -22,6 +22,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test test/*.test.mjs",
+    "coverage": "npm run build && node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=90 --test-coverage-include='dist/**' test/*.test.mjs",
     "prepublishOnly": "npm test"
   },
   "repository": {

@@ -12,13 +12,23 @@ and is not configurable from here.
 
 ## The contract you must not break
 
-- `POST https://resolve.wordlift.io/v1/resolve`, header `Authorization: Key <key>`.
-  Full schema: `docs/resolve-contract.md`, machine-readable `docs/openapi.resolve.json`,
-  live copy at `https://resolve.wordlift.io/openapi.json`.
+- `POST https://api.wordlift.io/accounts/{accountId}/resolve`, header `Authorization: Key <key>`;
+  the clients read `accountId` from `GET /accounts/me` with the key. The engine's
+  own `https://resolve.wordlift.io/v1/resolve` answers the same contract unmetered
+  (compatibility for clients released before 2026-10-11).
+  Full schema: `docs/resolve-contract.md`, machine-readable `docs/openapi.resolve.json`.
+  The engine serves its own schema at `https://resolve.wordlift.io/openapi.json`;
+  the repo copy is curated and currently ahead of it (see "API guidelines" in
+  the contract), so never overwrite it by regenerating from the live service.
 - Per mention the answer is `resolved` (with `entity`) or `unresolved` (with a
   `reason`). **Unresolved is a result.** Clients map transport failures to
   `resolver_unavailable` and never fall back to a guessed identity.
 - Identifiers are echoed in the caller's form (`Q312`, `wd:Q312`, Wikidata URI).
+- The answer for a mention is the one response row with its span, rebased to
+  the text that was sent (`Context` carries the window's offset). No row, two
+  rows, a resolved row without an identity, or a body of another shape is a
+  protocol error (`protocol_error` / `ResolverProtocolError`): never another
+  row, never a guessed identity, and distinct from `resolver_unavailable`.
 - Empty candidate list means "let the engine retrieve" unless the caller set
   `engine_retrieval=False`.
 - User datasets (`wordlift://dataset/me`, inline `dataset`, ordered worlds such
@@ -40,7 +50,14 @@ tests/                     Python tests: no network, no GPU, no key
 ## How to work
 
 - Setup: `make setup` (venv + `pip install -e ".[dev]"`); tests: `make test`;
-  TypeScript: `cd clients/typescript && npm install && npm test`.
+  coverage: `make coverage`; lint: `make lint`. TypeScript:
+  `cd clients/typescript && npm ci && npm test` (`npm run coverage` for coverage).
+- Coverage target: **90% or more** on every metric CI measures: Python line
+  and branch coverage combined, TypeScript lines, functions and branches. CI
+  enforces it (Python `fail_under` in `pyproject.toml`, TypeScript thresholds
+  in the `coverage` script). A change that adds code adds the tests that keep
+  it at or above 90%. Raise the floors when coverage rises; never lower them
+  to make a change pass.
 - Tests must stay offline. Engine calls in tests go through a mocked
   transport (`httpx.MockTransport` in Python, an injected `fetch` in TS).
 - Verify anything that touches a client against production once, with a real
@@ -48,10 +65,12 @@ tests/                     Python tests: no network, no GPU, no key
 - Gold data: add or change a mention only with a QID verified against
   Wikidata at authoring time, and say how in the PR.
 - Do not add engine internals, thresholds, holdout fixtures, keys or any
-  upstream hostname. The only public host is `resolve.wordlift.io`.
+  upstream hostname. The public hosts are `api.wordlift.io` and `resolve.wordlift.io`.
 - Releases of the TypeScript client are tag-driven (`ts-v<version>`, see
-  `.github/workflows/release-npm.yml`); bump `clients/typescript/package.json`
-  and `CHANGELOG.md` in the same commit.
+  `.github/workflows/release-npm.yml`); bump the version with
+  `npm version <x> --no-git-tag-version` in `clients/typescript` (it updates
+  `package.json` and `package-lock.json` together) and update `CHANGELOG.md`
+  in the same commit.
 
 ## Where things are decided
 
@@ -59,3 +78,17 @@ Gate results, release decisions and the reasoning behind the NIL rules are
 published at https://wordlift.io/resolve/ and summarized in README.md. If a
 change here depends on engine behaviour, say so explicitly rather than
 assuming it.
+
+- Resolution goes to the engine once per document through `BatchResolver`
+  (`as_batch` adapts a single-mention `Resolver`). Never reintroduce a request
+  per mention: with an inline vocabulary that re-uploads the whole vocabulary
+  for every mention (issue #4). Chunking by text length and by mention count
+  lives in `WordLiftResolver`, next to the limits, not in the pipeline. The
+  client does not retry: a timed-out request may have been served and metered.
+- Engine behaviour this client relies on, checked on 2026-10-10: the engine
+  decides each mention on the 400 characters either side of its span, so one
+  request per document gives the same decisions as one request per mention
+  with the client's former 400-character window. If the engine's window
+  changes, this note and the README sentence about `context_radius` change
+  with it.
+

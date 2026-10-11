@@ -9,7 +9,8 @@
 Without --mention the engine detects mentions; without --candidate it retrieves
 against the dataset (Wikidata by default; see docs/your-own-data.md for your
 WordLift graph, an inline vocabulary and local-first). Output is one line per mention; exit code is 0 when the call
-succeeded, 2 when the engine could not be reached.
+succeeded, 1 when the engine rejected the request (422: bad span, unknown identity form, unsupported dataset),
+2 when the engine could not be reached.
 """
 from __future__ import annotations
 
@@ -20,8 +21,10 @@ import sys
 
 import httpx
 
-from .resolver import WordLiftResolver
+from .resolver import WordLiftResolver, is_user_world
 from .types import RESOLVER_UNAVAILABLE
+
+INVALID_REQUEST = "invalid_request"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -38,7 +41,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--include", action="append", default=[], choices=["candidates", "evidence"])
     ap.add_argument("--json", action="store_true", help="print the raw response")
     ap.add_argument("--key", default=os.environ.get("WL_KEY"), help="WordLift API key (default: $WL_KEY)")
-    ap.add_argument("--base-url", default=WordLiftResolver.DEFAULT_BASE_URL)
+    ap.add_argument("--base-url", default=WordLiftResolver.DEFAULT_BASE_URL,
+                    help="the WordLift API; requests go to {base-url}/accounts/{account-id}/resolve")
+    ap.add_argument("--account-id", default=os.environ.get("WL_ACCOUNT_ID"),
+                    help="your account id (default: $WL_ACCOUNT_ID, else read from the key with GET /accounts/me)")
+    ap.add_argument("--endpoint", default=None,
+                    help="send the request to this URL instead, e.g. the engine's own " + WordLiftResolver.ENGINE_ENDPOINT)
     args = ap.parse_args(argv)
     if not args.key:
         ap.error("no API key: set WL_KEY or pass --key")
@@ -50,8 +58,11 @@ def main(argv: list[str] | None = None) -> int:
         with open(args.dataset, encoding="utf-8") as fh:
             entities = json.load(fh)
         body["dataset"] = {"entities": entities} if isinstance(entities, list) else entities
-        if args.candidate:
-            ap.error("--candidate cannot be combined with --dataset: the dataset is the candidate world")
+    if args.candidate and is_user_world(args.dataset_uri or "", body.get("dataset")):
+        ap.error("--candidate cannot be combined with --dataset or a user world in --dataset-uri: "
+                 "the dataset is the candidate world (the engine answers 422)")
+    if args.candidate and not args.mention:
+        ap.error("--candidate needs --mention")
     if args.mention:
         start = args.text.find(args.mention)
         if start < 0:
@@ -60,9 +71,28 @@ def main(argv: list[str] | None = None) -> int:
         if args.candidate:
             span["candidates"] = [{"id": c} for c in args.candidate]
         body["mentions"] = [span]
+    headers = {"Authorization": f"Key {args.key}", "Content-Type": "application/json"}
     try:
-        resp = httpx.post(f"{args.base_url.rstrip('/')}/v1/resolve", json=body, timeout=60,
-                          headers={"Authorization": f"Key {args.key}", "Content-Type": "application/json"})
+        url = args.endpoint
+        if not url:
+            account = args.account_id
+            if not account:
+                me = httpx.get(f"{args.base_url.rstrip('/')}/accounts/me", headers=headers, timeout=60)
+                me.raise_for_status()
+                account = me.json().get("accountId")
+                if account is None:
+                    print(f"{RESOLVER_UNAVAILABLE}: /accounts/me returned no accountId", file=sys.stderr)
+                    return 2
+            url = f"{args.base_url.rstrip('/')}/accounts/{account}/resolve"
+        resp = httpx.post(url, json=body, timeout=60, headers=headers)
+        if resp.status_code == 422:
+            # The engine answered: the request is wrong, the engine is not unavailable.
+            try:
+                detail = resp.json().get("detail")
+            except (ValueError, AttributeError):
+                detail = resp.text[:200]
+            print(f"{INVALID_REQUEST}: {json.dumps(detail, ensure_ascii=False)}", file=sys.stderr)
+            return 1
         resp.raise_for_status()
         data = resp.json()
     except httpx.HTTPStatusError as exc:
@@ -78,7 +108,9 @@ def main(argv: list[str] | None = None) -> int:
         e = m.get("entity") or {}
         world = f"  via {m['dataset_uri']}" if m.get("dataset_uri") and "," in (body.get("dataset_uri") or "") else ""
         if m["status"] == "resolved":
-            print(f"{m['text']:<16} {'resolved':<11} {e.get('id', ''):<12} {e.get('label', ''):<25} score {m.get('score'):.2f}{world}")
+            score = m.get("score")
+            shown = f"{score:.2f}" if isinstance(score, (int, float)) else "n/a"
+            print(f"{m['text']:<16} {'resolved':<11} {e.get('id', ''):<12} {e.get('label', ''):<25} score {shown}{world}")
         else:
             print(f"{m['text']:<16} {'unresolved':<11} {'':<12} {m.get('reason', '')}{world}")
     print(f"language {data.get('language')} · {data.get('engine')} · {data.get('processing_time_ms')} ms", file=sys.stderr)

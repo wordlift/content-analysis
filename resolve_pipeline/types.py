@@ -15,6 +15,21 @@ NO_CANDIDATES = "no_candidates"
 TYPE_CONFLICT = "type_conflict"
 LOW_RELEVANCE = "low_relevance"
 RESOLVER_UNAVAILABLE = "resolver_unavailable"
+# The engine (or the gateway) refused the request with 429: the replica's queue
+# is full or the plan's monthly allowance is spent. `diagnostics["retry_after"]`
+# carries the seconds the server asked for. Distinct from an outage so a caller
+# can wait instead of failing over; never turned into an identity.
+RATE_LIMITED = "rate_limited"
+# The engine answered, but not with something a client can act on: no row for
+# the requested span, two rows for it, a resolved row without an identity, a
+# body that is not the contract's shape. Distinct from a transport failure and
+# from a genuine abstention; never turned into an identity.
+PROTOCOL_ERROR = "protocol_error"
+# A caller-supplied mention that does not lie in the text as written (wrong
+# offsets, normalised text, offsets from another text). No request is made for
+# it. `run(..., on_invalid_mention="unresolved")` reports it with this reason;
+# the default raises ValueError before anything is sent (issue #5).
+INVALID_MENTION = "invalid_mention"
 
 RESOLVED = "resolved"
 UNRESOLVED = "unresolved"
@@ -27,6 +42,53 @@ class Mention:
     end: int
     label: str = ""
     score: float | None = None
+
+
+class Context(str):
+    """The text a resolver reads, and where it starts in the document.
+
+    A context window is a slice of the document; the mention's offsets are
+    document-relative. `offset` is what makes the two agree: the mention sits
+    at `start - offset` in the text. Context is a `str`, so a retriever or
+    resolver written against plain text keeps working; a plain string means
+    offset 0 (the string is the whole document).
+    """
+    offset: int
+
+    def __new__(cls, text: str, offset: int = 0) -> Context:
+        self = super().__new__(cls, text)
+        self.offset = offset
+        return self
+
+    @property
+    def text(self) -> str:
+        return str.__str__(self)
+
+    def __repr__(self) -> str:
+        return f"Context({self.text!r}, offset={self.offset})"
+
+    @classmethod
+    def of(cls, context: str | Context) -> Context:
+        return context if isinstance(context, Context) else cls(context, 0)
+
+    def local_span(self, mention: Mention) -> tuple[int, int] | None:
+        """The mention's span inside this text, or None when it does not lie here as written."""
+        start, end = mention.start - self.offset, mention.end - self.offset
+        if start < 0 or end > len(self.text) or self.text[start:end] != mention.text:
+            return None
+        return start, end
+
+
+def context_window(text: str, mention: Mention, radius: int = 400) -> Context:
+    """The text around a mention, with the offset that keeps the mention's span valid.
+
+    `text` may itself be a Context (a chunk of a longer document): the window is
+    cut from it and its offset is document-relative.
+    """
+    doc = Context.of(text)
+    start = max(0, mention.start - doc.offset - radius)
+    end = mention.end - doc.offset + radius
+    return Context(doc.text[start:end], doc.offset + start)
 
 
 @dataclass(frozen=True)

@@ -1,4 +1,4 @@
-.PHONY: setup test example lint clean
+.PHONY: setup test coverage example lint clean
 
 PY ?= python3
 VENV ?= .venv
@@ -11,12 +11,17 @@ setup:            ## create a venv and install with dev extras
 test:             ## run the test suite (no network, no key)
 	$(VENV)/bin/python -m pytest -q
 
+coverage:         ## run the tests with line and branch coverage; fails under the floor in pyproject.toml
+	$(VENV)/bin/python -m pytest -q --cov
+
 example:          ## resolve a sentence against the live engine (needs WL_KEY)
 	$(VENV)/bin/python examples/resolve_with_wordlift.py
 
-lint:             ## byte-compile every module
+lint:             ## byte-compile, then style (ruff) and static types (mypy)
 	$(VENV)/bin/python -m compileall -q resolve_pipeline tests examples
+	$(VENV)/bin/python -m ruff check .
+	$(VENV)/bin/python -m mypy
 
 clean:
-	rm -rf $(VENV) .pytest_cache build dist *.egg-info
+	rm -rf $(VENV) .pytest_cache .coverage build dist *.egg-info
 	find . -name __pycache__ -type d -exec rm -rf {} +
