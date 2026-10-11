@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.3 — unreleased
+## 0.1.3 — TypeScript client published 2026-10-11 (`@wordlift/resolve@0.1.3`); Python package installs from git
 
 - **The public address is the account route**: `POST https://api.wordlift.io/accounts/{accountId}/resolve`,
   metered by the WordLift gateway. Both clients default to `https://api.wordlift.io`
