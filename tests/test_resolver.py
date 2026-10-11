@@ -389,6 +389,17 @@ class BatchResolutionTests(unittest.TestCase):
         self.assertEqual([len(c["mentions"]) for c in calls], [1, 2])     # the cut moved back before the mention
         self.assertEqual(chunk_document("short", [], limit=100), [(0, 5)])
 
+    def test_a_mention_longer_than_the_limit_is_sent_whole_and_the_loop_advances(self):
+        text = "a " * 10 + "b" * 30 + " c" * 10
+        long = Mention("b" * 30, 20, 50)
+        self.assertEqual(chunk_document(text, [long], limit=20), [(0, 19), (19, 20), (20, 50), (50, 70)])
+        calls = []
+        resolver = self.resolver(self.engine(calls))
+        resolver.MAX_TEXT_CHARS = 20
+        res = resolver.resolve_many(text, [long, Mention("c", 69, 70)], [[], []])
+        self.assertEqual([c["text"] for c in calls], [long.text, text[50:70]])   # chunks without a mention send nothing
+        self.assertEqual([(r.mention.start, r.entity.id) for r in res], [(20, "Q0"), (69, "Q19")])
+
 
 if __name__ == "__main__":
     unittest.main()
