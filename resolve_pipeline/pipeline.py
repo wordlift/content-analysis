@@ -4,23 +4,19 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any, Literal
 
-from .resolver import Resolver, mention_not_in_text
-from .types import INVALID_MENTION, Candidate, Context, Mention, Resolution, unresolved
+from .resolver import BatchResolver, Resolver, as_batch, complete, mention_not_in_text
+from .types import INVALID_MENTION, Candidate, Context, Mention, Resolution, context_window, unresolved
+
+__all__ = ["run", "context_window", "Retriever"]
 
 Retriever = Callable[[Mention, str], list[Candidate]]
-
-
-def context_window(text: str, mention: Mention, radius: int = 400) -> Context:
-    """The text around a mention, with the offset that keeps the mention's span valid."""
-    start = max(0, mention.start - radius)
-    return Context(text[start: mention.end + radius], start)
 
 
 def run(
     text: str,
     *,
     retrieve: Retriever,
-    resolver: Resolver,
+    resolver: Resolver | BatchResolver,
     mentions: list[Mention] | None = None,
     language: str = "",
     model: Any = None,
@@ -35,6 +31,14 @@ def run(
     gold labels). Otherwise `model` must be a loaded GLiNER model from
     `extract.load_model()`.
 
+    Candidates are retrieved per mention with `context_radius` characters
+    either side of it. Resolution then happens once per document through the
+    batch protocol (`as_batch`): `WordLiftResolver` sends every span and the
+    inline vocabulary in one request per 200 mentions and per 100,000
+    characters, and a resolver that only offers `resolve()` is adapted to be
+    called mention by mention with the same window. Results keep the order of
+    `mentions` and their document offsets.
+
     A mention that does not lie in `text` as written is a caller error: with
     `on_invalid_mention="raise"` (the default) `run` raises ValueError before
     any request is sent; with `"unresolved"` the mention comes back as
@@ -48,15 +52,20 @@ def run(
             raise ValueError("either `mentions` or a loaded GLiNER `model` is required")
         from .extract import extract
         mentions = extract(model, text, labels, threshold, language)
-    out: list[Resolution] = []
     document = Context(text)
-    for mention in mentions:
+    out: list[Resolution | None] = [None] * len(mentions)
+    valid: list[int] = []
+    for i, mention in enumerate(mentions):
         if document.local_span(mention) is None:
             if on_invalid_mention == "raise":
                 raise mention_not_in_text(mention)
-            out.append(unresolved(mention, INVALID_MENTION, detail="mention does not lie in the text as written"))
-            continue
-        context = context_window(text, mention, context_radius)
-        candidates = retrieve(mention, context)
-        out.append(resolver.resolve(mention, context, candidates, language=language))
-    return out
+            out[i] = unresolved(mention, INVALID_MENTION, detail="mention does not lie in the text as written")
+        else:
+            valid.append(i)
+    candidates = [retrieve(mentions[i], context_window(document, mentions[i], context_radius)) for i in valid]
+    results = as_batch(resolver, context_radius).resolve_many(document, [mentions[i] for i in valid], candidates, language=language)
+    if len(results) != len(valid):
+        raise RuntimeError(f"resolver returned {len(results)} results for {len(valid)} mentions")
+    for i, r in zip(valid, results, strict=True):
+        out[i] = r
+    return complete(out)
