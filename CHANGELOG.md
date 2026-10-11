@@ -4,6 +4,12 @@
 
 Fixes from the review of 2026-10-07 (issue #2). Identity safety first:
 
+- `run(..., on_invalid_mention="raise" | "unresolved")` (issue #5): a
+  mention that does not lie in the text as written raises `ValueError`
+  before any request (the default), or comes back as `unresolved` with the
+  new reason `invalid_mention` so a batch of gold labels or external NER
+  spans carries on.
+
 - The context window carries its offset (`Context`, a `str` with an
   `offset`, so retrievers and resolvers written for plain text keep working),
   the request span is rebased to the text sent, and resolutions keep document
