@@ -22,10 +22,8 @@ metered against that account (Metering, below); a key used with another
 account's id is answered `403`. The open clients read the id from the key on
 first use, so they need only the key.
 
-The engine's own address, `POST https://resolve.wordlift.io/v1/resolve`, still
-answers with the same contract but is not metered and is kept only for
-compatibility with clients released before 2026-10-11; new integrations use the
-account route.
+`resolve.wordlift.io` is the gateway's upstream, not a public address: it serves
+`/v1/resolve` only to requests the gateway forwards and answers 404 to direct calls.
 
 ## Request
 

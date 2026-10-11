@@ -13,9 +13,9 @@ and is not configurable from here.
 ## The contract you must not break
 
 - `POST https://api.wordlift.io/accounts/{accountId}/resolve`, header `Authorization: Key <key>`;
-  the clients read `accountId` from `GET /accounts/me` with the key. The engine's
-  own `https://resolve.wordlift.io/v1/resolve` answers the same contract unmetered
-  (compatibility for clients released before 2026-10-11).
+  the clients read `accountId` from `GET /accounts/me` with the key. There is no
+  other public address: `resolve.wordlift.io` is the gateway's upstream and
+  answers 404 to direct calls.
   Full schema: `docs/resolve-contract.md`, machine-readable `docs/openapi.resolve.json`.
   The engine serves its own schema at `https://resolve.wordlift.io/openapi.json`;
   the repo copy is curated and currently ahead of it (see "API guidelines" in
@@ -65,7 +65,7 @@ tests/                     Python tests: no network, no GPU, no key
 - Gold data: add or change a mention only with a QID verified against
   Wikidata at authoring time, and say how in the PR.
 - Do not add engine internals, thresholds, holdout fixtures, keys or any
-  upstream hostname. The public hosts are `api.wordlift.io` and `resolve.wordlift.io`.
+  upstream hostname. The public host is `api.wordlift.io`.
 - Releases of the TypeScript client are tag-driven (`ts-v<version>`, see
   `.github/workflows/release-npm.yml`); bump the version with
   `npm version <x> --no-git-tag-version` in `clients/typescript` (it updates
