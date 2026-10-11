@@ -28,7 +28,15 @@ class ArgmaxTests(unittest.TestCase):
 
 class WordLiftClientTests(unittest.TestCase):
     def client(self, handler):
-        return WordLiftResolver("k", base_url="https://example.test", client=httpx.Client(transport=httpx.MockTransport(handler)))
+        return WordLiftResolver("k", account_id="1", base_url="https://example.test",
+                                client=httpx.Client(transport=httpx.MockTransport(handler)))
+
+    def test_requests_go_to_the_accounts_resolve_route(self):
+        seen = []
+        handler = lambda req: seen.append(str(req.url)) or httpx.Response(200, json={"mentions": []})
+        self.client(handler).resolve(APPLE, TEXT, CANDS)
+        self.assertEqual(seen, ["https://example.test/accounts/1/resolve"])
+        self.assertEqual(WordLiftResolver.DEFAULT_BASE_URL, "https://api.wordlift.io")
 
     def test_payload_and_resolved_response(self):
         seen = {}
@@ -65,7 +73,7 @@ class WordLiftClientTests(unittest.TestCase):
         r = self.client(handler).resolve(APPLE, TEXT, [], language="en")
         self.assertTrue(r.resolved)
         self.assertNotIn("candidates", seen["body"]["mentions"][0])
-        strict = WordLiftResolver("k", base_url="https://example.test", engine_retrieval=False,
+        strict = WordLiftResolver("k", account_id="1", base_url="https://example.test", engine_retrieval=False,
                                   client=httpx.Client(transport=httpx.MockTransport(handler)))
         self.assertEqual(strict.resolve(APPLE, TEXT, []).reason, NO_CANDIDATES)
 
@@ -80,7 +88,7 @@ class WordLiftClientTests(unittest.TestCase):
                                                                         "same_as": ["http://www.wikidata.org/entity/Q312"]}}],
                                              "dataset_uri": "inline"})
 
-        wl = WordLiftResolver("k", dataset=[{"id": "https://x/apple", "name": "Apple", "types": ["Organization"]}],
+        wl = WordLiftResolver("k", account_id="1", dataset=[{"id": "https://x/apple", "name": "Apple", "types": ["Organization"]}],
                               client=httpx.Client(transport=httpx.MockTransport(handler)))
         r = wl.resolve(APPLE, TEXT, CANDS, language="en")      # candidates are ignored: the dataset is the world
         self.assertEqual(seen["body"]["dataset_uri"], "inline")
@@ -88,10 +96,10 @@ class WordLiftClientTests(unittest.TestCase):
         self.assertNotIn("candidates", seen["body"]["mentions"][0])
         self.assertEqual((r.entity.id, r.entity.same_as), ("https://x/apple", ("http://www.wikidata.org/entity/Q312",)))
         mock = httpx.Client(transport=httpx.MockTransport(handler))
-        graph = WordLiftResolver("k", dataset_uri=WordLiftResolver.WORDLIFT_GRAPH, client=mock)
+        graph = WordLiftResolver("k", account_id="1", dataset_uri=WordLiftResolver.WORDLIFT_GRAPH, client=mock)
         graph.resolve(APPLE, TEXT, [], language="en")
         self.assertEqual(seen["body"]["dataset_uri"], "wordlift://dataset/me")
-        local_first = WordLiftResolver("k", dataset_uri=WordLiftResolver.LOCAL_FIRST, client=mock)
+        local_first = WordLiftResolver("k", account_id="1", dataset_uri=WordLiftResolver.LOCAL_FIRST, client=mock)
         r = local_first.resolve(APPLE, TEXT, CANDS, language="en")
         self.assertEqual(seen["body"]["dataset_uri"], "wordlift://dataset/me,wikidata://public")
         self.assertNotIn("candidates", seen["body"]["mentions"][0])      # a user world is in the list
@@ -117,7 +125,8 @@ class IdentitySafetyTests(unittest.TestCase):
     """The two findings of the 2026-10-07 review: offsets and the fallback row."""
 
     def client(self, handler):
-        return WordLiftResolver("k", base_url="https://example.test", client=httpx.Client(transport=httpx.MockTransport(handler)))
+        return WordLiftResolver("k", account_id="1", base_url="https://example.test",
+                                client=httpx.Client(transport=httpx.MockTransport(handler)))
 
     def test_cropped_context_sends_the_span_rebased_and_returns_document_offsets(self):
         text = "x" * 500 + " Apple laptop"
@@ -199,11 +208,11 @@ class IdentitySafetyTests(unittest.TestCase):
         self.assertEqual(r.entity.id, "b")
 
     def test_owned_client_is_closed_and_an_injected_one_is_not(self):
-        with WordLiftResolver("k") as wl:
+        with WordLiftResolver("k", account_id="1") as wl:
             self.assertFalse(wl._client.is_closed)
         self.assertTrue(wl._client.is_closed)
         injected = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200)))
-        with WordLiftResolver("k", client=injected):
+        with WordLiftResolver("k", account_id="1", client=injected):
             pass
         self.assertFalse(injected.is_closed)
 
@@ -249,7 +258,8 @@ class BatchResolutionTests(unittest.TestCase):
 
     @staticmethod
     def resolver(handler, **kw):
-        return WordLiftResolver("k", base_url="https://example.test", client=httpx.Client(transport=httpx.MockTransport(handler)), **kw)
+        return WordLiftResolver("k", account_id="1", base_url="https://example.test",
+                                client=httpx.Client(transport=httpx.MockTransport(handler)), **kw)
 
     def engine(self, calls, status=200, headers=None, rows=None, body=None):
         def handler(request):
@@ -399,6 +409,59 @@ class BatchResolutionTests(unittest.TestCase):
         res = resolver.resolve_many(text, [long, Mention("c", 69, 70)], [[], []])
         self.assertEqual([c["text"] for c in calls], [long.text, text[50:70]])   # chunks without a mention send nothing
         self.assertEqual([(r.mention.start, r.entity.id) for r in res], [(20, "Q0"), (69, "Q19")])
+
+
+class EndpointDiscoveryTests(unittest.TestCase):
+    """The account id comes from the key once; `endpoint=` bypasses the lookup."""
+
+    @staticmethod
+    def api(calls, me_status=200, me_body=None):
+        def handler(request):
+            calls.append((request.method, str(request.url)))
+            if request.url.path == "/accounts/me":
+                return httpx.Response(me_status, json=me_body if me_body is not None else {"accountId": 216, "datasetId": "x"})
+            return httpx.Response(200, json={"mentions": [{"start": 12, "end": 17, "status": "resolved", "entity": {"id": "Q312"}}]})
+        return handler
+
+    def resolver(self, handler, **kw):
+        return WordLiftResolver("k", base_url="https://example.test/", client=httpx.Client(transport=httpx.MockTransport(handler)), **kw)
+
+    def test_the_account_is_read_from_the_key_once(self):
+        calls = []
+        wl = self.resolver(self.api(calls))
+        self.assertTrue(wl.resolve(APPLE, TEXT, CANDS).resolved)
+        wl.resolve(APPLE, TEXT, CANDS)
+        self.assertEqual(calls, [("GET", "https://example.test/accounts/me"),
+                                 ("POST", "https://example.test/accounts/216/resolve"),
+                                 ("POST", "https://example.test/accounts/216/resolve")])
+        self.assertEqual((wl.account_id, wl.endpoint), ("216", "https://example.test/accounts/216/resolve"))
+
+    def test_a_given_account_or_endpoint_skips_the_lookup(self):
+        calls = []
+        self.resolver(self.api(calls), account_id=7).resolve(APPLE, TEXT, CANDS)
+        self.assertEqual(calls, [("POST", "https://example.test/accounts/7/resolve")])
+        calls.clear()
+        self.resolver(self.api(calls), endpoint=WordLiftResolver.ENGINE_ENDPOINT).resolve(APPLE, TEXT, CANDS)
+        self.assertEqual(calls, [("POST", "https://resolve.wordlift.io/v1/resolve")])
+
+    def test_a_refused_key_at_the_lookup_is_an_authorization_error(self):
+        for status in (401, 403):
+            with self.assertRaises(AuthorizationError) as caught:
+                self.resolver(self.api([], me_status=status, me_body={"title": "Unauthorized"})).resolve(APPLE, TEXT, CANDS)
+            self.assertEqual(caught.exception.status, status)
+
+    def test_a_failing_lookup_is_unavailability_and_a_wrong_api_is_a_value_error(self):
+        r = self.resolver(self.api([], me_status=503, me_body={})).resolve(APPLE, TEXT, CANDS)
+        self.assertEqual((r.reason, r.diagnostics), (RESOLVER_UNAVAILABLE, {"error": "HTTPStatusError"}))
+
+        def down(request):
+            raise httpx.ConnectError("refused", request=request)
+        r = self.resolver(down).resolve(APPLE, TEXT, CANDS)
+        self.assertEqual(r.diagnostics, {"error": "ConnectError"})
+        with self.assertRaises(ValueError):
+            self.resolver(self.api([], me_body={"something": "else"})).resolve(APPLE, TEXT, CANDS)
+        with self.assertRaises(ValueError):
+            self.resolver(self.api([], me_body=[1, 2])).resolve(APPLE, TEXT, CANDS)
 
 
 if __name__ == "__main__":

@@ -17,7 +17,10 @@
  * identity; catch it and treat the mention as unresolved.
  */
 
-export const DEFAULT_BASE_URL = "https://resolve.wordlift.io";
+/** The WordLift API: requests go to `POST {baseUrl}/accounts/{accountId}/resolve`, metered against the account. */
+export const DEFAULT_BASE_URL = "https://api.wordlift.io";
+/** The engine's own address, before the gateway; still answers, not metered. Pass it as `endpoint` to call the engine directly. */
+export const ENGINE_ENDPOINT = "https://resolve.wordlift.io/v1/resolve";
 export const PUBLIC_DATASET = "wikidata://public";
 
 /** Identity in the dataset: "Q312", "wd:Q312" or a Wikidata entity URI. Echoed back in the same form. */
@@ -128,7 +131,12 @@ export interface ResolveResponse {
 export interface WordLiftResolverOptions {
   /** WordLift API key, sent as `Authorization: Key <apiKey>`. */
   apiKey: string;
+  /** The WordLift API; default https://api.wordlift.io. */
   baseUrl?: string;
+  /** Your account id (the `accountId` of GET /accounts/me). Read from the key on first use when omitted. */
+  accountId?: string | number;
+  /** Send every request to this URL as given, for example ENGINE_ENDPOINT; skips the account lookup. */
+  endpoint?: string;
   datasetUri?: string;
   /** Milliseconds; default 30000. */
   timeoutMs?: number;
@@ -321,6 +329,9 @@ export class WordLiftResolver {
   private readonly datasetUri: string;
   private readonly timeoutMs: number;
   private readonly fetchImpl: typeof fetch;
+  private readonly fixedEndpoint?: string;
+  private _accountId?: string;
+  private endpointPromise?: Promise<string>;
 
   constructor(options: WordLiftResolverOptions) {
     if (!options.apiKey) throw new Error("apiKey is required");
@@ -330,20 +341,52 @@ export class WordLiftResolver {
     this.timeoutMs = options.timeoutMs ?? 30_000;
     this.fetchImpl = options.fetch ?? globalThis.fetch;
     if (!this.fetchImpl) throw new Error("no fetch available; pass options.fetch");
+    this.fixedEndpoint = options.endpoint;
+    if (options.accountId !== undefined) this._accountId = String(options.accountId);
   }
 
-  /** POST /v1/resolve with the request as given (the contract's shape). */
-  async resolve(request: ResolveRequest): Promise<ResolveResponse> {
-    const body = { dataset_uri: this.datasetUri, ...request };
+  /** The account id in use, once known (given, or read from the key by the first request). */
+  get accountId(): string | undefined {
+    return this._accountId;
+  }
+
+  /**
+   * Where requests go: `endpoint` as given, or `{baseUrl}/accounts/{accountId}/resolve`
+   * with the account id read from the key (GET /accounts/me) on first use and kept.
+   * A refused key is an AuthorizationError, an unreachable API a ResolverUnavailableError,
+   * an answer without `accountId` (wrong baseUrl) a ResolverProtocolError.
+   */
+  endpoint(): Promise<string> {
+    if (this.fixedEndpoint) return Promise.resolve(this.fixedEndpoint);
+    if (!this.endpointPromise) {
+      this.endpointPromise = this.discover().catch((err) => { this.endpointPromise = undefined; throw err; });
+    }
+    return this.endpointPromise;
+  }
+
+  private async discover(): Promise<string> {
+    if (this._accountId === undefined) {
+      const { response, parsed } = await this.send(`${this.baseUrl}/accounts/me`, { method: "GET" });
+      if (!response.ok) throw failure(problemOf(response.status, parsed, response.headers));
+      const account = (parsed as { accountId?: unknown } | null)?.accountId;
+      if (typeof account !== "number" && typeof account !== "string") {
+        throw new ResolverProtocolError(`${this.baseUrl}/accounts/me did not return an accountId`, parsed);
+      }
+      this._accountId = String(account);
+    }
+    return `${this.baseUrl}/accounts/${this._accountId}/resolve`;
+  }
+
+  /** One HTTP exchange with the key header and the timeout; a transport failure is a ResolverUnavailableError. */
+  private async send(url: string, init: { method: string; body?: string }): Promise<{ response: Response; parsed: unknown }> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     let response: Response;
     let text: string;
     try {
-      response = await this.fetchImpl(`${this.baseUrl}/v1/resolve`, {
-        method: "POST",
+      response = await this.fetchImpl(url, {
+        ...init,
         headers: { Authorization: `Key ${this.apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify(body),
         signal: controller.signal,
       });
       // The timeout covers the body too: a stalled stream is as unavailable as a stalled connection.
@@ -355,6 +398,14 @@ export class WordLiftResolver {
     }
     let parsed: unknown = text;
     try { parsed = text ? JSON.parse(text) : null; } catch { /* keep raw text */ }
+    return { response, parsed };
+  }
+
+  /** POST the request as given (the contract's shape) to the account's resolve route. */
+  async resolve(request: ResolveRequest): Promise<ResolveResponse> {
+    const body = { dataset_uri: this.datasetUri, ...request };
+    const url = await this.endpoint();
+    const { response, parsed } = await this.send(url, { method: "POST", body: JSON.stringify(body) });
     if (!response.ok) throw failure(problemOf(response.status, parsed, response.headers));
     const result = validateResponse(parsed);
     const credits = response.headers.get("X-Wordlift-Consumption");

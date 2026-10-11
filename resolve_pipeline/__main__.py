@@ -41,7 +41,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--include", action="append", default=[], choices=["candidates", "evidence"])
     ap.add_argument("--json", action="store_true", help="print the raw response")
     ap.add_argument("--key", default=os.environ.get("WL_KEY"), help="WordLift API key (default: $WL_KEY)")
-    ap.add_argument("--base-url", default=WordLiftResolver.DEFAULT_BASE_URL)
+    ap.add_argument("--base-url", default=WordLiftResolver.DEFAULT_BASE_URL,
+                    help="the WordLift API; requests go to {base-url}/accounts/{account-id}/resolve")
+    ap.add_argument("--account-id", default=os.environ.get("WL_ACCOUNT_ID"),
+                    help="your account id (default: $WL_ACCOUNT_ID, else read from the key with GET /accounts/me)")
+    ap.add_argument("--endpoint", default=None,
+                    help="send the request to this URL instead, e.g. the engine's own " + WordLiftResolver.ENGINE_ENDPOINT)
     args = ap.parse_args(argv)
     if not args.key:
         ap.error("no API key: set WL_KEY or pass --key")
@@ -66,9 +71,20 @@ def main(argv: list[str] | None = None) -> int:
         if args.candidate:
             span["candidates"] = [{"id": c} for c in args.candidate]
         body["mentions"] = [span]
+    headers = {"Authorization": f"Key {args.key}", "Content-Type": "application/json"}
     try:
-        resp = httpx.post(f"{args.base_url.rstrip('/')}/v1/resolve", json=body, timeout=60,
-                          headers={"Authorization": f"Key {args.key}", "Content-Type": "application/json"})
+        url = args.endpoint
+        if not url:
+            account = args.account_id
+            if not account:
+                me = httpx.get(f"{args.base_url.rstrip('/')}/accounts/me", headers=headers, timeout=60)
+                me.raise_for_status()
+                account = me.json().get("accountId")
+                if account is None:
+                    print(f"{RESOLVER_UNAVAILABLE}: /accounts/me returned no accountId", file=sys.stderr)
+                    return 2
+            url = f"{args.base_url.rstrip('/')}/accounts/{account}/resolve"
+        resp = httpx.post(url, json=body, timeout=60, headers=headers)
         if resp.status_code == 422:
             # The engine answered: the request is wrong, the engine is not unavailable.
             try:

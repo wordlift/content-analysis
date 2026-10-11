@@ -8,13 +8,26 @@ The contract has one job:
 returns the resolver's decision; callers should not need to invent a threshold
 to decide whether an identity exists.
 
-## Request
+## Address
 
 ```http
-POST /v1/resolve
+POST https://api.wordlift.io/accounts/{accountId}/resolve
 Authorization: Key <your_wordlift_key>
 Content-Type: application/json
 ```
+
+`accountId` is your WordLift account's id, the `accountId` field of
+`GET https://api.wordlift.io/accounts/me` called with the same key. The route is
+metered against that account (Metering, below); a key used with another
+account's id is answered `403`. The open clients read the id from the key on
+first use, so they need only the key.
+
+The engine's own address, `POST https://resolve.wordlift.io/v1/resolve`, still
+answers with the same contract but is not metered and is kept only for
+compatibility with clients released before 2026-10-11; new integrations use the
+account route.
+
+## Request
 
 ```json
 {
@@ -199,7 +212,7 @@ formats, and declared 401, 422, 429 and 503 responses with their headers.
 Recorded deviations of the existing contract, kept for compatibility; changing
 any of them needs a coordinated migration:
 
-- **Verb path** `/resolve` and **URL versioning** `/v1`.
+- **Verb path** `/accounts/{accountId}/resolve` (an action on the account resource, as the rest of the WordLift API), and **URL versioning** `/v1` on the engine's own address.
 - **`Key` authentication** (`Authorization: Key <key>`) instead of OAuth2:
   the WordLift account key is the credential.
 - **Error bodies**: every error under `/v1/` is RFC 9457 Problem JSON

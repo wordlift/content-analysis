@@ -3,7 +3,7 @@
   "info": {
     "title": "WordLift resolve()",
     "version": "1.0.0",
-    "description": "Map mentions to identities in an explicit dataset, or return unresolved. See docs/resolve-contract.md.",
+    "description": "Map mentions to identities in an explicit dataset, or return unresolved. See docs/resolve-contract.md. The engine's own address, https://resolve.wordlift.io/v1/resolve, serves the same operation unmetered for clients released before 2026-10-11.",
     "license": {
       "name": "Apache-2.0"
     },
@@ -17,7 +17,8 @@
   },
   "servers": [
     {
-      "url": "https://resolve.wordlift.io"
+      "url": "https://api.wordlift.io",
+      "description": "The WordLift API; the account route is metered."
     }
   ],
   "security": [
@@ -26,7 +27,7 @@
     }
   ],
   "paths": {
-    "/v1/resolve": {
+    "/accounts/{accountId}/resolve": {
       "post": {
         "tags": [
           "resolve"
@@ -179,11 +180,33 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The key does not belong to this account.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
           {
             "WordLiftKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "description": "Your WordLift account id: the `accountId` of GET /accounts/me with the same key. A key used with another account's id is answered 403.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
           }
         ]
       }

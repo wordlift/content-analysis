@@ -19,8 +19,12 @@ OK = {"mentions": [
 ], "language": "en", "engine": "test", "processing_time_ms": 1}
 
 
-def cli(argv, handler=lambda req: httpx.Response(200, json=OK), env_key="k"):
-    """Run the CLI with a mocked transport; returns (exit code, stdout, stderr, requests seen)."""
+def cli(argv, handler=lambda req: httpx.Response(200, json=OK), env_key="k", account="7"):
+    """Run the CLI with a mocked transport; returns (exit code, stdout, stderr, requests seen).
+
+    The account id comes from the environment (`WL_ACCOUNT_ID`) so no lookup is made;
+    `account=None` leaves it out and the CLI reads it from the key through `httpx.get`.
+    """
     seen = []
 
     def post(url, **kwargs):
@@ -31,8 +35,16 @@ def cli(argv, handler=lambda req: httpx.Response(200, json=OK), env_key="k"):
             return client.post(url, **kwargs)
 
     out, err = io.StringIO(), io.StringIO()
-    with mock.patch("resolve_pipeline.__main__.httpx.post", post), \
-         mock.patch.dict("os.environ", {"WL_KEY": env_key} if env_key else {}, clear=True), \
+    def get(url, **kwargs):
+        def record(request):
+            seen.append(request)
+            return handler(request)
+        with httpx.Client(transport=httpx.MockTransport(record)) as client:
+            return client.get(url, **kwargs)
+
+    env = {**({"WL_KEY": env_key} if env_key else {}), **({"WL_ACCOUNT_ID": account} if account else {})}
+    with mock.patch("resolve_pipeline.__main__.httpx.post", post), mock.patch("resolve_pipeline.__main__.httpx.get", get), \
+         mock.patch.dict("os.environ", env, clear=True), \
          contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
         try:
             code = main(argv)
@@ -47,12 +59,26 @@ class CliRequest(unittest.TestCase):
                                 "--language", "en", "--include", "evidence", "--base-url", "https://example.test/"])
         self.assertEqual(code, 0)
         request = seen[0]
-        self.assertEqual(str(request.url), "https://example.test/v1/resolve")
+        self.assertEqual(str(request.url), "https://example.test/accounts/7/resolve")
         self.assertEqual(request.headers["Authorization"], "Key k")
         body = json.loads(request.content)
         self.assertEqual(body["mentions"], [{"text": "Apple", "start": 12, "end": 17,
                                              "candidates": [{"id": "wd:Q312"}, {"id": "wd:Q89"}]}])
         self.assertEqual((body["language"], body["include"]), ("en", ["evidence"]))
+
+    def test_without_an_account_id_the_cli_reads_it_from_the_key(self):
+        def handler(request):
+            if request.url.path == "/accounts/me":
+                return httpx.Response(200, json={"accountId": 216})
+            return httpx.Response(200, json=OK)
+        code, _, _, seen = cli([TEXT, "--base-url", "https://example.test"], handler=handler, account=None)
+        self.assertEqual(code, 0)
+        self.assertEqual([(r.method, str(r.url)) for r in seen],
+                         [("GET", "https://example.test/accounts/me"), ("POST", "https://example.test/accounts/216/resolve")])
+        code, _, err, _ = cli([TEXT, "--base-url", "https://example.test"], handler=lambda r: httpx.Response(200, json={}), account=None)
+        self.assertEqual((code, "no accountId" in err), (2, True))
+        code, _, _, seen = cli([TEXT, "--endpoint", "https://engine.test/v1/resolve"], account=None)
+        self.assertEqual((code, str(seen[0].url)), (0, "https://engine.test/v1/resolve"))
 
     def test_an_inline_list_is_sent_as_entities(self):
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
