@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2 — unreleased
+## 0.1.2 — TypeScript client published 2026-10-11 (`@wordlift/resolve@0.1.2`); Python package installs from git
 
 - One request per document (issue #4): a `BatchResolver` protocol
   (`resolve_many`) with `as_batch()` adapting any single-mention `Resolver`;
