@@ -77,7 +77,7 @@ class CliRequest(unittest.TestCase):
                          [("GET", "https://example.test/accounts/me"), ("POST", "https://example.test/accounts/216/resolve")])
         code, _, err, _ = cli([TEXT, "--base-url", "https://example.test"], handler=lambda r: httpx.Response(200, json={}), account=None)
         self.assertEqual((code, "no accountId" in err), (2, True))
-        code, _, seen_url, seen = cli([TEXT, "--endpoint", "https://engine.test/v1/resolve"], account=None)[0], None, None, cli([TEXT, "--endpoint", "https://engine.test/v1/resolve"], account=None)[3]
+        code, _, _, seen = cli([TEXT, "--endpoint", "https://engine.test/v1/resolve"], account=None)
         self.assertEqual((code, str(seen[0].url)), (0, "https://engine.test/v1/resolve"))
 
     def test_an_inline_list_is_sent_as_entities(self):
