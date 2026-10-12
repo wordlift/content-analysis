@@ -254,8 +254,9 @@ class WordLiftResolver:
     #: metered against the account; the account id is read from the key once
     #: (`GET /accounts/me`) unless given.
     DEFAULT_BASE_URL = "https://api.wordlift.io"
-    #: The engine's own address, before the gateway; still answers, not metered.
-    #: Pass it as `endpoint=` to call the engine directly.
+    #: Deprecated: the engine's upstream address, served only to the gateway since
+    #: 2026-10-11 (direct calls are 404). Kept so 0.1.3 code imports; use `endpoint=`
+    #: for a private deployment of the engine.
     ENGINE_ENDPOINT = "https://resolve.wordlift.io/v1/resolve"
     WORDLIFT_GRAPH = WORDLIFT_GRAPH
     #: Your entities first, Wikidata for everything else.

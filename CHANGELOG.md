@@ -2,12 +2,15 @@
 
 ## 0.1.3 — TypeScript client published 2026-10-11 (`@wordlift/resolve@0.1.3`); Python package installs from git
 
+- README: the repository leads with resolve(), says how to get a key (free, 1,000 credits a month),
+  what a call costs, where the open tester and the live demos are, and has a section for agents.
+
 - **The public address is the account route**: `POST https://api.wordlift.io/accounts/{accountId}/resolve`,
   metered by the WordLift gateway. Both clients default to `https://api.wordlift.io`
   and read `accountId` from the key (`GET /accounts/me`) on first use; pass
   `account_id` / `accountId` to skip the lookup, or `endpoint` to call one URL
-  as given. The engine's own `https://resolve.wordlift.io/v1/resolve`
-  (`ENGINE_ENDPOINT`) still answers unmetered for the 0.1.2 clients. The CLI
+  as given. `ENGINE_ENDPOINT` is deprecated: that address serves only the
+  gateway since 2026-10-11 (direct calls are 404). The CLI
   takes `--account-id` (or `$WL_ACCOUNT_ID`) and `--endpoint`. A key used with
   another account's id is `403` (`AuthorizationError`). Breaking for callers
   that passed `base_url`/`baseUrl` pointing at the engine host: pass it as

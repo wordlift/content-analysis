@@ -3,7 +3,7 @@
   "info": {
     "title": "WordLift resolve()",
     "version": "1.0.0",
-    "description": "Map mentions to identities in an explicit dataset, or return unresolved. See docs/resolve-contract.md. The engine's own address, https://resolve.wordlift.io/v1/resolve, serves the same operation unmetered for clients released before 2026-10-11.",
+    "description": "Map mentions to identities in an explicit dataset, or return unresolved. See docs/resolve-contract.md.",
     "license": {
       "name": "Apache-2.0"
     },
