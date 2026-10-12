@@ -8,6 +8,10 @@ Zero dependencies, uses the global `fetch` (Node 18+, browsers, edge runtimes).
 npm install @wordlift/resolve
 ```
 
+You need a WordLift key (free for individual developers, 1,000 credits a month: request it at
+[wordlift.io/resolve](https://wordlift.io/resolve/#access)). The client reads your account id from the
+key, so the key is the only configuration.
+
 ```ts
 import { WordLiftResolver } from "@wordlift/resolve";
 

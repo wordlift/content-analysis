@@ -7,11 +7,12 @@
   </a>
 </p>
 
-<h1 align="center">Content Analysis pipeline</h1>
+<h1 align="center">resolve() by WordLift</h1>
 
 <p align="center">
   <b>extract → retrieve → resolve | NIL</b><br>
-  An open pipeline for turning text into entity identities, with a pluggable decision step.
+  The open pipeline, clients and contract for WordLift's entity resolution API: map a mention to an identity in Wikidata, your knowledge graph or your own vocabulary, or get <code>unresolved</code>.<br>
+  <a href="https://wordlift.io/resolve/">wordlift.io/resolve</a> · <a href="https://docs.wordlift.io/developer-resources/resolve/">developer guide</a> · <a href="https://docs.wordlift.io/api/resolve/resolve-api/">API reference</a> · <a href="https://wordlift.io/resolve/demos/">live agent demos</a>
 </p>
 
 <p align="center">
@@ -35,6 +36,24 @@ knowledge graph or vocabulary, and hand mention, context and candidates to a
 | `WordLiftResolver` | Client for WordLift's `resolve()` API, `POST /accounts/{accountId}/resolve` | Production: multilingual disambiguation that returns NIL when the evidence is not strong enough |
 
 Open where you build. Proprietary where we resolve.
+
+## Get a key
+
+Every call to the hosted API needs a WordLift key in `Authorization: Key <key>`.
+
+- **New here:** request a free key at [wordlift.io/resolve](https://wordlift.io/resolve/#access).
+  It comes with 1,000 smart credits a month: one credit per request plus one per
+  1,000 characters of text, so a sentence costs 2 and a 5,000-character article 6.
+  Past the allowance the API answers `429` with the reset time; nothing is charged.
+- **Already a WordLift customer:** your account key works as it is, with the
+  allowance of your plan, and `wordlift://dataset/me` resolves against your graph.
+- **Just looking:** the landing page's tester is an open endpoint, no key,
+  600 characters, ten calls a minute: `POST https://resolve.wordlift.io/demo/resolve`
+  with `{"text": "...", "language": "en"}`. The [live demos](https://wordlift.io/resolve/demos/)
+  run three agent workflows on it, with and without resolve().
+
+Put the key in `WL_KEY`; the clients and the CLI read it from there and look up
+your account id from it, so nothing else is configured.
 
 ## 60-second start
 
@@ -93,7 +112,9 @@ it answers 429 (with `retry_after` in the diagnostics), `protocol_error` when
 it answers with something the client cannot act on, and `invalid_mention` for
 a caller span that is not in the text, so none of these ever becomes a guessed
 identity. Identifiers are echoed in the form you sent: `Q312`, `wd:Q312` or a
-Wikidata entity URI.
+Wikidata entity URI. Every error the API sends is an RFC 9457 Problem JSON
+document with a stable `code` whose `type` links to its page; the list is at
+[docs.wordlift.io/developer-resources/resolve-errors](https://docs.wordlift.io/developer-resources/resolve-errors/).
 
 **One request per document.** `run()` retrieves candidates per mention with
 `context_radius` characters either side of it, then hands the whole document to
@@ -202,7 +223,14 @@ export WL_KEY="your-wordlift-key"
 python clients/mcp/server.py
 ```
 
-This version is **local/stdio only**. It does not provide an OAuth-enabled remote endpoint for ChatGPT. Remote access will require OAuth, tenant-safe account-to-key mapping, and a separate deployment decision; no upstream changes are required by this PR. See [`clients/mcp/README.md`](clients/mcp/README.md) for configuration and tests.
+This version is **local/stdio only**. It does not provide an OAuth-enabled remote endpoint for ChatGPT. Remote access will require OAuth, tenant-safe account-to-key mapping, and a separate deployment decision. See [`clients/mcp/README.md`](clients/mcp/README.md) for configuration and tests.
+
+## For agents
+
+- The one call, the limits and the open tester, in plain text: [resolve.wordlift.io/llms.txt](https://resolve.wordlift.io/llms.txt).
+- A local MCP server exposing `resolve_text`: [`clients/mcp`](clients/mcp).
+- The contract in one JSON file: [`docs/openapi.resolve.json`](docs/openapi.resolve.json).
+- `unresolved` is an answer. Never replace it with a guess, and never treat a transport error as `unresolved`.
 
 ## Clients
 
@@ -274,6 +302,7 @@ resolve_pipeline/
   html.py        HTML → text with a character offset map (standard library)
   evaluate.py    error attribution CLI
   __main__.py    `python -m resolve_pipeline "text"`
+clients/typescript/  @wordlift/resolve, zero dependencies (npm)
 clients/mcp/     experimental local MCP adapter (stdio)
 datasets/        development gold sets (en, it, fr, de, es, pt)
 docs/            resolve() contract, your-own-data guide, OpenAPI, logos
