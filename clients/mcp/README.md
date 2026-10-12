@@ -17,7 +17,7 @@ From the repository root:
 ```bash
 python -m venv .venv
 .venv/bin/pip install -r clients/mcp/requirements.txt
-export WL_KEY='your-wordlift-key'
+export WL_KEY='your-wordlift-key'   # free key: https://wordlift.io/resolve/#access
 .venv/bin/python clients/mcp/server.py
 ```
 
