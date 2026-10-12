@@ -19,6 +19,9 @@ Nothing is uploaded or trained. The engine reads the dataset per request
 names and aliases in it, and runs every match through the same context
 ranking and abstention gate as Wikidata. `unresolved` stays a valid answer.
 
+All three need a WordLift key (`WL_KEY`; free for individual developers at
+[wordlift.io/resolve](https://wordlift.io/resolve/#access), or your account key).
+
 ## 1. Your WordLift knowledge graph, derived from the key
 
 If you use WordLift, your graph is already the dataset. There is nothing to
