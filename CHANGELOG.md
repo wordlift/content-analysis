@@ -2,6 +2,9 @@
 
 ## 0.1.4 — TypeScript client published 2026-10-13 (`@wordlift/resolve@0.1.4`); Python package installs from git
 
+- Wording: the allowance is in resolve() requests (a call counts as one request plus one per
+  1,000 characters), not "smart credits", which at WordLift are a different, paid unit. The
+  clients' `credits` fields keep their names.
 - **The cost header is `X-Wordlift-Cost`** (wordlift/content-analysis-engine#57): both clients read
   a request's cost from `X-Wordlift-Cost`, the header the WordLift gateway books on every route,
   instead of `X-Wordlift-Consumption`, which the gateway never read (every call was booked as
@@ -11,7 +14,7 @@
 
 ## 0.1.3 — TypeScript client published 2026-10-11 (`@wordlift/resolve@0.1.3`); Python package installs from git
 
-- README: the repository leads with resolve(), says how to get a key (free, 1,000 credits a month),
+- README: the repository leads with resolve(), says how to get a key (free, 1,000 requests a month),
   what a call costs, where the open tester and the live demos are, and has a section for agents.
 
 - **The public address is the account route**: `POST https://api.wordlift.io/accounts/{accountId}/resolve`,

@@ -124,7 +124,7 @@ export interface ResolveResponse {
   language: string;
   processing_time_ms: number;
   engine?: string;
-  /** Smart credits this request cost (`X-Wordlift-Cost`), when the header was present. */
+  /** What this call counted against the monthly allowance of requests (`X-Wordlift-Cost`), when the header was present. */
   credits?: number;
 }
 
@@ -280,7 +280,7 @@ export interface DocumentResolution {
   mentions: MentionResolution[];
   /** Requests sent: one per 200 mentions and per 100,000 characters. */
   requests: number;
-  /** Smart credits charged, summed over the requests (`X-Wordlift-Cost`), when every request reported them. */
+  /** What the document counted against the monthly allowance of requests, summed over the calls (`X-Wordlift-Cost`), when every call reported it. */
   credits?: number;
 }
 

@@ -176,7 +176,7 @@ not support the match. Resolved entities carry the dataset's own `id`, `label`,
 
 ## Metering
 
-Every successful response carries the request's cost in smart credits:
+Every successful response carries what the call counted against the allowance, in requests:
 
 ```
 X-Wordlift-Cost: 2
@@ -186,12 +186,12 @@ X-Wordlift-Cost: 2
 on every route; it replaces `X-Wordlift-Consumption`, which the engine no
 longer sends.
 
-One credit per request plus one per 1,000 characters of `text`, so a sentence
-costs 2 and a 5,000-character article costs 6. Resolving against your own
+A call counts as one request, plus one per 1,000 characters of `text`, so a
+sentence counts 2 and a 5,000-character article counts 6. Resolving against your own
 graph or an inline vocabulary costs the same as the public world; the graph
 load is not charged per request.
 
-Credits are booked against the account's monthly allowance for resolve(), and
+The count is booked against the account's monthly allowance of resolve() requests, and
 the usual rate-limit headers describe where it stands:
 
 ```

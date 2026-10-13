@@ -42,8 +42,8 @@ Open where you build. Proprietary where we resolve.
 Every call to the hosted API needs a WordLift key in `Authorization: Key <key>`.
 
 - **New here:** request a free key at [wordlift.io/resolve](https://wordlift.io/resolve/#access).
-  It comes with 1,000 smart credits a month: one credit per request plus one per
-  1,000 characters of text, so a sentence costs 2 and a 5,000-character article 6.
+  It comes with 1,000 requests a month. A call counts as one request, plus one per
+  1,000 characters of text, so a sentence counts 2 and a 5,000-character article 6.
   Past the allowance the API answers `429` with the reset time; nothing is charged.
 - **Already a WordLift customer:** your account key works as it is, with the
   allowance of your plan, and `wordlift://dataset/me` resolves against your graph.
@@ -130,7 +130,7 @@ mentions and their document offsets; every span is checked before the first
 request. A custom `Resolver` that implements only `resolve()` is adapted and
 called mention by mention with its window. The client never retries on its
 own: a timed-out request may have been served and metered, so the retry policy
-is yours; `diagnostics["credits"]` reports what each request cost
+is yours; `diagnostics["credits"]` reports what each call counted against the allowance
 (`X-Wordlift-Cost`). A refused key raises `AuthorizationError`, a
 rejected request `InvalidRequestError`: caller errors stop the batch. A 429 is
 `rate_limited` with `retry_after`; the engine's own 429 also carries its
