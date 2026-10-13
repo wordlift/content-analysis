@@ -26,7 +26,7 @@ const refusing = (status, body, headers = {}) => async () =>
 test("one request carries every span and the vocabulary once; order, offsets and credits kept", async () => {
   const calls = [];
   const dataset = { entities: [{ id: "v:apple", name: "Apple", description: "x".repeat(1000) }] };
-  const wl = new WordLiftResolver({ apiKey: "k", accountId: "1", fetch: engine(calls, { headers: { "X-Wordlift-Consumption": "2" } }) });
+  const wl = new WordLiftResolver({ apiKey: "k", accountId: "1", fetch: engine(calls, { headers: { "X-Wordlift-Cost": "2" } }) });
   const res = await wl.resolveDocument(TEXT, SPANS, { language: "en", dataset_uri: "inline", dataset });
   assert.equal(calls.length, 1);
   assert.equal(calls[0].mentions.length, 5);
@@ -42,12 +42,12 @@ test("batches are bounded and credits are summed, or absent when a request did n
   WordLiftResolver.MAX_MENTIONS_PER_REQUEST = 2;
   try {
     let n = 0;
-    const counting = async (url, init) => engine(calls, { headers: ++n < 3 ? { "X-Wordlift-Consumption": "1" } : {} })(url, init);
+    const counting = async (url, init) => engine(calls, { headers: ++n < 3 ? { "X-Wordlift-Cost": "1" } : {} })(url, init);
     const res = await new WordLiftResolver({ apiKey: "k", accountId: "1", fetch: counting }).resolveDocument(TEXT, SPANS);
     assert.equal(calls.length, 3);
     assert.deepEqual(res.mentions.map((m) => m.entity.id), ["Q0", "Q24", "Q30", "Q47", "Q54"]);
     assert.equal(res.credits, undefined);                      // the third request had no header
-    const all = await new WordLiftResolver({ apiKey: "k", accountId: "1", fetch: engine([], { headers: { "X-Wordlift-Consumption": "1" } }) }).resolveDocument(TEXT, SPANS);
+    const all = await new WordLiftResolver({ apiKey: "k", accountId: "1", fetch: engine([], { headers: { "X-Wordlift-Cost": "1" } }) }).resolveDocument(TEXT, SPANS);
     assert.deepEqual([all.requests, all.credits], [3, 3]);
   } finally {
     WordLiftResolver.MAX_MENTIONS_PER_REQUEST = saved;
@@ -155,8 +155,8 @@ test("problemOf reads a body once, from Problem JSON, another object, text or no
 
 test("credits are read from the header when it is a number", async () => {
   const ok = { mentions: [], dataset_uri: "wikidata://public", language: "en", processing_time_ms: 1 };
-  const withCredits = async () => new Response(JSON.stringify(ok), { status: 200, headers: { "X-Wordlift-Consumption": "6" } });
+  const withCredits = async () => new Response(JSON.stringify(ok), { status: 200, headers: { "X-Wordlift-Cost": "6" } });
   assert.equal((await new WordLiftResolver({ apiKey: "k", accountId: "1", fetch: withCredits }).resolve({ text: TEXT })).credits, 6);
-  const junk = async () => new Response(JSON.stringify(ok), { status: 200, headers: { "X-Wordlift-Consumption": "many" } });
+  const junk = async () => new Response(JSON.stringify(ok), { status: 200, headers: { "X-Wordlift-Cost": "many" } });
   assert.equal((await new WordLiftResolver({ apiKey: "k", accountId: "1", fetch: junk }).resolve({ text: TEXT })).credits, undefined);
 });

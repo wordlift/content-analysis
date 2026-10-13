@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.4 — unreleased
+
+- **The cost header is `X-Wordlift-Cost`** (wordlift/content-analysis-engine#57): both clients read
+  a request's cost from `X-Wordlift-Cost`, the header the WordLift gateway books on every route,
+  instead of `X-Wordlift-Consumption`, which the gateway never read (every call was booked as
+  one credit) and the engine no longer sends. `credits` / `diagnostics["credits"]` stay
+  optional: with an engine that still sends only the old name they are absent. Contract and
+  OpenAPI document updated.
+
 ## 0.1.3 — TypeScript client published 2026-10-11 (`@wordlift/resolve@0.1.3`); Python package installs from git
 
 - README: the repository leads with resolve(), says how to get a key (free, 1,000 credits a month),

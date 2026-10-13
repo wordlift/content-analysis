@@ -131,7 +131,7 @@ request. A custom `Resolver` that implements only `resolve()` is adapted and
 called mention by mention with its window. The client never retries on its
 own: a timed-out request may have been served and metered, so the retry policy
 is yours; `diagnostics["credits"]` reports what each request cost
-(`X-Wordlift-Consumption`). A refused key raises `AuthorizationError`, a
+(`X-Wordlift-Cost`). A refused key raises `AuthorizationError`, a
 rejected request `InvalidRequestError`: caller errors stop the batch. A 429 is
 `rate_limited` with `retry_after`; the engine's own 429 also carries its
 problem `code`, the gateway's allowance block is plain text and does not.
