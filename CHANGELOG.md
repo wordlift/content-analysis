@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.4 — unreleased
+## 0.1.4 — TypeScript client published 2026-10-13 (`@wordlift/resolve@0.1.4`); Python package installs from git
 
 - **The cost header is `X-Wordlift-Cost`** (wordlift/content-analysis-engine#57): both clients read
   a request's cost from `X-Wordlift-Cost`, the header the WordLift gateway books on every route,
