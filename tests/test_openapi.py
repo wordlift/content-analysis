@@ -46,7 +46,7 @@ class OpenApiDocument(unittest.TestCase):
         self.assertEqual(S["ResolvedEntity"]["required"], ["id", "label"])      # types and same_as are optional
         responses = DOC["paths"]["/accounts/{accountId}/resolve"]["post"]["responses"]
         self.assertTrue({"200", "401", "422", "429"} <= set(responses))
-        self.assertIn("X-Wordlift-Consumption", responses["200"]["headers"])
+        self.assertIn("X-Wordlift-Cost", responses["200"]["headers"])
         self.assertIn("X-RateLimit-Remaining", responses["429"]["headers"])
 
 

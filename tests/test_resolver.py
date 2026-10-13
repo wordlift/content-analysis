@@ -280,7 +280,7 @@ class BatchResolutionTests(unittest.TestCase):
     def test_one_request_carries_every_span_and_the_vocabulary_once(self):
         calls = []
         vocab = [{"id": "v:apple", "name": "Apple", "description": "x" * 1000}]
-        resolver = self.resolver(self.engine(calls, headers={"X-Wordlift-Consumption": "2"}), dataset=vocab)
+        resolver = self.resolver(self.engine(calls, headers={"X-Wordlift-Cost": "2"}), dataset=vocab)
         res = run(self.TEXT, retrieve=lambda m, c: [], resolver=resolver, mentions=self.spans(), language="en")
         self.assertEqual(len(calls), 1)                                   # was five requests
         self.assertEqual(len(calls[0]["mentions"]), 5)

@@ -179,8 +179,12 @@ not support the match. Resolved entities carry the dataset's own `id`, `label`,
 Every successful response carries the request's cost in smart credits:
 
 ```
-X-Wordlift-Consumption: 2
+X-Wordlift-Cost: 2
 ```
+
+`X-Wordlift-Cost` is the header the WordLift gateway uses for a request's cost
+on every route; it replaces `X-Wordlift-Consumption`, which the engine no
+longer sends.
 
 One credit per request plus one per 1,000 characters of `text`, so a sentence
 costs 2 and a 5,000-character article costs 6. Resolving against your own
