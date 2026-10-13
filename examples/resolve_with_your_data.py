@@ -43,7 +43,7 @@ def show(title: str, resolver: WordLiftResolver) -> None:
 def main() -> None:
     key = os.environ.get("WL_KEY")
     if not key:
-        raise SystemExit("set WL_KEY to your WordLift API key")
+        raise SystemExit("set WL_KEY to your WordLift API key (free key: https://wordlift.io/resolve/#access)")
     show("1. Your WordLift graph (derived from the key)",
          WordLiftResolver(api_key=key, dataset_uri=WordLiftResolver.WORDLIFT_GRAPH))
     show("2. An inline vocabulary", WordLiftResolver(api_key=key, dataset=VOCABULARY))

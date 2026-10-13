@@ -32,7 +32,7 @@ def retrieve(mention: Mention, context: str) -> list[Candidate]:
 def main() -> None:
     key = os.environ.get("WL_KEY")
     if not key:
-        raise SystemExit("set WL_KEY to your WordLift API key")
+        raise SystemExit("set WL_KEY to your WordLift API key (free key: https://wordlift.io/resolve/#access)")
     resolver = WordLiftResolver(api_key=key)
     for r in run(TEXT, retrieve=retrieve, resolver=resolver, mentions=MENTIONS, language="en"):
         if r.resolved:
