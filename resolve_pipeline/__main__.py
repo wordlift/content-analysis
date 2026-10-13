@@ -49,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
                     help="send the request to this URL instead, e.g. the engine's own " + WordLiftResolver.ENGINE_ENDPOINT)
     args = ap.parse_args(argv)
     if not args.key:
-        ap.error("no API key: set WL_KEY or pass --key")
+        ap.error("no API key: set WL_KEY or pass --key (free key: https://wordlift.io/resolve/#access)")
 
     body: dict = {"text": args.text, "language": args.language, "include": args.include}
     if args.dataset_uri:

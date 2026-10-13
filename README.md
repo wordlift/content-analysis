@@ -23,6 +23,10 @@
   <a href="https://wordlift.io/resolve/"><img alt="resolve()" src="https://img.shields.io/badge/resolve()-EN%20IT%20FR%20DE%20ES%20PT-3452DB.svg"></a>
 </p>
 
+<p align="center">
+  <a href="https://wordlift.io/resolve/#access"><img alt="Get a free API key" src="https://img.shields.io/badge/Get%20a%20free%20API%20key-1%2C000%20requests%20a%20month-22A286?style=for-the-badge"></a>
+</p>
+
 ---
 
 **What it does.** You extract mentions from a document, look them up in your own
@@ -41,7 +45,7 @@ Open where you build. Proprietary where we resolve.
 
 Every call to the hosted API needs a WordLift key in `Authorization: Key <key>`.
 
-- **New here:** request a free key at [wordlift.io/resolve](https://wordlift.io/resolve/#access).
+- **New here:** [request a free key](https://wordlift.io/resolve/#access): name, email and use case, and the key arrives by email.
   It comes with 1,000 requests a month. A call counts as one request, plus one per
   1,000 characters of text, so a sentence counts 2 and a 5,000-character article 6.
   Past the allowance the API answers `429` with the reset time; nothing is charged.
@@ -59,7 +63,7 @@ your account id from it, so nothing else is configured.
 
 ```bash
 pip install "resolve-pipeline @ git+https://github.com/wordlift/content-analysis.git"
-export WL_KEY=...      # WordLift API key, only for WordLiftResolver
+export WL_KEY=...      # free key: https://wordlift.io/resolve/#access (only WordLiftResolver needs it)
 python -m resolve_pipeline "Apple opened a new store in Rome." --language en
 ```
 
