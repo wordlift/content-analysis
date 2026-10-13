@@ -8,7 +8,7 @@ Zero dependencies, uses the global `fetch` (Node 18+, browsers, edge runtimes).
 npm install @wordlift/resolve
 ```
 
-You need a WordLift key (free for individual developers, 1,000 credits a month: request it at
+You need a WordLift key (free for individual developers, 1,000 requests a month: request it at
 [wordlift.io/resolve](https://wordlift.io/resolve/#access)). The client reads your account id from the
 key, so the key is the only configuration.
 
@@ -50,13 +50,13 @@ before anything is sent, and resolves them in as few requests as possible: one
 per 200 mentions and per 100,000 characters (the engine's text limit; long
 documents are cut at whitespace, never through a mention). With an inline
 `dataset` the vocabulary travels once. Rows come back in the order of your
-mentions with document offsets, and `credits` says what the document cost.
+mentions with document offsets, and `credits` says what the document counted against your allowance.
 
 ```ts
 const doc = await wl.resolveDocument(article, spans, { language: "en" });
 doc.mentions[3].entity?.id;   // same order as `spans`, offsets in `article`
 doc.requests;                 // 1 for most articles
-doc.credits;                  // smart credits charged, summed over the requests
+doc.credits;                  // requests counted against the allowance, summed over the calls
 ```
 
 The engine decides each mention on the 400 characters either side of it, so one
