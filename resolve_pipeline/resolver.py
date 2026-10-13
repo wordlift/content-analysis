@@ -396,7 +396,7 @@ class WordLiftResolver:
         there is one. The client never retries on its own: a timed-out request
         may have been served and metered, so the retry policy is the caller's,
         and `diagnostics["credits"]` reports what each request cost
-        (`X-Wordlift-Consumption`).
+        (`X-Wordlift-Cost`).
         """
         if len(mentions) != len(candidates):
             raise ValueError("one candidate list per mention")
@@ -467,7 +467,7 @@ class WordLiftResolver:
 
     @staticmethod
     def _with_credits(results: list[Resolution], response: httpx.Response) -> list[Resolution]:
-        credits = response.headers.get("X-Wordlift-Consumption")
+        credits = response.headers.get("X-Wordlift-Cost")
         if credits is None:
             return results
         return [replace(r, diagnostics={**r.diagnostics, "credits": credits}) for r in results]

@@ -124,7 +124,7 @@ export interface ResolveResponse {
   language: string;
   processing_time_ms: number;
   engine?: string;
-  /** Smart credits this request cost (`X-Wordlift-Consumption`), when the header was present. */
+  /** What this call counted against the monthly allowance of requests (`X-Wordlift-Cost`), when the header was present. */
   credits?: number;
 }
 
@@ -280,7 +280,7 @@ export interface DocumentResolution {
   mentions: MentionResolution[];
   /** Requests sent: one per 200 mentions and per 100,000 characters. */
   requests: number;
-  /** Smart credits charged, summed over the requests (`X-Wordlift-Consumption`), when every request reported them. */
+  /** What the document counted against the monthly allowance of requests, summed over the calls (`X-Wordlift-Cost`), when every call reported it. */
   credits?: number;
 }
 
@@ -408,7 +408,7 @@ export class WordLiftResolver {
     const { response, parsed } = await this.send(url, { method: "POST", body: JSON.stringify(body) });
     if (!response.ok) throw failure(problemOf(response.status, parsed, response.headers));
     const result = validateResponse(parsed);
-    const credits = response.headers.get("X-Wordlift-Consumption");
+    const credits = response.headers.get("X-Wordlift-Cost");
     if (credits !== null && /^\d+(\.\d+)?$/.test(credits.trim())) result.credits = Number(credits);
     return result;
   }
