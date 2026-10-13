@@ -56,7 +56,7 @@
               }
             },
             "headers": {
-              "X-Wordlift-Consumption": {
+              "X-Wordlift-Cost": {
                 "description": "The request's cost in smart credits: one per request plus one per 1,000 characters of text.",
                 "schema": {
                   "type": "integer",
