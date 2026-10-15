@@ -152,7 +152,7 @@ with the same key; the clients read it from the key on first use, so they take
 only the key. There is no other public address: `resolve.wordlift.io` is the
 gateway's upstream and answers 404 to direct calls.
 
-Six languages: English, Italian, French, German, Spanish, Portuguese. Japanese and Chinese answer too and are measured on the same gold sets, at a lower level (F1 77.2 and 68.7 against Google's 81.4 and 74.8; [benchmark](https://wordlift.io/resolve/#benchmarks))
+Six languages: English, Italian, French, German, Spanish, Portuguese. Japanese and Chinese are experimental: measured on small gold sets (79 and 78 mentions), currently behind Google (F1 77.2 and 68.7 against 81.4 and 74.8; [benchmark](https://wordlift.io/resolve/#benchmarks))
 (`language` is detected when omitted). Full request and response contract:
 [`docs/resolve-contract.md`](docs/resolve-contract.md).
 
