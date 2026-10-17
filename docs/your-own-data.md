@@ -65,8 +65,21 @@ surface forms from `alternateName`, `rdfs:label`, `skos:prefLabel`,
 compares with the context); `rdf:type` and `sameAs`. Content items (articles,
 web pages) are skipped unless the graph itself annotates other content with
 them (`schema:mentions` / `schema:about`), which is how WordLift models topic
-pages. The first call on a graph takes a few seconds while it is read; later
-calls reuse it for about ten minutes.
+pages.
+
+**The first call on a graph.** The engine reads the graph before it answers
+from it: seconds for a few hundred entities, several minutes for hundreds of
+thousands. The read happens again after a few hours without calls and when a
+new server starts; edits to the graph are picked up after about ten minutes.
+While it is read, a call waits about 20 seconds and then answers `503` with the
+code `dataset_warming` and a `Retry-After` header; nothing is resolved or
+charged, and the read goes on. The clients do not retry on their own. In
+Python the mentions come back `unresolved` with reason `resolver_unavailable`
+and `diagnostics` `{"status": 503, "code": "dataset_warming", "retry_after": ...}`;
+in TypeScript a `ResolverUnavailableError` carries `code` and `retryAfter`.
+Wait the given seconds and send the request again until it answers. Before a
+batch, send one call first: calls sent in parallel during the read all get
+`503`.
 
 Python:
 
@@ -255,8 +268,9 @@ The same ordering works with an inline vocabulary: `"dataset_uri": "inline,wikid
   1). They turn transport failures into `resolver_unavailable`, never into a
   guess.
 - **Size and speed.** Inline: up to 5,000 entities per request. Graph: the
-  first call reads it (a few seconds for a few hundred entities), then it is
-  cached for about ten minutes per key.
+  first call reads it (seconds for a few hundred entities, several minutes for
+  hundreds of thousands), answering `503 dataset_warming` with `Retry-After`
+  until it is ready; then it is reused, and edits show after about ten minutes.
 
 ## Runnable example
 

@@ -91,4 +91,9 @@ assuming it.
   with the client's former 400-character window. If the engine's window
   changes, this note and the README sentence about `context_radius` change
   with it.
+- Engine behaviour `docs/your-own-data.md` describes, checked on 2026-10-17:
+  the first call on a user graph waits about 20 s, then answers 503
+  `dataset_warming` with `Retry-After` while the read continues; nothing is
+  charged (`X-Wordlift-Cost` 0); the read recurs after a few hours idle or on
+  a new server. Change that page if the engine's wait or caching changes.
 
