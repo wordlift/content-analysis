@@ -270,6 +270,27 @@ python -m resolve_pipeline.evaluate --cases datasets/en_gold.json --predictions 
 (ids offered to the resolver) and `prediction` (id or `null`). Six development
 gold sets, one Wikidata QID per mention, are in [`datasets/`](datasets/).
 
+### Against other services
+
+`tools/compare.py` runs resolve() and other entity linking services on the
+same gold mentions and scores them with one rule: an answer counts only when
+its Wikidata ID equals the gold ID.
+
+```bash
+python tools/compare.py --datasets datasets --out results
+```
+
+It runs every system configured in the environment and lists the others with
+what they need: resolve() through the API (`WL_KEY`) or the open demo (no
+key), Wikidata search taking the first hit (no key), Entity-Fishing
+(`EF_URL`), Dandelion (`DANDELION_TOKEN`), Google Cloud Natural Language
+(`GOOGLE_API_KEY`) and Azure Entity Linking (`AZURE_LANGUAGE_ENDPOINT`,
+`AZURE_LANGUAGE_KEY`). Services that find their own mentions are matched to
+the gold mention by span. Answers are cached under `results/cache`, so a
+re-run only re-scores. It writes `summary.md` (the tables), `report.json`
+(every number) and `rows.jsonl` (every answer). These are development sets,
+not held-out data: run it on your own texts before you choose.
+
 ## Status of the NIL-safe decision layer
 
 The endpoint runs on WordLift's production linker today. A stricter,
@@ -311,6 +332,7 @@ clients/mcp/     experimental local MCP adapter (stdio)
 datasets/        development gold sets (en, it, fr, de, es, pt)
 docs/            resolve() contract, your-own-data guide, OpenAPI, logos
 examples/        runnable scripts
+tools/           compare.py: resolve() and other services on the gold sets
 tests/           no network, no GPU, no key needed
 ```
 

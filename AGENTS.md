@@ -44,6 +44,7 @@ clients/typescript/        @wordlift/resolve, zero dependencies, tests under tes
 docs/                      contract, your-own-data guide, OpenAPI document, logos
 datasets/                  development gold sets: one Wikidata QID per mention
 examples/                  runnable scripts (need WL_KEY)
+tools/compare.py           the comparison harness: live services, keys from the environment
 tests/                     Python tests: no network, no GPU, no key
 ```
 

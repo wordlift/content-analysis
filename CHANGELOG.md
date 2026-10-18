@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- `tools/compare.py`: runs resolve() (API or open demo), Wikidata search (first hit),
+  Entity-Fishing, Dandelion, Google Cloud Natural Language and Azure Entity Linking on the
+  development gold sets and scores them with one rule; systems without configuration are
+  listed and skipped, answers are cached, outputs are `summary.md`, `report.json` and
+  `rows.jsonl`. Tests run offline against mocked services.
+
 ## 0.1.4 — TypeScript client published 2026-10-13 (`@wordlift/resolve@0.1.4`); Python package installs from git
 
 - Wording: the allowance is in resolve() requests (a call counts as one request plus one per
