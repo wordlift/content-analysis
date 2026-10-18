@@ -44,6 +44,7 @@ clients/typescript/        @wordlift/resolve, zero dependencies, tests under tes
 docs/                      contract, your-own-data guide, OpenAPI document, logos
 datasets/                  development gold sets: one Wikidata QID per mention
 examples/                  runnable scripts (need WL_KEY)
+tools/compare.py           the comparison harness: live services, keys from the environment
 tests/                     Python tests: no network, no GPU, no key
 ```
 
@@ -91,4 +92,13 @@ assuming it.
   with the client's former 400-character window. If the engine's window
   changes, this note and the README sentence about `context_radius` change
   with it.
+- Engine and service behaviour `tools/compare.py` relies on, checked on
+  2026-10-18: the open demo (`resolve.wordlift.io/demo/resolve`, listed in
+  llms.txt) takes at most 600 characters and 16 spans and allows 10 requests a
+  minute per IP; ranked rows carry `signals.path` (`fast`, `reranked`); with no
+  `mentions` the engine detects them itself at the request's `confidence`
+  (0.5 by default). Google is called through v1 `analyzeEntities`, the only
+  version that returns `metadata.wikipedia_url`; Azure Entity Linking answers
+  English and Spanish only. If any of these change, the tool and the README
+  section "Against other services" change with them.
 
