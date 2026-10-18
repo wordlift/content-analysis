@@ -16,10 +16,12 @@ configuration is in the environment and is skipped otherwise:
 
 Scoring. An answer counts only when its Wikidata ID equals the gold ID.
 Precision is correct out of answered, recall is correct out of every gold
-mention, F1 their harmonic mean. A system that finds its own mentions is
-matched to a gold mention by span: the same span, else the found mention that
-overlaps it most. A gold mention it skips counts as no answer, and so does a
-mention in a language the service does not support (Azure: en, es). Each
+mention, F1 their harmonic mean. A system that finds its own mentions gets the
+benefit of the doubt: a link on the gold span counts, right or wrong; a link on
+an overlapping span counts only when it is the gold ID ("o Porto" for "Porto"),
+and is otherwise a reading of another mention ("north west of England" for
+"England"), so no answer. A gold mention it skips counts as no answer, and so
+does a mention in a language the service does not support (Azure: en, es). Each
 service runs with its defaults (Dandelion's `min_confidence` 0.6). Answers
 given as Wikipedia articles are mapped to Wikidata through that edition's page
 props, redirects followed. The Wikidata search uses the document's language.
@@ -152,23 +154,25 @@ class Found:
 
 
 def align(gold: Iterable[Gold], found: list[Found]) -> list[Answer]:
-    """The answer for each gold mention among the mentions a service found itself: the one with
-    the same span, else the one overlapping it most (the earlier on a tie), else no answer.
-    Lenient on purpose: a boundary difference ("o Porto" for "Porto") never costs a link."""
+    """The answer for each gold mention among the mentions a service found itself.
+
+    The benefit of the doubt goes to the service. A link on the same span counts, right or
+    wrong. A link on another span that overlaps counts when it is the gold ID, so a boundary
+    difference ("o Porto" for "Porto") never costs a link. When it is another ID the service
+    read another mention ("north west of England" for "England"): the gold mention gets no
+    answer, and the other link is kept in the detail."""
     answers = []
     for g in gold:
-        best, most = None, 0
-        for f in found:
-            if (f.start, f.end) == (g.start, g.end):
-                best = f
-                break
-            overlap = min(g.end, f.end) - max(g.start, f.start)
-            if overlap > most:
-                best, most = f, overlap
-        if best is None:
-            answers.append(Answer(NO_ANSWER))
+        exact = next((f for f in found if (f.start, f.end) == (g.start, g.end) and f.qid), None)
+        scored = [(min(g.end, f.end) - max(g.start, f.start), f) for f in found if f.qid]
+        near = [f for _, f in sorted((p for p in scored if p[0] > 0), key=lambda p: (-p[0], p[1].start))]
+        hit = exact or next((f for f in near if canonical_id(f.qid) == g.qid), None)
+        if hit is not None:
+            answers.append(Answer(LINKED, hit.qid, hit.text, dict(hit.detail)))
+        elif near:
+            answers.append(Answer(NO_ANSWER, found=near[0].text, detail={**near[0].detail, "other_span_qid": near[0].qid}))
         else:
-            answers.append(Answer(LINKED if best.qid else NO_ANSWER, best.qid, best.text, dict(best.detail)))
+            answers.append(Answer(NO_ANSWER))
     return answers
 
 

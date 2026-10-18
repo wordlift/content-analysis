@@ -85,6 +85,15 @@ class ScoringTests(unittest.TestCase):
         self.assertEqual([x.qid for x in a[:2]], ["Q1130849", "Q9616"])
         self.assertEqual(compare.align(d.gold, [])[0].status, compare.NO_ANSWER)
 
+    def test_another_span_with_another_id_is_no_answer_but_the_gold_span_is_judged(self):
+        d = doc("Liverpool is in north west England.", gold={"England": {"qid": "Q21"}, "Liverpool": {"qid": "Q24826"}})
+        found = [compare.Found(16, 34, "north west England", "Q47967"), compare.Found(0, 9, "Liverpool", "Q1130849"),
+                 compare.Found(0, 15, "Liverpool is in", "Q24826")]
+        england, liverpool = compare.align(d.gold, found)
+        self.assertEqual((england.status, england.found), (compare.NO_ANSWER, "north west England"))
+        self.assertEqual(england.detail["other_span_qid"], "Q47967")
+        self.assertEqual((liverpool.status, liverpool.qid), (compare.LINKED, "Q1130849"))
+
     def test_tally_counts_unsupported_as_no_answer_and_errors_apart(self):
         d = doc()
         pairs = list(zip(d.gold, [compare.Answer(compare.LINKED, "wd:Q1130849"), compare.Answer(compare.LINKED, "Q1"),
