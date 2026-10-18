@@ -290,7 +290,8 @@ class MainTests(unittest.TestCase):
     def routes(self):
         def resolve(request):
             body = json.loads(request.content)
-            rows = [{**m, "status": "resolved", "entity": {"id": "Q1130849"}, "signals": {"path": "fast"}} for m in body["mentions"]]
+            spans = body.get("mentions", [])
+            rows = [{**m, "status": "resolved", "entity": {"id": "Q1130849"}, "signals": {"path": "fast"}} for m in spans]
             return httpx.Response(200, json={"mentions": rows})
         return {("api.wordlift.io", "/accounts/me"): lambda r: httpx.Response(200, json={"accountId": 7}),
                 ("api.wordlift.io", "/accounts/7/resolve"): resolve,
@@ -310,7 +311,8 @@ class MainTests(unittest.TestCase):
             self.assertEqual(compare.main(argv, env=env, client=rec.client(), sleep=lambda s: None), 0)
             report = json.loads(Path(out, "report.json").read_text())
             self.assertEqual({k: v["status"] for k, v in report["systems"].items()},
-                             {"resolve": "ran", "resolve-demo": "ran", "wikidata": "ran", "entity-fishing": "skipped",
+                             {"resolve": "ran", "resolve-demo": "ran", "resolve-detect": "ran", "wikidata": "ran",
+                              "entity-fishing": "skipped",
                               "dandelion": "skipped", "google": "failed", "azure": "skipped"})
             self.assertEqual(report["systems"]["resolve"]["overall"]["correct"], 1)
             self.assertEqual(report["systems"]["resolve"]["paths"]["fast"]["answered"], 4)
@@ -319,10 +321,11 @@ class MainTests(unittest.TestCase):
             self.assertIn("| resolve() (API) | 25.0 | 25.0 | 25.0 | 1 | 3 | 0 |", summary)
             self.assertIn("- Dandelion: set DANDELION_TOKEN", summary)
             rows = [json.loads(line) for line in Path(out, "rows.jsonl").read_text().splitlines()]
-            self.assertEqual(len(rows), 3 * 4)
+            self.assertEqual(len(rows), 4 * 4)
             sent = len([r for r in rec.requests if "googleapis" not in r.url.host])
             again = Recorder(self.routes())
-            compare.main(argv + ["--systems", "resolve,resolve-demo,wikidata"], env=env, client=again.client(), sleep=lambda s: None)
+            compare.main(argv + ["--systems", "resolve,resolve-demo,resolve-detect,wikidata"], env=env, client=again.client(),
+                         sleep=lambda s: None)
             self.assertGreater(sent, 0)
             self.assertEqual([r.url.path for r in again.requests], [])
 
@@ -350,3 +353,23 @@ class MainTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ResolveDetectTests(unittest.TestCase):
+    def test_sends_the_text_alone_and_aligns_by_span(self):
+        def resolve(request):
+            body = json.loads(request.content)
+            self.assertNotIn("mentions", body)
+            return httpx.Response(200, json={"mentions": [
+                {"text": "Liverpool", "start": 0, "end": 9, "status": "resolved", "entity": {"id": "wd:Q1130849"},
+                 "signals": {"path": "fast"}},
+                {"text": "Anfield", "start": 26, "end": 33, "status": "unresolved", "reason": "low_relevance"}]})
+        rec = Recorder({("api.wordlift.io", "/accounts/me"): lambda r: httpx.Response(200, json={"accountId": 9}),
+                        ("api.wordlift.io", "/accounts/9/resolve"): resolve})
+        with tempfile.TemporaryDirectory() as out:
+            system = compare.ResolveDetect.from_env({"WL_KEY": "k"}, services(rec, out))
+            answers = system.answer(doc())
+            self.assertIsNone(compare.ResolveDetect.from_env({}, services(rec, out)))
+        self.assertEqual([(a.status, a.qid) for a in answers],
+                         [(compare.LINKED, "Q1130849"), (compare.NO_ANSWER, None), (compare.NO_ANSWER, None)])
+        self.assertEqual(answers[0].detail["path"], "fast")

@@ -281,16 +281,28 @@ python tools/compare.py --datasets datasets --out results
 ```
 
 It runs every system configured in the environment and lists the others with
-what they need: resolve() through the API (`WL_KEY`) or the open demo (no
-key), Wikidata search taking the first hit (no key), Entity-Fishing
+what they need: resolve() through the API with the mentions given (`WL_KEY`),
+finding its own mentions (`resolve-detect`, same key) or through the open demo
+(no key), Wikidata search taking the first hit (no key), Entity-Fishing
 (`EF_URL`), Dandelion (`DANDELION_TOKEN`), Google Cloud Natural Language
-(`GOOGLE_API_KEY`) and Azure Entity Linking (`AZURE_LANGUAGE_ENDPOINT`,
+(`GOOGLE_API_KEY`, or `GOOGLE_ACCESS_TOKEN` from `gcloud auth
+print-access-token`) and Azure Entity Linking (`AZURE_LANGUAGE_ENDPOINT`,
 `AZURE_LANGUAGE_KEY`). Services that find their own mentions get the benefit
 of the doubt: a link on the gold span counts right or wrong, a link on an
-overlapping span counts only when it is right. Answers are cached under `results/cache`, so a
-re-run only re-scores. It writes `summary.md` (the tables), `report.json`
-(every number) and `rows.jsonl` (every answer). These are development sets,
-not held-out data: run it on your own texts before you choose.
+overlapping span counts only when it is right. Answers are cached under
+`results/cache`, so a re-run only re-scores. It writes `summary.md` (the
+tables), `report.json` (every number) and `rows.jsonl` (every answer).
+
+The development sets are short sentences built around ambiguous names and are
+not held-out data. For a test nobody tuned on, use VoxEL (Rosales-Méndez,
+Hogan and Poblete, ISWC 2018, CC BY 4.0: the same 15 news articles in German,
+English, Spanish, French and Italian):
+
+```bash
+python tools/voxel.py --out results/voxel
+python tools/compare.py --datasets results/voxel --out results/voxel-run \
+    --about "VoxEL (ISWC 2018, CC BY 4.0): news in five languages."
+```
 
 ## Status of the NIL-safe decision layer
 

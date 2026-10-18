@@ -449,6 +449,34 @@ class ResolveDemo(System):
         return [resolution_answer(row) for row in self.cache.get(body, call)]
 
 
+class ResolveDetect(System):
+    """resolve() finding its own mentions: the text alone, scored by span like the other detecting services."""
+    name, title, needs = "resolve-detect", "resolve() (API, own mentions)", "WL_KEY"
+    gets_spans = False
+
+    def __init__(self, resolver: WordLiftResolver, key: str, http: Http, cache: Cache):
+        self.resolver, self.key, self.http, self.cache = resolver, key, http, cache
+
+    @classmethod
+    def from_env(cls, env: Mapping[str, str], services: Services) -> System | None:
+        if not env.get("WL_KEY"):
+            return None
+        resolver = WordLiftResolver(env["WL_KEY"], client=services.http.client, timeout=60.0)
+        return cls(resolver, env["WL_KEY"], services.http, services.cache(cls.name))
+
+    def answer(self, doc: Doc) -> list[Answer]:
+        body = {"text": doc.text, "language": doc.lang}
+        raw = self.cache.get(body, lambda: self.http.json("POST", self.resolver.endpoint, json=body,
+                                                          headers={"Authorization": f"Key {self.key}"}))
+        found = []
+        for m in raw.get("mentions") or []:
+            entity = m.get("entity") or {}
+            qid = canonical_id(entity.get("id")) if m.get("status") == RESOLVED and entity.get("id") else None
+            found.append(Found(m["start"], m["end"], m.get("text", ""), qid,
+                               {"label": entity.get("label"), "score": m.get("score"), "path": (m.get("signals") or {}).get("path")}))
+        return align(doc.gold, found)
+
+
 class WikidataFirstHit(System):
     name, title, needs = "wikidata", "Wikidata search, first hit", ""
 
@@ -589,7 +617,7 @@ class Azure(System):
         return raw
 
 
-SYSTEMS: list[type[System]] = [ResolveAPI, ResolveDemo, WikidataFirstHit, EntityFishing, Dandelion, Google, Azure]
+SYSTEMS: list[type[System]] = [ResolveAPI, ResolveDemo, ResolveDetect, WikidataFirstHit, EntityFishing, Dandelion, Google, Azure]
 
 
 # --- running and scoring ------------------------------------------------------------------------
@@ -673,8 +701,7 @@ def summary_md(report: dict[str, Any], langs: list[str]) -> str:
     ran = {name: s for name, s in report["systems"].items() if s["status"] == "ran"}
     run = report["run"]
     lines = [f"# Entity linking compared, {run['date']}", "",
-             f"{run['documents']} documents, {run['mentions']} gold mentions, languages {', '.join(langs)}. "
-             "These are development sets, not held-out data.", "",
+             f"{run['documents']} documents, {run['mentions']} gold mentions, languages {', '.join(langs)}. " + run["about"], "",
              "| System | Precision | Recall | F1 | Correct | Wrong | No answer |", "| --- | --- | --- | --- | --- | --- | --- |"]
     notes = []
     for s in ran.values():
@@ -720,6 +747,8 @@ def main(argv: list[str] | None = None, env: Mapping[str, str] | None = None, cl
     ap.add_argument("--out", type=Path, default=Path("results"), help="where the outputs and the answer cache go")
     ap.add_argument("--systems", default="", help="comma-separated names; default: every configured system")
     ap.add_argument("--limit", type=int, default=0, help="only the first N documents of each set (a smoke test)")
+    ap.add_argument("--about", default="These are development sets, not held-out data.",
+                    help="the sentence under the summary's title that says what the sets are")
     args = ap.parse_args(argv)
     env = os.environ if env is None else env
     log = lambda line: print(line, file=sys.stderr)
@@ -735,7 +764,7 @@ def main(argv: list[str] | None = None, env: Mapping[str, str] | None = None, cl
     langs = language_order(docs)
     datasets = sorted({d.dataset for d in docs})
     report: dict[str, Any] = {
-        "run": {"date": date.today().isoformat(), "documents": len(docs), "mentions": sum(len(d.gold) for d in docs),
+        "run": {"date": date.today().isoformat(), "about": args.about, "documents": len(docs), "mentions": sum(len(d.gold) for d in docs),
                 "datasets": {name: hashlib.sha256((args.datasets / f"{name}_gold.json").read_bytes()).hexdigest() for name in datasets}},
         "systems": {}, "head_to_head": {}, "reference": None}
     results: dict[str, list[tuple[Gold, Answer]]] = {}
@@ -760,7 +789,7 @@ def main(argv: list[str] | None = None, env: Mapping[str, str] | None = None, cl
             results[cls.name] = pairs
             entry.update(status="ran", gets_spans=system.gets_spans, overall=tally(pairs),
                          by_language={x: tally([p for p in pairs if p[0].lang == x]) for x in langs})
-            if isinstance(system, (ResolveAPI, ResolveDemo)):
+            if isinstance(system, (ResolveAPI, ResolveDemo, ResolveDetect)):
                 entry["paths"] = by_path(pairs)
     finally:
         if own_client:
@@ -770,7 +799,7 @@ def main(argv: list[str] | None = None, env: Mapping[str, str] | None = None, cl
     report["reference"] = reference
     if reference:
         report["head_to_head"] = {name: head_to_head(results[reference], pairs) for name, pairs in results.items()
-                                  if name not in ("resolve", "resolve-demo")}
+                                  if name not in ("resolve", "resolve-demo", "resolve-detect")}
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     with (args.out / "rows.jsonl").open("w", encoding="utf-8") as f:
