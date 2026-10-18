@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- `tools/compare.py`: runs resolve() (API or open demo), Wikidata search (first hit),
+  Entity-Fishing, Dandelion, Google Cloud Natural Language and Azure Entity Linking on the
+  development gold sets and scores them with one rule; systems without configuration are
+  listed and skipped, answers are cached, outputs are `summary.md`, `report.json` and
+  `rows.jsonl`. resolve() also runs finding its own mentions (`resolve-detect`), scored by
+  span like the services that detect. Tests run offline against mocked services.
+- `tools/voxel.py`: converts VoxEL (ISWC 2018, CC BY 4.0) into compare.py's gold format, one
+  document per article with span-level mentions mapped to Wikidata; compare.py reads that
+  format and lets a system declare size limits (the open demo: 600 characters, 16 spans).
+
 ## 0.1.4 — TypeScript client published 2026-10-13 (`@wordlift/resolve@0.1.4`); Python package installs from git
 
 - Wording: the allowance is in resolve() requests (a call counts as one request plus one per

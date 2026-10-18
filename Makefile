@@ -18,7 +18,7 @@ example:          ## resolve a sentence against the live engine (needs WL_KEY)
 	$(VENV)/bin/python examples/resolve_with_wordlift.py
 
 lint:             ## byte-compile, then style (ruff) and static types (mypy)
-	$(VENV)/bin/python -m compileall -q resolve_pipeline tests examples
+	$(VENV)/bin/python -m compileall -q resolve_pipeline tests examples tools
 	$(VENV)/bin/python -m ruff check .
 	$(VENV)/bin/python -m mypy
 

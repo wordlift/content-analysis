@@ -152,7 +152,7 @@ with the same key; the clients read it from the key on first use, so they take
 only the key. There is no other public address: `resolve.wordlift.io` is the
 gateway's upstream and answers 404 to direct calls.
 
-Six languages: English, Italian, French, German, Spanish, Portuguese; Japanese and Chinese answer too, without a gold set or gate yet
+Six languages: English, Italian, French, German, Spanish, Portuguese. Japanese and Chinese answer too and are measured on the same gold sets, at a lower level (F1 77.2 and 68.7 against Google's 81.4 and 74.8; [benchmark](https://wordlift.io/resolve/#benchmarks))
 (`language` is detected when omitted). Full request and response contract:
 [`docs/resolve-contract.md`](docs/resolve-contract.md).
 
@@ -270,6 +270,40 @@ python -m resolve_pipeline.evaluate --cases datasets/en_gold.json --predictions 
 (ids offered to the resolver) and `prediction` (id or `null`). Six development
 gold sets, one Wikidata QID per mention, are in [`datasets/`](datasets/).
 
+### Against other services
+
+`tools/compare.py` runs resolve() and other entity linking services on the
+same gold mentions and scores them with one rule: an answer counts only when
+its Wikidata ID equals the gold ID.
+
+```bash
+python tools/compare.py --datasets datasets --out results
+```
+
+It runs every system configured in the environment and lists the others with
+what they need: resolve() through the API with the mentions given (`WL_KEY`),
+finding its own mentions (`resolve-detect`, same key) or through the open demo
+(no key), Wikidata search taking the first hit (no key), Entity-Fishing
+(`EF_URL`), Dandelion (`DANDELION_TOKEN`), Google Cloud Natural Language
+(`GOOGLE_API_KEY`, or `GOOGLE_ACCESS_TOKEN` from `gcloud auth
+print-access-token`) and Azure Entity Linking (`AZURE_LANGUAGE_ENDPOINT`,
+`AZURE_LANGUAGE_KEY`). Services that find their own mentions get the benefit
+of the doubt: a link on the gold span counts right or wrong, a link on an
+overlapping span counts only when it is right. Answers are cached under
+`results/cache`, so a re-run only re-scores. It writes `summary.md` (the
+tables), `report.json` (every number) and `rows.jsonl` (every answer).
+
+The development sets are short sentences built around ambiguous names and are
+not held-out data. For a test nobody tuned on, use VoxEL (Rosales-Méndez,
+Hogan and Poblete, ISWC 2018, CC BY 4.0: the same 15 news articles in German,
+English, Spanish, French and Italian):
+
+```bash
+python tools/voxel.py --out results/voxel
+python tools/compare.py --datasets results/voxel --out results/voxel-run \
+    --about "VoxEL (ISWC 2018, CC BY 4.0): news in five languages."
+```
+
 ## Status of the NIL-safe decision layer
 
 The endpoint runs on WordLift's production linker today. A stricter,
@@ -311,6 +345,7 @@ clients/mcp/     experimental local MCP adapter (stdio)
 datasets/        development gold sets (en, it, fr, de, es, pt)
 docs/            resolve() contract, your-own-data guide, OpenAPI, logos
 examples/        runnable scripts
+tools/           compare.py: resolve() and other services on the gold sets
 tests/           no network, no GPU, no key needed
 ```
 
