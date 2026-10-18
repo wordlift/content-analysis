@@ -118,17 +118,26 @@ def place(text: str, names: Iterable[str]) -> dict[str, tuple[int, int]]:
 
 
 def load_docs(folder: Path, limit: int = 0) -> list[Doc]:
-    """Every `<set>_gold.json` in `folder`, in name order: [{"text", "lang", "gold": {name: {"qid"}}}]."""
+    """Every `<set>_gold.json` in `folder`, in name order. A case is {"text", "lang"} with either
+    "gold": {name: {"qid"}} (the development sets: spans inferred by `place`) or
+    "mentions": [{"text", "start", "end", "qid"}] (spans given, as tools/voxel.py writes them)."""
     docs = []
     for path in sorted(folder.glob("*_gold.json")):
         dataset = path.name.removesuffix("_gold.json")
         cases = json.loads(path.read_text(encoding="utf-8"))
         for i, case in enumerate(cases[:limit] if limit else cases):
-            lang = case.get("lang") or dataset
-            spans = place(case["text"], case["gold"])
-            gold = tuple(Gold(dataset, i, lang, name, *spans[name], str(canonical_id(info["qid"])))
-                         for name, info in case["gold"].items())
-            docs.append(Doc(dataset, i, lang, case["text"], gold))
+            lang, text = case.get("lang") or dataset, case["text"]
+            if "mentions" in case:
+                for m in case["mentions"]:
+                    if text[m["start"]:m["end"]] != m["text"]:
+                        raise ValueError(f"{path.name} #{i}: {m['text']!r} is not at {m['start']}:{m['end']}")
+                gold = tuple(Gold(dataset, i, lang, m["text"], m["start"], m["end"], str(canonical_id(m["qid"])))
+                             for m in case["mentions"])
+            else:
+                spans = place(text, case["gold"])
+                gold = tuple(Gold(dataset, i, lang, name, *spans[name], str(canonical_id(info["qid"])))
+                             for name, info in case["gold"].items())
+            docs.append(Doc(dataset, i, lang, text, gold))
     return docs
 
 
@@ -355,6 +364,8 @@ class System:
     title = ""
     needs = ""                                  # what to set when it is skipped
     languages: frozenset[str] | None = None     # None: every language
+    max_chars: int | None = None                # a longer document is not supported
+    max_mentions: int | None = None             # nor one with more gold mentions
     gets_spans = True                           # False: it finds its own mentions
 
     @classmethod
@@ -417,6 +428,7 @@ class ResolveAPI(System):
 
 class ResolveDemo(System):
     name, title, needs = "resolve-demo", "resolve() (open demo)", ""
+    max_chars, max_mentions = 600, 16           # the demo's limits
 
     def __init__(self, http: Http, cache: Cache):
         self.http, self.cache = http, cache
@@ -589,7 +601,9 @@ def run_system(system: System, docs: list[Doc], log: Callable[[str], None]) -> l
     sent = failed = 0
     last: ServiceError | None = None
     for doc in docs:
-        if system.languages is not None and doc.lang not in system.languages:
+        too_long = ((system.max_chars is not None and len(doc.text) > system.max_chars)
+                    or (system.max_mentions is not None and len(doc.gold) > system.max_mentions))
+        if too_long or (system.languages is not None and doc.lang not in system.languages):
             pairs += [(g, Answer(UNSUPPORTED)) for g in doc.gold]
             continue
         sent += 1
@@ -668,7 +682,7 @@ def summary_md(report: dict[str, Any], langs: list[str]) -> str:
         cells = [pct(o["precision"]), pct(o["recall"]), pct(o["f1"]), o["correct"], o["wrong"], o["no_answer"]]
         lines.append(f"| {s['title']} | " + " | ".join(map(str, cells)) + " |")
         if o["unsupported"]:
-            notes.append(f"{s['title']}: {o['unsupported']} mentions in languages it does not support count as no answer.")
+            notes.append(f"{s['title']}: {o['unsupported']} mentions it does not support (language or document size) count as no answer.")
         if o["errors"]:
             notes.append(f"{s['title']}: {o['errors']} mentions failed and count as neither; re-run to retry them before quoting this row.")
     lines += ["", *notes] if notes else []
