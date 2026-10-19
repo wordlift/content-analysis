@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `benchmarks/2026-10-19/`: the published comparison run, summaries and reports for VoxEL and the
+  development sets, with how each service ran and how to reproduce it.
 - `tools/compare.py`: runs resolve() (API or open demo), Wikidata search (first hit),
   Entity-Fishing, Dandelion, Google Cloud Natural Language and Azure Entity Linking on the
   development gold sets and scores them with one rule; systems without configuration are
