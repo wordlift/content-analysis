@@ -1,0 +1,700 @@
+{
+  "run": {
+    "date": "2026-10-19",
+    "about": "These are development sets, not held-out data.",
+    "documents": 126,
+    "mentions": 351,
+    "datasets": {
+      "de": "531f4319a6bf333f728e81fa902367493d45b47a8ea5974fa7519cc6d19e5034",
+      "en": "4a847cf928a7ae809a900b6a2405418cee5d0a0673e1e9669f4bad805c5b3900",
+      "es": "ce3bce835eb680ecacb9f0f488de6920aeae36f08171af62257972b6f016e173",
+      "fr": "7717613eb7130f807ffd793d190927f21c337fca73e08d6f443e7c79dbe2980d",
+      "it": "3508d3ac15a79b2718d21cde12d56085ec5ce3cf7783490c42ffb2ce58d0f2ce",
+      "pt": "18fd69b7fa3bb5c1fd55231aba7d07a25aea3d62f1672dd9ab78183e8e9b9aa0"
+    }
+  },
+  "systems": {
+    "resolve": {
+      "title": "resolve() (API)",
+      "status": "ran",
+      "gets_spans": true,
+      "overall": {
+        "mentions": 351,
+        "correct": 321,
+        "wrong": 23,
+        "no_answer": 7,
+        "unsupported": 0,
+        "errors": 0,
+        "precision": 0.9331395348837209,
+        "recall": 0.9145299145299145,
+        "f1": 0.9237410071942446
+      },
+      "by_language": {
+        "en": {
+          "mentions": 100,
+          "correct": 93,
+          "wrong": 6,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9393939393939394,
+          "recall": 0.93,
+          "f1": 0.9346733668341709
+        },
+        "it": {
+          "mentions": 44,
+          "correct": 39,
+          "wrong": 5,
+          "no_answer": 0,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.8863636363636364,
+          "recall": 0.8863636363636364,
+          "f1": 0.8863636363636365
+        },
+        "fr": {
+          "mentions": 37,
+          "correct": 32,
+          "wrong": 1,
+          "no_answer": 4,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9696969696969697,
+          "recall": 0.8648648648648649,
+          "f1": 0.9142857142857143
+        },
+        "de": {
+          "mentions": 45,
+          "correct": 42,
+          "wrong": 2,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9545454545454546,
+          "recall": 0.9333333333333333,
+          "f1": 0.9438202247191012
+        },
+        "es": {
+          "mentions": 42,
+          "correct": 38,
+          "wrong": 4,
+          "no_answer": 0,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9047619047619048,
+          "recall": 0.9047619047619048,
+          "f1": 0.9047619047619048
+        },
+        "pt": {
+          "mentions": 83,
+          "correct": 77,
+          "wrong": 5,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9390243902439024,
+          "recall": 0.927710843373494,
+          "f1": 0.9333333333333333
+        }
+      },
+      "paths": {
+        "fast": {
+          "answered": 123,
+          "correct": 122,
+          "declined": 0
+        },
+        "reranked": {
+          "answered": 221,
+          "correct": 199,
+          "declined": 7
+        }
+      }
+    },
+    "resolve-demo": {
+      "title": "resolve() (open demo)",
+      "status": "ran",
+      "gets_spans": true,
+      "overall": {
+        "mentions": 351,
+        "correct": 321,
+        "wrong": 23,
+        "no_answer": 7,
+        "unsupported": 0,
+        "errors": 0,
+        "precision": 0.9331395348837209,
+        "recall": 0.9145299145299145,
+        "f1": 0.9237410071942446
+      },
+      "by_language": {
+        "en": {
+          "mentions": 100,
+          "correct": 93,
+          "wrong": 6,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9393939393939394,
+          "recall": 0.93,
+          "f1": 0.9346733668341709
+        },
+        "it": {
+          "mentions": 44,
+          "correct": 39,
+          "wrong": 5,
+          "no_answer": 0,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.8863636363636364,
+          "recall": 0.8863636363636364,
+          "f1": 0.8863636363636365
+        },
+        "fr": {
+          "mentions": 37,
+          "correct": 32,
+          "wrong": 1,
+          "no_answer": 4,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9696969696969697,
+          "recall": 0.8648648648648649,
+          "f1": 0.9142857142857143
+        },
+        "de": {
+          "mentions": 45,
+          "correct": 42,
+          "wrong": 2,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9545454545454546,
+          "recall": 0.9333333333333333,
+          "f1": 0.9438202247191012
+        },
+        "es": {
+          "mentions": 42,
+          "correct": 38,
+          "wrong": 4,
+          "no_answer": 0,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9047619047619048,
+          "recall": 0.9047619047619048,
+          "f1": 0.9047619047619048
+        },
+        "pt": {
+          "mentions": 83,
+          "correct": 77,
+          "wrong": 5,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9390243902439024,
+          "recall": 0.927710843373494,
+          "f1": 0.9333333333333333
+        }
+      },
+      "paths": {
+        "fast": {
+          "answered": 123,
+          "correct": 122,
+          "declined": 0
+        },
+        "reranked": {
+          "answered": 221,
+          "correct": 199,
+          "declined": 7
+        }
+      }
+    },
+    "resolve-detect": {
+      "title": "resolve() (API, own mentions)",
+      "status": "ran",
+      "gets_spans": false,
+      "overall": {
+        "mentions": 351,
+        "correct": 312,
+        "wrong": 16,
+        "no_answer": 23,
+        "unsupported": 0,
+        "errors": 0,
+        "precision": 0.9512195121951219,
+        "recall": 0.8888888888888888,
+        "f1": 0.9189985272459499
+      },
+      "by_language": {
+        "en": {
+          "mentions": 100,
+          "correct": 93,
+          "wrong": 3,
+          "no_answer": 4,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.96875,
+          "recall": 0.93,
+          "f1": 0.9489795918367346
+        },
+        "it": {
+          "mentions": 44,
+          "correct": 39,
+          "wrong": 3,
+          "no_answer": 2,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9285714285714286,
+          "recall": 0.8863636363636364,
+          "f1": 0.9069767441860465
+        },
+        "fr": {
+          "mentions": 37,
+          "correct": 29,
+          "wrong": 2,
+          "no_answer": 6,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9354838709677419,
+          "recall": 0.7837837837837838,
+          "f1": 0.8529411764705881
+        },
+        "de": {
+          "mentions": 45,
+          "correct": 42,
+          "wrong": 1,
+          "no_answer": 2,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9767441860465116,
+          "recall": 0.9333333333333333,
+          "f1": 0.9545454545454545
+        },
+        "es": {
+          "mentions": 42,
+          "correct": 36,
+          "wrong": 3,
+          "no_answer": 3,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9230769230769231,
+          "recall": 0.8571428571428571,
+          "f1": 0.888888888888889
+        },
+        "pt": {
+          "mentions": 83,
+          "correct": 73,
+          "wrong": 4,
+          "no_answer": 6,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.948051948051948,
+          "recall": 0.8795180722891566,
+          "f1": 0.9125
+        }
+      },
+      "paths": {
+        "fast": {
+          "answered": 118,
+          "correct": 117,
+          "declined": 1
+        },
+        "none": {
+          "answered": 0,
+          "correct": 0,
+          "declined": 21
+        },
+        "reranked": {
+          "answered": 210,
+          "correct": 195,
+          "declined": 1
+        }
+      }
+    },
+    "wikidata": {
+      "title": "Wikidata search, first hit",
+      "status": "ran",
+      "gets_spans": true,
+      "overall": {
+        "mentions": 351,
+        "correct": 288,
+        "wrong": 61,
+        "no_answer": 2,
+        "unsupported": 0,
+        "errors": 0,
+        "precision": 0.8252148997134671,
+        "recall": 0.8205128205128205,
+        "f1": 0.822857142857143
+      },
+      "by_language": {
+        "en": {
+          "mentions": 100,
+          "correct": 81,
+          "wrong": 18,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.8181818181818182,
+          "recall": 0.81,
+          "f1": 0.8140703517587939
+        },
+        "it": {
+          "mentions": 44,
+          "correct": 36,
+          "wrong": 8,
+          "no_answer": 0,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.8181818181818182,
+          "recall": 0.8181818181818182,
+          "f1": 0.8181818181818182
+        },
+        "fr": {
+          "mentions": 37,
+          "correct": 26,
+          "wrong": 11,
+          "no_answer": 0,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.7027027027027027,
+          "recall": 0.7027027027027027,
+          "f1": 0.7027027027027027
+        },
+        "de": {
+          "mentions": 45,
+          "correct": 40,
+          "wrong": 4,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9090909090909091,
+          "recall": 0.8888888888888888,
+          "f1": 0.8988764044943819
+        },
+        "es": {
+          "mentions": 42,
+          "correct": 35,
+          "wrong": 7,
+          "no_answer": 0,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.8333333333333334,
+          "recall": 0.8333333333333334,
+          "f1": 0.8333333333333334
+        },
+        "pt": {
+          "mentions": 83,
+          "correct": 70,
+          "wrong": 13,
+          "no_answer": 0,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.8433734939759037,
+          "recall": 0.8433734939759037,
+          "f1": 0.8433734939759037
+        }
+      }
+    },
+    "entity-fishing": {
+      "title": "Entity-Fishing",
+      "status": "ran",
+      "gets_spans": true,
+      "overall": {
+        "mentions": 351,
+        "correct": 251,
+        "wrong": 25,
+        "no_answer": 75,
+        "unsupported": 0,
+        "errors": 0,
+        "precision": 0.9094202898550725,
+        "recall": 0.7150997150997151,
+        "f1": 0.8006379585326954
+      },
+      "by_language": {
+        "en": {
+          "mentions": 100,
+          "correct": 85,
+          "wrong": 14,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.8585858585858586,
+          "recall": 0.85,
+          "f1": 0.8542713567839195
+        },
+        "it": {
+          "mentions": 44,
+          "correct": 18,
+          "wrong": 4,
+          "no_answer": 22,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.8181818181818182,
+          "recall": 0.4090909090909091,
+          "f1": 0.5454545454545455
+        },
+        "fr": {
+          "mentions": 37,
+          "correct": 10,
+          "wrong": 3,
+          "no_answer": 24,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.7692307692307693,
+          "recall": 0.2702702702702703,
+          "f1": 0.4
+        },
+        "de": {
+          "mentions": 45,
+          "correct": 39,
+          "wrong": 0,
+          "no_answer": 6,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 1.0,
+          "recall": 0.8666666666666667,
+          "f1": 0.9285714285714286
+        },
+        "es": {
+          "mentions": 42,
+          "correct": 30,
+          "wrong": 1,
+          "no_answer": 11,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.967741935483871,
+          "recall": 0.7142857142857143,
+          "f1": 0.821917808219178
+        },
+        "pt": {
+          "mentions": 83,
+          "correct": 69,
+          "wrong": 3,
+          "no_answer": 11,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9583333333333334,
+          "recall": 0.8313253012048193,
+          "f1": 0.8903225806451613
+        }
+      }
+    },
+    "dandelion": {
+      "title": "Dandelion",
+      "status": "ran",
+      "gets_spans": false,
+      "overall": {
+        "mentions": 351,
+        "correct": 312,
+        "wrong": 15,
+        "no_answer": 24,
+        "unsupported": 0,
+        "errors": 0,
+        "precision": 0.9541284403669725,
+        "recall": 0.8888888888888888,
+        "f1": 0.9203539823008849
+      },
+      "by_language": {
+        "en": {
+          "mentions": 100,
+          "correct": 88,
+          "wrong": 2,
+          "no_answer": 10,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9777777777777777,
+          "recall": 0.88,
+          "f1": 0.9263157894736842
+        },
+        "it": {
+          "mentions": 44,
+          "correct": 39,
+          "wrong": 4,
+          "no_answer": 1,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9069767441860465,
+          "recall": 0.8863636363636364,
+          "f1": 0.896551724137931
+        },
+        "fr": {
+          "mentions": 37,
+          "correct": 33,
+          "wrong": 1,
+          "no_answer": 3,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9705882352941176,
+          "recall": 0.8918918918918919,
+          "f1": 0.9295774647887325
+        },
+        "de": {
+          "mentions": 45,
+          "correct": 40,
+          "wrong": 3,
+          "no_answer": 2,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9302325581395349,
+          "recall": 0.8888888888888888,
+          "f1": 0.9090909090909092
+        },
+        "es": {
+          "mentions": 42,
+          "correct": 39,
+          "wrong": 1,
+          "no_answer": 2,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.975,
+          "recall": 0.9285714285714286,
+          "f1": 0.951219512195122
+        },
+        "pt": {
+          "mentions": 83,
+          "correct": 73,
+          "wrong": 4,
+          "no_answer": 6,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.948051948051948,
+          "recall": 0.8795180722891566,
+          "f1": 0.9125
+        }
+      }
+    },
+    "google": {
+      "title": "Google Cloud Natural Language",
+      "status": "ran",
+      "gets_spans": false,
+      "overall": {
+        "mentions": 351,
+        "correct": 294,
+        "wrong": 12,
+        "no_answer": 45,
+        "unsupported": 0,
+        "errors": 0,
+        "precision": 0.9607843137254902,
+        "recall": 0.8376068376068376,
+        "f1": 0.8949771689497716
+      },
+      "by_language": {
+        "en": {
+          "mentions": 100,
+          "correct": 81,
+          "wrong": 4,
+          "no_answer": 15,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9529411764705882,
+          "recall": 0.81,
+          "f1": 0.8756756756756757
+        },
+        "it": {
+          "mentions": 44,
+          "correct": 39,
+          "wrong": 1,
+          "no_answer": 4,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.975,
+          "recall": 0.8863636363636364,
+          "f1": 0.9285714285714285
+        },
+        "fr": {
+          "mentions": 37,
+          "correct": 29,
+          "wrong": 1,
+          "no_answer": 7,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9666666666666667,
+          "recall": 0.7837837837837838,
+          "f1": 0.8656716417910447
+        },
+        "de": {
+          "mentions": 45,
+          "correct": 40,
+          "wrong": 0,
+          "no_answer": 5,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 1.0,
+          "recall": 0.8888888888888888,
+          "f1": 0.9411764705882353
+        },
+        "es": {
+          "mentions": 42,
+          "correct": 33,
+          "wrong": 2,
+          "no_answer": 7,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9428571428571428,
+          "recall": 0.7857142857142857,
+          "f1": 0.8571428571428571
+        },
+        "pt": {
+          "mentions": 83,
+          "correct": 72,
+          "wrong": 4,
+          "no_answer": 7,
+          "unsupported": 0,
+          "errors": 0,
+          "precision": 0.9473684210526315,
+          "recall": 0.8674698795180723,
+          "f1": 0.9056603773584905
+        }
+      }
+    }
+  },
+  "head_to_head": {
+    "wikidata": {
+      "neither": 22,
+      "their_wrong": 61,
+      "their_wrong_we_fixed": 39,
+      "only_ours": 41,
+      "only_theirs_we_wrong": 6,
+      "only_theirs_we_none": 2,
+      "their_wrong_by_our_path": {
+        "reranked": 51,
+        "declined": 5,
+        "fast": 5
+      }
+    },
+    "entity-fishing": {
+      "only_theirs_we_wrong": 11,
+      "only_ours": 83,
+      "neither": 17,
+      "their_wrong": 25,
+      "their_wrong_we_fixed": 19,
+      "only_theirs_we_none": 2,
+      "their_wrong_by_our_path": {
+        "reranked": 21,
+        "fast": 4
+      }
+    },
+    "dandelion": {
+      "only_theirs_we_wrong": 18,
+      "only_ours": 30,
+      "their_wrong": 15,
+      "their_wrong_we_fixed": 11,
+      "neither": 9,
+      "only_theirs_we_none": 3,
+      "their_wrong_by_our_path": {
+        "reranked": 11,
+        "fast": 3,
+        "declined": 1
+      }
+    },
+    "google": {
+      "only_theirs_we_wrong": 14,
+      "only_ours": 47,
+      "only_theirs_we_none": 6,
+      "neither": 10,
+      "their_wrong": 12,
+      "their_wrong_we_fixed": 9,
+      "their_wrong_by_our_path": {
+        "reranked": 8,
+        "fast": 4
+      }
+    }
+  },
+  "reference": "resolve"
+}
