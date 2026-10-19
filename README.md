@@ -304,6 +304,10 @@ python tools/compare.py --datasets results/voxel --out results/voxel-run \
     --about "VoxEL (ISWC 2018, CC BY 4.0): news in five languages."
 ```
 
+Published runs, with how each service ran: [`benchmarks/`](benchmarks/)
+(19 October 2026: resolve(), Google Cloud Natural Language, Dandelion,
+Entity-Fishing and the Wikidata first hit on VoxEL and the development sets).
+
 ## Status of the NIL-safe decision layer
 
 The endpoint runs on WordLift's production linker today. A stricter,
